@@ -246,3 +246,26 @@ owner rotation, recovery, or membership approval yet. The UI cannot guarantee
 that an out-of-band comparison was performed honestly; it makes the required
 comparison explicit and blocks accidental trust based only on a valid
 self-signature.
+
+
+## Signed owner enrollment decisions
+
+The identity module now defines a versioned, domain-separated owner decision
+payload and a bounded `FMOD1.` text envelope. A decision binds the family-space
+ID, exact request ID, applicant device-key ID, owner device-key ID, outcome,
+and decision timestamp. The local signing service refuses to sign unless the
+current device identity matches the locally established initial-owner key and
+the request is inside its declared validity window.
+
+Recipients verify the signature against the immutable owner public key they
+previously pinned, and the verifier checks every request/owner binding plus
+the request validity window and decision timestamp. The codec rejects
+oversized fields, unsupported versions, malformed UTF-8, and trailing bytes.
+Unit tests cover round-trip verification, request/family mismatch, a different
+owner key, timestamp bounds, outcome tampering, and trailing data.
+
+This artifact is a signed statement, **not a membership grant**. It does not
+persist a decision, change the pending inbox state, create a member, or
+synchronize state between devices. Those operations require a separately
+reviewed atomic acceptance protocol and must not be inferred from the word
+"APPROVED" in an imported text code.
