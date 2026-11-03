@@ -139,12 +139,17 @@ At minimum, preserve the current semantic bindings:
 - Owner decision: protocol version, family ID, request ID, applicant key ID,
   owner key ID, outcome, and decision time.
 - Applicant acceptance: protocol version, exact approved decision digest or
-  exact encoded decision, applicant key ID, and acceptance time.
+  exact encoded decision, applicant key ID, applicant public COSE key, and
+  acceptance time. The public key is present in the current v1 acceptance
+  artifact and must not be dropped without an explicit reviewed decision.
 
 All identifiers need specified byte/text encodings and strict maximum sizes.
 Time fields need a single specified unit and range. No field may be silently
 defaulted when absent. Unknown payload labels should be rejected in v2 unless
 a later version explicitly defines extension behavior.
+
+See also [ADR 0004: COSE v2 schema parity review](0004-cose-v2-schema-parity-review.md)
+for the v1-to-v2 semantic parity gap and the schema-freeze checklist.
 
 ## 7. Migration and compatibility
 
