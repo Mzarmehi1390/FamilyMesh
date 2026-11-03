@@ -90,7 +90,6 @@ fun FamilyMeshHomeScreen() {
     val clipboardManager = LocalClipboardManager.current
     val profile by profileRepository.profile.collectAsState(initial = null)
     val familySpaces by familySpaceRepository.observeFamilySpaces().collectAsState(initial = emptyList())
-    val authenticatedDevices by enrollmentFinalizationRepository.observeAuthenticatedDevices(selectedFamilySpaceId).collectAsState(initial = emptyList())
     val pendingEnrollmentRequests by proofAcceptanceService.observePendingRequests().collectAsState(initial = emptyList())
     val initialOwners by initialOwnerTrustRepository.observeInitialOwners().collectAsState(initial = emptyList())
     val trustedOwners by initialOwnerPinRepository.observeTrustedOwners().collectAsState(initial = emptyList())
@@ -101,6 +100,7 @@ fun FamilyMeshHomeScreen() {
     var keySecurityLevel by remember { mutableStateOf<DeviceKeySecurityLevel?>(null) }
     var isCreatingIdentity by remember { mutableStateOf(false) }
     var selectedFamilySpaceId by remember { mutableStateOf("") }
+    val authenticatedDevices by enrollmentFinalizationRepository.observeAuthenticatedDevices(selectedFamilySpaceId).collectAsState(initial = emptyList())
     var generatedProofText by remember { mutableStateOf("") }
     var importedProofText by remember { mutableStateOf("") }
     var proofStatus by remember { mutableStateOf<String?>(null) }
