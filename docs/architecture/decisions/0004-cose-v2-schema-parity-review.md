@@ -77,7 +77,4 @@ vectors before approval.
 
 ## Next evidence required
 
-The next implementation-neutral task is to inspect the actual Kotlin v1
-models and codecs and produce a source-referenced field inventory. Only then
-should the team freeze CBOR labels and build complete vectors for all four
-artifacts. Independent second-implementation verification remains mandatory.
+The source-backed inventory is now recorded in [ADR 0005](0005-v1-enrollment-source-field-inventory.md). It confirms the applicant public key in acceptance and surfaces additional parity decisions: proof identity-creation time is transfer metadata rather than signed content; acceptance currently binds the exact encoded decision; constructor character limits differ from UTF-8 byte limits; and all timestamps are epoch milliseconds without upper bounds. Review these choices before freezing CBOR labels. Independent second-implementation verification remains mandatory.
