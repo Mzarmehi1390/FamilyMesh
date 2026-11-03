@@ -32,6 +32,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.familymesh.core.common.domain.FamilySpace
+import com.familymesh.core.common.domain.FamilySpaceRepository
 import com.familymesh.core.storage.LocalProfileRepository
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -41,8 +43,11 @@ fun FamilyMeshHomeScreen() {
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val profileRepository: LocalProfileRepository = koinInject()
+    val familySpaceRepository: FamilySpaceRepository = koinInject()
     val profile by profileRepository.profile.collectAsState(initial = null)
+    val familySpaces by familySpaceRepository.observeFamilySpaces().collectAsState(initial = emptyList())
     var displayName by remember(profile?.displayName) { mutableStateOf(profile?.displayName.orEmpty()) }
+    var familyName by remember { mutableStateOf("") }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -94,23 +99,62 @@ fun FamilyMeshHomeScreen() {
             Card(modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
                 Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("Your family space", style = MaterialTheme.typography.titleLarge,
+                    Text("Your family spaces", style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                    Text("No family space connected yet. Create a new space or join one with an invitation when those features are available.",
-                        style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                    Text(
+                        text = if (familySpaces.isEmpty()) {
+                            "No family spaces are saved on this device yet."
+                        } else {
+                            "${familySpaces.size} family space(s) saved locally on this device."
+                        },
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
                     Surface(color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f), shape = MaterialTheme.shapes.small) {
-                        Text("NOT CONNECTED", modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                            style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface)
+                        Text(
+                            if (familySpaces.isEmpty()) "NO LOCAL SPACE" else "LOCAL ONLY",
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
                     }
+                    familySpaces.forEach { space -> FamilySpaceRow(space) }
                 }
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text("Get started", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                Button(onClick = { coroutineScope.launch { snackbarHostState.showSnackbar("Creating a family space is coming in a future milestone.") } },
-                    modifier = Modifier.fillMaxWidth()) { Text("Create a family space") }
-                OutlinedButton(onClick = { coroutineScope.launch { snackbarHostState.showSnackbar("Joining with an invitation is coming in a future milestone.") } },
-                    modifier = Modifier.fillMaxWidth()) { Text("Join with an invitation") }
+                Text("Create a family space", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                OutlinedTextField(
+                    value = familyName,
+                    onValueChange = { familyName = it.take(FamilySpace.MAX_NAME_LENGTH) },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Family space name") },
+                    supportingText = { Text("1–60 characters · Saved only on this device") },
+                    singleLine = true
+                )
+                Button(
+                    onClick = {
+                        coroutineScope.launch {
+                            runCatching {
+                                familySpaceRepository.createFamilySpace(
+                                    name = familyName,
+                                    createdAtEpochMillis = System.currentTimeMillis()
+                                )
+                            }.onSuccess {
+                                familyName = ""
+                                snackbarHostState.showSnackbar("Family space saved on this device.")
+                            }.onFailure {
+                                snackbarHostState.showSnackbar("Could not create the family space. Check its name and try again.")
+                            }
+                        }
+                    },
+                    enabled = profile != null && familyName.trim().isNotEmpty(),
+                    modifier = Modifier.fillMaxWidth()
+                ) { Text("Create family space") }
+                OutlinedButton(
+                    onClick = { coroutineScope.launch { snackbarHostState.showSnackbar("Joining with an invitation is not available yet.") } },
+                    modifier = Modifier.fillMaxWidth()
+                ) { Text("Join with an invitation") }
             }
 
             Card(modifier = Modifier.fillMaxWidth(),
@@ -118,14 +162,28 @@ fun FamilyMeshHomeScreen() {
                 Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text("Privacy by design", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                     InfoRow("Platform", "Android 12 and newer")
+                    InfoRow("Storage", "Family spaces saved locally")
                     InfoRow("Network", "No connection established")
                     InfoRow("Encryption", "Not configured yet")
                 }
             }
             Spacer(modifier = Modifier.height(4.dp))
-            Text("Early preview · Core features are under development",
+            Text("Early preview · Local family-space storage only",
                 style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
+    }
+}
+
+@Composable
+private fun FamilySpaceRow(space: FamilySpace) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        Text(space.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onPrimaryContainer)
+        Text("Local ID: ${space.id.take(8)}…", style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onPrimaryContainer)
     }
 }
 
