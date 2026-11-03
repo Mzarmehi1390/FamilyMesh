@@ -34,7 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.familymesh.core.storage.LocalProfileRepository
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.koinInject
+import org.koin.compose.koinInject
 
 @Composable
 fun FamilyMeshHomeScreen() {
