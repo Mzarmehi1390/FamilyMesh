@@ -22,7 +22,9 @@
 - [x] Add local member-list persistence (metadata only; not authenticated enrollment)
 - [x] Document proposed invitation and membership lifecycle
 - [x] Document device identity, initial trust, key lifecycle, and recovery requirements
+- [x] Add protocol-neutral device identity model and key-manager boundary
 - [ ] Select and review cryptographic identity protocol and public-key format
+- [ ] Implement and test Android-backed key storage after protocol review
 - [ ] Define trusted initial-owner ceremony and ownership transfer
 - [ ] Define trusted device enrollment, revocation, and recovery
 - [ ] Implement invitation lifecycle only after protocol review

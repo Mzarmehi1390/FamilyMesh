@@ -2,9 +2,11 @@
 
 ## Status
 
-This document defines requirements and a proposed trust model. It does not
-implement key generation, authentication, signatures, enrollment, or recovery.
-FamilyMesh currently has local profile IDs and local member metadata only.
+This document defines requirements and a proposed trust model. The
+`:core:identity` module now contains a protocol-neutral public identity model
+and a `DeviceKeyManager` interface only. It does not implement key generation,
+Android Keystore access, authentication, signatures, enrollment, or recovery.
+FamilyMesh still has local profile IDs and local member metadata only.
 
 ## Separate identifiers
 
@@ -21,6 +23,19 @@ The implementation must keep these values distinct:
   enrollment. It is not necessarily equal to the profile ID or device ID.
 - **Display name** — user-editable presentation data. It is never an identity
   or authorization factor.
+
+## Identity module boundary
+
+The current module exposes only public metadata: a key ID, opaque public-key
+bytes, and a creation timestamp. It defensively copies the supplied byte list
+and rejects blank IDs, empty public keys, and negative timestamps. The byte
+encoding is intentionally unspecified until a protocol is selected.
+
+`DeviceKeyManager` is the future provider boundary. Its contract returns
+public identity metadata only; it has no method that exposes private key
+material. No production implementation is registered or used by the app yet.
+This abstraction is not proof that a key exists, is hardware-backed, or is
+trusted by a family.
 
 ## Proposed trust model
 

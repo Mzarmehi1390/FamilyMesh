@@ -4,4 +4,4 @@ dependencyResolutionManagement {
     repositories { google(); mavenCentral() }
 }
 rootProject.name = "FamilyMesh"
-include(":app", ":core:common", ":core:storage", ":core:designsystem")
+include(":app", ":core:common", ":core:storage", ":core:designsystem", ":core:identity")
