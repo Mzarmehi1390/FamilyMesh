@@ -182,3 +182,12 @@ revocation, and recovery are also resolved.
 
 
 - Follow-up: ADR 0014 records a potential same-artifact import race. Sequential replay ignores local `recordedAtEpochMillis`, but the DAO's concurrent existing-row equality includes it; test same signed FMOD1 arriving concurrently with different local receipt times before deciding whether that race should be idempotent or conflict.
+
+
+## 2026-11-03 — Room DAO instrumentation baseline handover
+
+- `:core:storage` now has an Android instrumentation runner and an initial Room/SQLite test class covering nonce replay rejection, applicant decision persistence/replay/conflict, and owner finalization/replay/conflict.
+- CI has a separate emulator-backed `storage-instrumentation` job invoking `gradle :core:storage:connectedDebugAndroidTest`; reports are uploaded even on failure.
+- This does not yet satisfy all ADR 0009/0014 acceptance criteria. Still required: real historical schema fixtures for versions 1–7, injected rollback failures, concurrent import/issuance cases, and database close/reopen durability.
+- Initial commits: `3b38a2a1` (storage test configuration), `e94f00e9` (CI), `5868c4a0` (DAO tests). Verify the first emulator CI results before extending the suite.
+- No production runtime, schema, protocol, cryptographic, or transport changes.
