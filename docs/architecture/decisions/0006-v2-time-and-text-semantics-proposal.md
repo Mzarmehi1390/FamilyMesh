@@ -59,7 +59,7 @@ during codec implementation.
 Until those values are approved, v2 vectors must test interval boundaries
 but must not claim a final maximum TTL or skew allowance.
 
-### T3 — Decision and acceptance ordering
+### T3 — Distinguish signed event time from local receipt time\n\nTreat these as separate concepts and fields:\n\n- `createdAt`, `decidedAt`, and `acceptedAt` are signed event-time claims\n  made by the respective device.\n- `receivedAt` / `recordedAt` are local observer timestamps. They are not\n  transferable protocol facts and must not be included in another device's\n  signed artifact unless the protocol explicitly defines a signed receipt.\n- Nonce consumption is performed at local proof receipt and remains\n  installation-local in the current design.\n\n### T4 — Decision and acceptance ordering
 
 Preserve these minimum ordering constraints unless a reviewed lifecycle
 decision supersedes them:
