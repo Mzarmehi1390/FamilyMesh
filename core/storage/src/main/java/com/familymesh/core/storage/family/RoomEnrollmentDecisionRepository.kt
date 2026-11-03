@@ -45,7 +45,7 @@ class RoomEnrollmentDecisionRepository(
     }
 
     override fun observeDecisions(): Flow<List<EnrollmentDecisionRecord>> =
-        dao.observeDecisions().map { rows -> rows.map(EnrollmentDecisionEntity::toDomain) }
+        dao.observeDecisions().map { rows -> rows.map { it.toDomain() } }
 
     private fun PendingEnrollmentRequestEntity.toDomain() = PendingEnrollmentRequest(
         requestId = requestId,
