@@ -33,15 +33,29 @@ bytes, and a creation timestamp. It copies byte data both when constructed and
 when read, and rejects blank IDs, empty public keys, and negative timestamps.
 The byte encoding is intentionally unspecified until a protocol is selected.
 
-`DeviceKeyManager` is the future provider boundary. Its contract returns
-public identity metadata only; it has no method that exposes private key
-material. It specifies that successful repeated reads should return the same
-identity and that key invalidation must not trigger silent key replacement.
+`DeviceKeyManager` separates reading an existing identity from explicitly
+creating a new one. A missing identity is not permission to replace an old
+identity; a provider must distinguish a genuinely unprovisioned installation
+from inconsistent or missing key material and report a typed failure.
+Creating an identity must not overwrite one that already exists. The API
+returns public metadata only and never exposes private key material.
+
 Typed failures distinguish unavailable secure storage, invalidated keys,
-unsupported reviewed configuration, and corrupt stored public metadata.
-No production implementation is registered or used by the app yet. This
-abstraction is not proof that a key exists, is hardware-backed, or is trusted
-by a family.
+missing key material, an already provisioned identity, unsupported reviewed
+configuration, and corrupt stored public metadata. No production implementation
+is registered or used by the app yet. This abstraction is not proof that a key
+exists, is hardware-backed, or is trusted by a family.
+
+## Reinstall and restore considerations
+
+Android Keystore key material is tied to the app/device security environment;
+it must not be assumed to survive uninstall, device replacement, or restore.
+The app must not back up private key material. If public metadata and the
+Keystore alias disagree, the provider must fail closed and require an explicit
+recovery or re-enrollment decision. A fresh install cannot independently
+prove that it is the same family member as a previous installation. A trusted
+family authority or a separately reviewed recovery mechanism must approve a
+replacement identity. The app must not claim that reinstall preserves identity.
 
 ## Proposed trust model
 

@@ -18,6 +18,12 @@ sealed class DeviceKeyManagerException(
     class KeyInvalidated(cause: Throwable? = null) :
         DeviceKeyManagerException("The device key is no longer usable", cause)
 
+    class KeyMaterialMissing(cause: Throwable? = null) :
+        DeviceKeyManagerException("Expected device key material is missing", cause)
+
+    class IdentityAlreadyExists(cause: Throwable? = null) :
+        DeviceKeyManagerException("A device identity is already provisioned", cause)
+
     class UnsupportedKeyConfiguration(cause: Throwable? = null) :
         DeviceKeyManagerException("The reviewed key configuration is unsupported", cause)
 

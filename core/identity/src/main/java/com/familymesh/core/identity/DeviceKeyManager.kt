@@ -10,24 +10,24 @@ package com.familymesh.core.identity
  */
 interface DeviceKeyManager {
     /**
-     * Returns the existing public identity, or creates it once using the
-     * reviewed platform and protocol configuration.
+     * Loads the currently provisioned public identity.
      *
-     * Repeated successful calls for the same key lifecycle must return the
-     * same identity. An invalidated or missing key must not be silently
-     * replaced: callers need an explicit, separately designed recovery or
-     * re-enrollment flow before a new identity can be trusted.
-     *
-     * This contract alone does not establish family membership or trust.
-     *
-     * @throws DeviceKeyManagerException.KeyStoreUnavailable when secure
-     * key storage cannot be accessed.
-     * @throws DeviceKeyManagerException.KeyInvalidated when the existing key
-     * can no longer be used.
-     * @throws DeviceKeyManagerException.UnsupportedKeyConfiguration when the
-     * reviewed configuration is unavailable on this device.
-     * @throws DeviceKeyManagerException.CorruptKeyMaterial when stored public
-     * metadata cannot be validated.
+     * Returns null only when the provider can establish that no identity has
+     * ever been provisioned in its current installation state. If metadata
+     * and the platform key disagree, implementations must report a typed
+     * failure rather than treating the device as new.
      */
-    suspend fun getOrCreatePublicIdentity(): DevicePublicIdentity
+    suspend fun getPublicIdentity(): DevicePublicIdentity?
+
+    /**
+     * Explicitly provisions a new device identity after the caller has
+     * completed the reviewed user-facing setup/trust flow.
+     *
+     * Implementations must not overwrite an existing identity. A missing key
+     * after reinstall, restore, invalidation, or metadata loss must not be
+     * interpreted as authorization to silently create a replacement.
+     *
+     * This operation alone does not establish family membership or trust.
+     */
+    suspend fun createPublicIdentity(): DevicePublicIdentity
 }
