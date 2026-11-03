@@ -59,7 +59,15 @@ during codec implementation.
 Until those values are approved, v2 vectors must test interval boundaries
 but must not claim a final maximum TTL or skew allowance.
 
-### T3 — Distinguish signed event time from local receipt time\n\nTreat these as separate concepts and fields:\n\n- `createdAt`, `decidedAt`, and `acceptedAt` are signed event-time claims\n  made by the respective device.\n- `receivedAt` / `recordedAt` are local observer timestamps. They are not\n  transferable protocol facts and must not be included in another device's\n  signed artifact unless the protocol explicitly defines a signed receipt.\n- Nonce consumption is performed at local proof receipt and remains\n  installation-local in the current design.\n\n### T4 — Decision and acceptance ordering
+### T3 — Distinguish signed event time from local receipt time
+
+Treat these as separate concepts and fields:
+
+- `createdAt`, `decidedAt`, and `acceptedAt` are signed event-time claims made by the respective device.
+- `receivedAt` / `recordedAt` are local observer timestamps. They are not transferable protocol facts and must not be included in another device's signed artifact unless the protocol explicitly defines a signed receipt.
+- Nonce consumption is performed at local proof receipt and remains installation-local in the current design.
+
+### T4 — Decision and acceptance ordering
 
 Preserve these minimum ordering constraints unless a reviewed lifecycle
 decision supersedes them:
@@ -130,3 +138,72 @@ authorization semantics.
    vectors.
 5. ADR 0003/0004/0005 are updated to reflect approved choices before final
    schema labels and artifact vectors are frozen.
+
+
+## Receipt-time expiry decision record — review required
+
+The two policies have materially different offline behavior and must not be
+collapsed into a timestamp-validation detail.
+
+### Option A — owner receipt deadline
+
+The owner installation must receive and validate the applicant acceptance
+before the request expiry instant. The verifier uses the owner's local
+receipt time for this check; the applicant's signed `acceptedAt` remains a
+separate event-time claim and must also satisfy the existing ordering rules.
+
+Advantages:
+- expiry has a clear operational meaning on the owner installation;
+- delayed delivery cannot revive an expired request;
+- cleanup and inbox eligibility can use one locally observable boundary.
+
+Costs:
+- an acceptance created before expiry but delivered after expiry is rejected;
+- offline transport and intermittent connectivity can cause otherwise
+  valid applicants to restart enrollment;
+- a trustworthy local clock is still required, with an explicit skew and
+  rollback policy.
+
+### Option B — signed-event deadline
+
+An acceptance whose signed `acceptedAt` is before expiry may be accepted
+after expiry, subject to a separately specified maximum delivery delay and
+retention period.
+
+Advantages:
+- tolerates delayed delivery and offline transfer after the applicant has
+  completed the acceptance in time;
+- aligns eligibility with the applicant's signed event rather than network
+  availability.
+
+Costs:
+- the owner must retain pending request facts beyond nominal expiry;
+- a signed timestamp does not prove when the artifact was actually created;
+  a compromised applicant clock/key can backdate a claim unless additional
+  controls exist;
+- a delivery-delay bound and cleanup policy are mandatory, not optional.
+
+### Required product/security inputs
+
+Before selecting either option, product/security review must answer:
+
+1. Must a household be able to complete enrollment when devices are offline
+   from one another for a prolonged period?
+2. Is expiry intended to stop *new acceptance creation* or to stop *owner
+   authorization after a deadline*?
+3. What maximum offline delivery delay, if any, is acceptable?
+4. What clock rollback and clock-skew threat model is in scope?
+5. How long must the owner retain pending request facts and signed decisions?
+
+No numeric TTL, skew allowance, delivery grace period, or expiry cleanup
+behavior is selected by this record. Until these inputs are approved, do not
+add an `EXPIRED` state, change v1 behavior, or implement a v2 policy based
+on an assumed default.
+
+### Implementation invariant after selection
+
+Whichever policy is approved, preserve three distinct values:
+applicant-signed `acceptedAt`, owner-local `receivedAt`, and owner-local
+`recordedAt`. The verifier must receive the local receipt timestamp from a
+trusted owner-side boundary; callers must not be able to supply an arbitrary
+receipt time as if it were authenticated.
