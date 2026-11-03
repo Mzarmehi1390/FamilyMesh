@@ -6,7 +6,10 @@ plugins {
 android {
     namespace = "com.familymesh.core.storage"
     compileSdk = 36
-    defaultConfig { minSdk = 31 }
+    defaultConfig {
+        minSdk = 31
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -19,4 +22,6 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
     api(libs.androidx.datastore.preferences)
+    androidTestImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.test.ext)
 }
