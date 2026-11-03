@@ -7,7 +7,7 @@ Default branch: `main`
 ## Last verified repository state
 
 - Branch: `main`
-- Latest documentation baseline before this handover refresh: `acbb3d46a729925cf346b42731443173af7a9b3e`
+- Latest documentation commit: `be4a85cd7d2b357e3fb356c2834d94491c59db95`
 - Latest verified source commit: `21dd7ca4db718ee31416e45319d88ffce9c950c3`
 - Latest CI run checked: [Android CI #41672460808](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41672460808)
 - CI result: completed successfully; unit tests, debug APK assembly, and artifact upload all passed.
@@ -62,7 +62,7 @@ Default branch: `main`
 **WP — Identity and trusted enrollment protocol review.**
 
 The local enrollment prototype is implemented, but its custom binary payloads
-are not the proposed interoperable COSE protocol. ADR 0003 now records a
+are not the proposed interoperable COSE protocol. ADR 0003 records a
 draft v2 profile to make the open encoding and signature decisions concrete.
 It remains a proposal: no protocol migration or authorization integration
 should be implemented until independent vectors and platform tests validate it.
