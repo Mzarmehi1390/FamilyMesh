@@ -47,8 +47,10 @@ completed successfully for the documentation baseline:
 - debug APK artifact upload
 
 This is CI evidence only; it is not a production security review or device
-instrumentation result. The next documentation-only changes require their
-own CI result before being considered verified.
+instrumentation result. Subsequent documentation commits through ADR 0005
+were queried, but the available combined-status and PR-run endpoints returned
+no status entries. Their CI outcome is therefore **unknown / unconfirmed**;
+do not treat those commits as CI-verified.
 
 Latest documentation commit 63c7222 has no status entries exposed by the current combined-status query; CI is not confirmed.\n\n## Immediate priority
 
