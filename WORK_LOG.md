@@ -556,3 +556,10 @@ Add real Room/SQLite test infrastructure only after reviewing ADR 0014's scope a
 ### Next action
 
 Resolve any compile/emulator failures from the first instrumentation run. Then add historical migration fixtures and deterministic race/rollback/reopen tests before considering the suite sufficient for the ADR 0008/0012 schema work.
+
+
+### Follow-up test expansion
+
+- Extended the Room instrumentation suite with a transaction rollback case: a duplicate pending-request insert must roll back the preceding nonce insert, allowing the same nonce digest to be retried for a different request.
+- Added a file-backed close/reopen test verifying pending enrollment and nonce replay state survive database recreation.
+- Follow-up test commits: `0b620981aee5fc75388f5725c209c31c6ac75d68` and cleanup `b100e6e4d8ac550bdc1659ae15b136749f17a832`. The corresponding CI run is pending.
