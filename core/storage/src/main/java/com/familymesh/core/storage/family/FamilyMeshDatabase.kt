@@ -86,6 +86,22 @@ data class EnrollmentDecisionEntity(
     val recordedAtEpochMillis: Long,
 )
 
+@Entity(
+    tableName = "authenticated_family_devices",
+    primaryKeys = ["familySpaceId", "requestId"],
+    foreignKeys = [ForeignKey(entity = FamilySpaceEntity::class, parentColumns = ["id"], childColumns = ["familySpaceId"], onDelete = ForeignKey.CASCADE)],
+    indices = [Index(value = ["familySpaceId", "deviceKeyId"], unique = true)]
+)
+data class AuthenticatedFamilyDeviceEntity(
+    val familySpaceId: String,
+    val requestId: String,
+    val deviceKeyId: String,
+    val publicKeyBase64: String,
+    val role: String,
+    val joinedAtEpochMillis: Long,
+    val acceptanceSignatureBase64: String,
+)
+
 @Dao
 interface EnrollmentNonceDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
@@ -102,6 +118,30 @@ interface EnrollmentNonceDao {
 
     @Query("DELETE FROM pending_enrollment_requests WHERE familySpaceId = :familySpaceId AND requestId = :requestId")
     suspend fun deletePendingRequest(familySpaceId: String, requestId: String): Int
+
+    @Query("SELECT * FROM authenticated_family_devices WHERE familySpaceId = :familySpaceId AND requestId = :requestId LIMIT 1")
+    suspend fun getAuthenticatedDevice(familySpaceId: String, requestId: String): AuthenticatedFamilyDeviceEntity?
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertAuthenticatedDevice(entity: AuthenticatedFamilyDeviceEntity): Long
+
+    @Transaction
+    suspend fun finalizeAuthenticatedDevice(device: AuthenticatedFamilyDeviceEntity): String {
+        val existing = getAuthenticatedDevice(device.familySpaceId, device.requestId)
+        if (existing != null) return if (existing == device) "ALREADY_FINALIZED" else "CONFLICT"
+        val pending = getPendingRequest(device.familySpaceId, device.requestId)
+            ?: return "REQUEST_NOT_PENDING"
+        if (pending.deviceKeyId != device.deviceKeyId ||
+            pending.requestedRole != device.role ||
+            device.joinedAtEpochMillis < pending.createdAtEpochMillis ||
+            device.joinedAtEpochMillis >= pending.expiresAtEpochMillis
+        ) return "CONFLICT"
+        if (insertAuthenticatedDevice(device) == -1L) return "CONFLICT"
+        if (deletePendingRequest(device.familySpaceId, device.requestId) != 1) {
+            throw IllegalStateException("Pending request changed during finalization.")
+        }
+        return "FINALIZED"
+    }
 
     @Query("SELECT * FROM enrollment_decisions ORDER BY recordedAtEpochMillis DESC, requestId ASC")
     fun observeDecisions(): Flow<List<EnrollmentDecisionEntity>>
@@ -216,8 +256,8 @@ interface FamilySpaceDao {
 }
 
 @Database(
-    entities = [FamilySpaceEntity::class, FamilyMemberEntity::class, ConsumedEnrollmentNonceEntity::class, PendingEnrollmentRequestEntity::class, InitialOwnerTrustEntity::class, TrustedInitialOwnerEntity::class, EnrollmentDecisionEntity::class],
-    version = 6,
+    entities = [FamilySpaceEntity::class, FamilyMemberEntity::class, ConsumedEnrollmentNonceEntity::class, PendingEnrollmentRequestEntity::class, InitialOwnerTrustEntity::class, TrustedInitialOwnerEntity::class, EnrollmentDecisionEntity::class, AuthenticatedFamilyDeviceEntity::class],
+    version = 7,
     exportSchema = false
 )
 abstract class FamilyMeshDatabase : RoomDatabase() {
@@ -287,11 +327,24 @@ abstract class FamilyMeshDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(
+                    "CREATE TABLE IF NOT EXISTS authenticated_family_devices (" +
+                        "familySpaceId TEXT NOT NULL, requestId TEXT NOT NULL, deviceKeyId TEXT NOT NULL, " +
+                        "publicKeyBase64 TEXT NOT NULL, role TEXT NOT NULL, joinedAtEpochMillis INTEGER NOT NULL, " +
+                        "acceptanceSignatureBase64 TEXT NOT NULL, PRIMARY KEY(familySpaceId, requestId), " +
+                        "FOREIGN KEY(familySpaceId) REFERENCES family_spaces(id) ON UPDATE NO ACTION ON DELETE CASCADE)"
+                )
+                database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_authenticated_family_devices_familySpaceId_deviceKeyId ON authenticated_family_devices(familySpaceId, deviceKeyId)")
+            }
+        }
+
         fun create(context: Context): FamilyMeshDatabase =
             Room.databaseBuilder(
                 context.applicationContext,
                 FamilyMeshDatabase::class.java,
                 "familymesh.db"
-            ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6).build()
+            ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7).build()
     }
 }
