@@ -22,6 +22,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,6 +36,11 @@ import androidx.compose.ui.unit.dp
 import com.familymesh.core.common.domain.FamilySpace
 import com.familymesh.core.common.domain.FamilySpaceRepository
 import com.familymesh.core.storage.LocalProfileRepository
+import com.familymesh.core.identity.DeviceKeyManager
+import com.familymesh.core.identity.DeviceKeyManagerException
+import com.familymesh.core.identity.DeviceKeySecurityInfoProvider
+import com.familymesh.core.identity.DeviceKeySecurityLevel
+import com.familymesh.core.identity.DevicePublicIdentity
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
@@ -44,10 +50,35 @@ fun FamilyMeshHomeScreen() {
     val coroutineScope = rememberCoroutineScope()
     val profileRepository: LocalProfileRepository = koinInject()
     val familySpaceRepository: FamilySpaceRepository = koinInject()
+    val deviceKeyManager: DeviceKeyManager = koinInject()
+    val keySecurityInfoProvider: DeviceKeySecurityInfoProvider = koinInject()
     val profile by profileRepository.profile.collectAsState(initial = null)
     val familySpaces by familySpaceRepository.observeFamilySpaces().collectAsState(initial = emptyList())
     var displayName by remember(profile?.displayName) { mutableStateOf(profile?.displayName.orEmpty()) }
     var familyName by remember { mutableStateOf("") }
+    var deviceIdentity by remember { mutableStateOf<DevicePublicIdentity?>(null) }
+    var identityError by remember { mutableStateOf<String?>(null) }
+    var keySecurityLevel by remember { mutableStateOf<DeviceKeySecurityLevel?>(null) }
+    var isCreatingIdentity by remember { mutableStateOf(false) }
+
+    LaunchedEffect(deviceKeyManager) {
+        try {
+            deviceIdentity = deviceKeyManager.getPublicIdentity()
+            identityError = null
+            keySecurityLevel = if (deviceIdentity != null) {
+                runCatching { keySecurityInfoProvider.getSecurityLevel() }.getOrNull()
+            } else null
+        } catch (failure: DeviceKeyManagerException) {
+            identityError = when (failure) {
+                is DeviceKeyManagerException.KeyInvalidated,
+                is DeviceKeyManagerException.KeyMaterialMissing,
+                is DeviceKeyManagerException.CorruptKeyMaterial -> "This device identity needs recovery. It will not be replaced automatically."
+                else -> "Device identity storage is temporarily unavailable."
+            }
+        } catch (_: Exception) {
+            identityError = "Could not read this device's signing identity."
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -93,6 +124,72 @@ fun FamilyMeshHomeScreen() {
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                }
+            }
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+            ) {
+                Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("Device signing identity", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    if (deviceIdentity != null) {
+                        Text("Public key ID: ${deviceIdentity!!.keyId.take(16)}…", style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            "Key protection: " + when (keySecurityLevel) {
+                                DeviceKeySecurityLevel.SOFTWARE -> "Software-backed"
+                                DeviceKeySecurityLevel.TRUSTED_ENVIRONMENT -> "Trusted environment"
+                                DeviceKeySecurityLevel.STRONGBOX -> "StrongBox"
+                                DeviceKeySecurityLevel.UNKNOWN, null -> "Unknown"
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            "This proves possession of a device key only. It does not enroll this device in a family.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    } else {
+                        Text(
+                            identityError ?: "No signing identity has been created on this device.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Button(
+                            onClick = {
+                                isCreatingIdentity = true
+                                coroutineScope.launch {
+                                    try {
+                                        deviceIdentity = deviceKeyManager.createPublicIdentity()
+                                        identityError = null
+                                        keySecurityLevel = runCatching {
+                                            keySecurityInfoProvider.getSecurityLevel()
+                                        }.getOrNull()
+                                        snackbarHostState.showSnackbar("Device signing identity created locally.")
+                                    } catch (failure: DeviceKeyManagerException) {
+                                        identityError = when (failure) {
+                                            is DeviceKeyManagerException.IdentityAlreadyExists -> "A device identity already exists. Refresh the app state before continuing."
+                                            is DeviceKeyManagerException.KeyMaterialMissing,
+                                            is DeviceKeyManagerException.KeyInvalidated,
+                                            is DeviceKeyManagerException.CorruptKeyMaterial -> "Device identity recovery is required. No replacement was created."
+                                            else -> "Could not create a device signing identity."
+                                        }
+                                        snackbarHostState.showSnackbar(identityError!!)
+                                    } catch (_: Exception) {
+                                        identityError = "Could not create a device signing identity."
+                                        snackbarHostState.showSnackbar(identityError!!)
+                                    } finally {
+                                        isCreatingIdentity = false
+                                    }
+                                }
+                            },
+                            enabled = !isCreatingIdentity && identityError == null,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(if (isCreatingIdentity) "Creating identity…" else "Create device signing identity")
+                        }
+                    }
                 }
             }
 

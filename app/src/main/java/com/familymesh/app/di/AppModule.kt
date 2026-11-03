@@ -10,11 +10,14 @@ import com.familymesh.core.storage.family.RoomEnrollmentNonceStore
 import com.familymesh.core.identity.DeviceEnrollmentProofAcceptanceService
 import com.familymesh.core.identity.AndroidKeystoreDeviceKeyManager
 import com.familymesh.core.identity.DeviceKeyManager
+import com.familymesh.core.identity.DeviceKeySecurityInfoProvider
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
 val appModule = module {
-    single<DeviceKeyManager> { AndroidKeystoreDeviceKeyManager(androidContext()) }
+    single { AndroidKeystoreDeviceKeyManager(androidContext()) }
+    single<DeviceKeyManager> { get<AndroidKeystoreDeviceKeyManager>() }
+    single<DeviceKeySecurityInfoProvider> { get<AndroidKeystoreDeviceKeyManager>() }
     single { FamilyMeshPreferences(androidContext()) }
     single { LocalProfileRepository(get<FamilyMeshPreferences>().dataStore) }
     single { FamilyMeshDatabase.create(androidContext()) }
