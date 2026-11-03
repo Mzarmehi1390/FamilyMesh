@@ -29,7 +29,7 @@ class EnrollmentDecisionAcceptanceService(
         nowEpochMillis: Long,
     ): EnrollmentDecisionAcceptanceResult {
         if (nowEpochMillis < 0L) return EnrollmentDecisionAcceptanceResult.INVALID_OR_UNTRUSTED
-        try {
+        return try {
             val pending = repository.findPendingRequest(decision.familySpaceId, decision.requestId)
             if (pending == null) {
                 val existing = repository.findDecision(decision.familySpaceId, decision.requestId)
