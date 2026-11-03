@@ -42,6 +42,7 @@
 - [x] Add explicit, one-per-family local initial-owner bootstrap bound to the current device key\n- [x] Add signed, bounded initial-owner trust bundle export/verification primitives (manual out-of-band fingerprint check still required)
 - [x] Add explicit recipient-side fingerprint confirmation and immutable local owner-key pinning
 - [x] Add signed, bounded owner decision artifacts bound to the exact family, request, applicant key, and pinned owner key (portable statement only; no membership grant)
+- [x] Persist verified owner decisions atomically and close the matching pending inbox request (no member creation)
 - [ ] Complete protocol review for canonical encoding, key identifiers, and persistent replay protection
 - [x] Implement Android Keystore P-256 signing-key storage and public identity retrieval
 - [x] Add explicit local device-identity setup and protection-level status to the home screen

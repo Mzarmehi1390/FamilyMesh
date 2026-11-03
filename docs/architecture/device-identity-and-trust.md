@@ -264,8 +264,24 @@ oversized fields, unsupported versions, malformed UTF-8, and trailing bytes.
 Unit tests cover round-trip verification, request/family mismatch, a different
 owner key, timestamp bounds, outcome tampering, and trailing data.
 
-This artifact is a signed statement, **not a membership grant**. It does not
-persist a decision, change the pending inbox state, create a member, or
-synchronize state between devices. Those operations require a separately
-reviewed atomic acceptance protocol and must not be inferred from the word
-"APPROVED" in an imported text code.
+This artifact is a signed statement, **not a membership grant**. A recipient
+can now validate an imported decision against the exact locally pending request
+and the previously pinned owner key. After successful verification, Room
+stores the complete signed decision and removes the matching pending request
+in one transaction. A primary key on (familySpaceId, requestId) prevents
+multiple conflicting outcomes for the same request; an exact repeated import
+is idempotent, while a different decision conflicts. Schema version 6 adds
+the decision table and a 5-to-6 migration.
+
+The acceptance service loads the pending request from local storage rather
+than trusting caller-supplied request fields. It checks the signature, owner
+pin, family/request/applicant bindings, and decision time before asking the
+repository to commit. The database transaction rechecks the pending row and
+applicant key, then inserts the decision and deletes the pending row atomically.
+Storage errors fail closed and coroutine cancellation is propagated.
+
+No member row is created, no role is assigned, and no authorization state is
+changed by an APPROVED decision. The persisted record is an auditable local
+copy of the owner's signed statement, not proof that this device has joined
+the family. There is still no network synchronization or cross-device replay
+coordination.
