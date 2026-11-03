@@ -47,12 +47,12 @@ completed successfully for the documentation baseline:
 - debug APK artifact upload
 
 This is CI evidence only; it is not a production security review or device
-instrumentation result. Subsequent documentation commits through ADR 0005
-were queried, but the available combined-status and PR-run endpoints returned
-no status entries. Their CI outcome is therefore **unknown / unconfirmed**;
-do not treat those commits as CI-verified.
+instrumentation result. Documentation commits after the last verified baseline are not covered by
+that successful run. The latest lifecycle-audit commit is 86cc551; Android CI
+run #41677314967 was queued/in progress at the last check, so its result is
+not yet confirmed.
 
-Latest documentation commit 63c7222 has no status entries exposed by the current combined-status query; CI is not confirmed.\n\n## Immediate priority
+## Immediate priority
 
 Complete the Identity & Trusted Enrollment protocol review. Keep authorization
 integration and network transport blocked until canonical encoding, key IDs,
@@ -60,6 +60,14 @@ signature representation, replay scope, trust ceremony, and recovery/
 revocation semantics have been reviewed.
 
 ## Protocol audit progress
+
+- ADR 0007 traces the separate applicant and owner Room stores. Applicant-side
+  decision import and owner-side finalization use independent local rows; the
+  apparent same-database conflict is not real. A separate owner-inbox gap is
+  confirmed: issuing FMOD1 does not persist/update owner-side status, so
+  rejected requests remain shown as awaiting review. Proposed remediation
+  and integration/Room instrumentation tests are documented; no runtime
+  change has been made.
 
 - Four signed v1 envelope decoders enforce canonical unpadded Base64URL.
 - All four signature verification paths reject non-P-256 EC keys.
