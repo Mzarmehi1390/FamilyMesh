@@ -441,3 +441,23 @@ Room instrumentation in separately reviewable changes.
 ### Next action
 
 Resolve ADR 0006's expiry policy and threat model before centralizing production clock acquisition or changing finalization behavior. Review ADR 0008/0009 before any owner-ledger schema implementation.
+
+
+## 2026-11-03 — Finalization replay exactness audit
+
+### Work completed
+
+- Added ADR 0011 after tracing the already-finalized fast path through the identity service and Room repository.
+- Confirmed the fast path returns `ALREADY_FINALIZED` from applicant key ID plus stored acceptance-signature bytes, before re-verifying the complete FMJA1 artifact.
+- Confirmed the current stored membership record does not retain the exact FMJA1 artifact or a digest of its complete signed payload.
+- Identified a result-integrity gap: a modified envelope retaining the same key ID and signature bytes can be reported as an already-finalized replay. This does not create a second membership row, but it is not proof of exact replay.
+- Specified additive replay-identity persistence, legacy-row behavior, and unit/Room test coverage. No runtime or schema changes were made.
+
+### Verification
+
+- ADR 0011 commit: `ede1f826b2a612e32173dc8050b34f7ea6766770`.
+- Documentation-only change; CI pending. No local tests run.
+
+### Next action
+
+Review the exact-replay compatibility policy for existing finalized rows, then coordinate any replay-identity column with ADR 0008/0009's owner-ledger migration. Keep expiry-policy work separate until ADR 0006 is accepted.
