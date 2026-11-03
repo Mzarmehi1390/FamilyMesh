@@ -4,7 +4,7 @@ Last verified: 2026-11-03
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
 Branch: `main`
 Latest verified source commit: `21dd7ca4db718ee31416e45319d88ffce9c950c3`
-Protocol review draft: ADR 0003 (proposal only; not production-approved)
+Protocol review drafts: ADR 0003 and ADR 0006 (proposals only; not production-approved)
 
 ## Overall state
 
@@ -30,7 +30,7 @@ production authorization are not implemented.
 | Signed owner decision | IMPLEMENTED_AND_TESTED | Service resolves the pin itself; tests reject missing, mismatched, and ambiguous pins |
 | Applicant acceptance + owner finalization | IMPLEMENTED_AND_TESTED | Both signatures verified; local Room v7 record |
 | Production membership authorization | BLOCKED | No trusted resolver; default denies all |
-| Canonical COSE protocol | IN_PROGRESS | Draft v2 profile, one primitive known-answer fixture, schema-parity review, and source-backed v1 field inventory documented; production implementation and independent interoperability validation not complete |
+| Canonical COSE protocol | IN_PROGRESS | Draft v2 profile, one primitive known-answer fixture, schema-parity review, and source-backed v1 field inventory and v2 time/text semantics proposal documented; production implementation and independent interoperability validation not complete |
 | Invitations / revocation / recovery | NOT_STARTED | Requires reviewed lifecycle and authority model |
 | E2EE messaging | NOT_STARTED | No message crypto implementation |
 | BLE / Wi-Fi Direct / internet P2P / relay | NOT_STARTED | No transport implementation |
