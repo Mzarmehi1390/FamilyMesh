@@ -51,7 +51,9 @@ SHA-256. The current enrollment exchange uses bounded, versioned,
 length-prefixed application payloads and manual text transfer; it is not yet
 the proposed interoperable COSE wire format. Protocol review is still
 required for canonical encoding, key identifiers, signature representation,
-replay protection, trust ceremony, revocation, and recovery.
+replay protection, trust ceremony, revocation, and recovery. A concrete but
+unapproved COSE v2 proposal is recorded in
+[ADR 0003](docs/architecture/decisions/0003-cose-v2-enrollment-profile-draft.md).
 
 All enrollment state described here is local to an individual installation.
 It must not be interpreted as cross-device authorization. No end-to-end
