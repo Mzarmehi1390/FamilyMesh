@@ -2,10 +2,16 @@
 
 ## Status and scope
 
-This document is a design baseline, not an implementation claim. FamilyMesh
-currently stores family spaces and member-list entries on one device. It has no
-trusted identity, invitation protocol, remote enrollment, synchronization, or
-authorization enforcement.
+This document describes both the design baseline and the current local
+prototype. FamilyMesh now has an Android Keystore device-signing identity,
+manual signed enrollment-proof transfer, local initial-owner trust bootstrap
+and pinning, signed owner decisions, applicant-signed acceptance, and
+owner-side local finalization into an authenticated-device record.
+
+The workflow is still device-local and manually transferred. It has no network
+transport, cross-device synchronization, production membership resolver,
+invitation lifecycle, revocation, or recovery. These local records must not be
+presented as globally current membership or production authorization.
 
 The next implementation must not treat a display name, local UUID, or locally
 stored role as proof of identity or permission.
@@ -14,7 +20,9 @@ stored role as proof of identity or permission.
 
 - **Family space**: a logical group with a stable identifier.
 - **Member record**: descriptive metadata shown in the local member list.
-- **Device identity**: a future cryptographic identity bound to a device key.
+- **Device identity**: the current prototype's P-256 signing public key and
+  versioned fingerprint; canonical interoperable serialization remains under
+  review.
 - **Invitation**: a time-limited authorization offer to request enrollment in
   one specific family space.
 - **Enrollment**: the verified transition that binds a device identity to a
@@ -86,12 +94,13 @@ approving authority.
 
 ## Role policy
 
-The current local API can only create a `MEMBER` metadata entry. This is
-intentional. `OWNER` and `ADMIN` are domain labels today, not enforced
-permissions. A future role policy must define who can grant each role, whether
-there can be multiple owners, and how ownership transfer and last-owner
-removal work. No UI should imply that these permissions are enforced before
-that policy and its enforcement are implemented.
+The local member-list metadata API still creates only a `MEMBER` entry.
+Separately, the enrollment prototype stores an authenticated-device record
+after owner-side verification and atomic finalization. These records are not
+yet consumed by a production authorization resolver. `OWNER` and `ADMIN`
+remain domain labels governed by a proposed policy, not end-to-end enforced
+permissions. Ownership transfer, multiple-owner rules, and last-owner
+protection remain unresolved.
 
 ## Initial role-permission policy (proposed)
 
@@ -181,7 +190,41 @@ The receiving device verifies the signed proof and, in one Room transaction,
 consumes its nonce and persists a minimal pending-request record. A failed
 request insert rolls back nonce consumption; a repeated nonce is rejected.
 The home screen displays received requests as awaiting a trusted owner decision.
-This inbox is local to one database and is not synchronized. It does not
-approve requests, establish the first owner, or create member records. The
-embedded public key and signature are verified before the request is stored;
-the inbox stores request metadata, not private key material.
+This inbox is local to one database and is not synchronized. The embedded
+public key and signature are verified before the request is stored; the inbox
+stores request metadata, not private key material.
+
+## Signed approval, applicant acceptance, and local finalization
+
+The current prototype adds two explicit steps after the owner decision:
+
+1. The owner creates a bounded, versioned `FMOD1.` decision bound to the
+   family-space ID, exact request ID, applicant device-key ID, owner device-key
+   ID, outcome, and decision timestamp. The receiving device verifies it
+   against its immutable locally pinned owner key and exact pending request.
+   The verified statement is persisted and the matching pending inbox row is
+   consumed atomically. An approval alone does not create membership.
+2. For an approved decision, the applicant signs an acceptance receipt using
+   its device key. The receipt binds the exact signed decision, applicant
+   key ID, applicant public key, and acceptance timestamp. The owner device
+   verifies both the owner decision and applicant acceptance against its
+   locally stored pending request and initial-owner key.
+
+After successful verification, the owner device atomically inserts an
+`authenticated_family_devices` record and removes the pending request.
+Room schema version 7 adds this table and a unique per-family device-key index.
+The home screen exposes these records for the selected family.
+
+This is a local owner-side record, not a distributed membership system. The
+applicant's device does not receive a synchronized membership record through
+this flow; there is no network protocol, membership-version propagation,
+production authorization resolver, revocation, ownership transfer, or
+recovery. The existing `FamilyAuthorizationService` remains fail-closed via
+`DenyAllFamilyMembershipResolver` and is not wired to these records.
+
+The current payload format is a custom fixed-order, length-prefixed v1
+encoding with domain separation and bounded manual text envelopes. It is not
+COSE serialization. The P-256 / COSE ESP256 ADR remains proposed; key-ID
+canonicalization, COSE signature conversion, interoperability, persistent
+replay semantics across devices, and end-to-end threat-model review remain
+open gates.

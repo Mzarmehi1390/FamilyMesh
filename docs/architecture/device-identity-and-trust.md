@@ -2,15 +2,19 @@
 
 ## Status
 
-This document defines requirements and a proposed trust model. The
-`:core:identity` module contains a protocol-neutral public identity model,
-a `DeviceKeyManager` interface, and typed expected failure categories. The
-public-key byte array is copied on input and on access to prevent callers from
-mutating the model's contents. The module includes an Android Keystore-backed P-256 signing-key provider. It
-can create and read public identity metadata and sign caller-supplied bytes
-without exporting the private key. This does not implement enrollment,
-message encryption, protocol serialization, or account recovery.
-FamilyMesh still has local profile IDs and local member metadata only.
+This document records both implemented local identity/enrollment primitives
+and the remaining proposed trust model. The `:core:identity` module contains
+a public identity model, a `DeviceKeyManager` boundary, typed lifecycle
+failures, an Android Keystore-backed P-256 signing-key provider, signed
+enrollment requests, owner trust bundles and pins, signed owner decisions,
+applicant-signed acceptance, and owner-side finalization services.
+
+Public-key byte arrays are copied on input and access. The current key
+representation exposed by Android Keystore is X.509 Subject Public Key Info;
+the stable interoperable protocol representation and COSE encoding remain
+under review. These primitives implement a local manually transferred
+prototype only. They do not provide end-to-end message encryption, network
+transport, distributed membership, revocation, or account recovery.
 
 ## Separate identifiers
 
@@ -224,9 +228,10 @@ A valid bundle is **self-signed**, not self-authenticating: it proves that the
 included key signed the statement, but does not prove that the key belongs to
 the intended family owner. Before pinning it, another device must compare the
 full key fingerprint with the owner through an independent trusted channel
-(for example, an in-person comparison). The bundle is not encrypted, does not
-provide confidentiality, does not synchronize trust automatically, and does
-not yet implement remote pin storage or signed membership decisions.
+(for example, an in-person comparison). The bundle is not encrypted and does
+not provide confidentiality or automatic trust synchronization. Recipient-side
+pinning and signed owner decisions are implemented locally, but are not
+distributed to other devices.
 
 
 ## Recipient-side initial-owner pinning
@@ -285,3 +290,49 @@ changed by an APPROVED decision. The persisted record is an auditable local
 copy of the owner's signed statement, not proof that this device has joined
 the family. There is still no network synchronization or cross-device replay
 coordination.
+
+
+## Applicant acceptance and owner-side local finalization
+
+The current prototype now supports an applicant-signed acceptance receipt
+for an exact approved `FMOD1.` owner decision. The `FMJA1.` envelope binds
+the signed decision, applicant device-key ID, applicant public key, and
+acceptance timestamp. The owner-side finalization service loads the pending
+request from local storage, verifies the owner decision against the locally
+established initial-owner identity, verifies that the applicant public-key
+fingerprint matches the pending request's device-key ID, and verifies the
+applicant signature and validity bounds.
+
+After successful verification, Room schema version 7 persists an
+`authenticated_family_devices` record and consumes the matching pending
+request in one transaction. The operation checks request/device/role/time
+bindings and treats an exact repeat as idempotent while conflicting records
+are rejected. The home screen lists authenticated devices for the selected
+family. Unit tests cover the domain services and repository behavior.
+
+These records exist only on the owner installation. They are not synchronized
+to the applicant or other peers, do not yet feed a production
+`TrustedFamilyMembershipResolver`, and do not establish globally current
+membership. There is no device revocation, ownership transfer, or recovery.
+
+## Protocol status and review gates
+
+The implemented local payloads use domain-separated, fixed-order,
+length-prefixed binary encodings and bounded text envelopes (`FMOT1.`,
+`FMER1.`, `FMOD1.`, and `FMJA1.`). The Android Keystore provider signs
+with JCA `SHA256withECDSA` and exposes X.509 Subject Public Key Info public
+keys. This is **not** a canonical COSE implementation. ADR 0001's P-256 /
+COSE ESP256 profile remains proposed and must not be described as completed.
+
+Before this prototype can become a production protocol, review:
+- canonical encoding, strict parser behavior, and cross-language test vectors;
+- versioned key-ID derivation and public-key serialization;
+- JCA-to-COSE signature conversion and signature canonicality;
+- persistent replay semantics across independent devices and clock skew;
+- initial-owner ceremony, ownership transfer, revocation, and recovery;
+- database tampering, compromised devices, and offline authorization;
+- Android API 31+ Keystore behavior and Room migration/instrumentation tests.
+
+Do not wire the local authenticated-device table into authorization or add
+network transport until the membership authority and consistency model are
+reviewed. The authorization service must remain fail-closed meanwhile.

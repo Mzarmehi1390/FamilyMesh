@@ -4,32 +4,60 @@ Private, decentralized, end-to-end encrypted family messaging for Android.
 
 ## Project status
 
-Milestone 0 establishes the native Android foundation. The repository is being built from scratch. The initial unit-test and debug-APK CI checks pass.
+Milestone 0 (native Android foundation) is implemented. Milestone 1 (domain,
+device identity, and trusted enrollment foundations) is in progress. The
+repository currently contains a local, manually transferred enrollment
+prototype: device-key-signed requests, locally pinned initial-owner trust,
+signed owner decisions, applicant-signed acceptance, and owner-side local
+membership finalization.
+
+This is **not** a production-ready messaging system. There is no end-to-end
+message encryption, peer-to-peer transport, relay, cross-device membership
+synchronization, production authorization resolver, device revocation, or
+recovery protocol yet. See the [project status](PROJECT_STATUS.md),
+[handover](HANDOVER.md), and [roadmap](docs/roadmap.md).
 
 ## Platform and stack
 
 - Minimum OS: Android 12 (API 31)
 - Kotlin + Jetpack Compose
 - Gradle Kotlin DSL and Version Catalog
-- Modular structure: `app`, `core:common`, `core:storage`, `core:designsystem`
+- Modular structure: `app`, `core:common`, `core:storage`,
+  `core:designsystem`, `core:identity`
 - Koin for dependency injection
 - Preferences DataStore for small settings
-- Room runtime foundation for structured local data
+- Room for local family, trust, enrollment, and authenticated-device records
 - JDK 17 toolchain
 
 ## Build
 
-Open the repository in a current Android Studio installation with Android SDK 36 installed. A Gradle Wrapper is not included yet; until it is added, install a compatible Gradle 8.13 distribution and run:
+Open the repository in a current Android Studio installation with Android SDK
+36 installed. A Gradle Wrapper is not included yet. Until it is added, install
+Gradle 8.13 and run:
 
 ```bash
 gradle testDebugUnitTest
 gradle assembleDebug
 ```
 
-Successful CI runs publish the debug APK as the `familymesh-debug-apk` workflow artifact for seven days.
+GitHub Actions runs both commands on Ubuntu with JDK 17 and Gradle 8.13.
+Successful runs publish the `familymesh-debug-apk` artifact for seven days.
 
 ## Security notes
 
-Cleartext traffic and Android automatic backup are disabled by default. This milestone does not yet implement end-to-end encryption, identity, or peer-to-peer transport. Those components will be designed and reviewed in later milestones.
+Cleartext traffic and Android automatic backup are disabled by default.
+Device signing keys are generated in Android Keystore using P-256 ECDSA and
+SHA-256. The current enrollment exchange uses bounded, versioned,
+length-prefixed application payloads and manual text transfer; it is not yet
+the proposed interoperable COSE wire format. Protocol review is still
+required for canonical encoding, key identifiers, signature representation,
+replay protection, trust ceremony, revocation, and recovery.
 
-See [Architecture](docs/architecture/overview.md) and [Roadmap](docs/roadmap.md).
+All enrollment state described here is local to an individual installation.
+It must not be interpreted as cross-device authorization. No end-to-end
+messaging encryption or network transport is implemented.
+
+See [Architecture](docs/architecture/overview.md),
+[Device identity and trust](docs/architecture/device-identity-and-trust.md),
+[Membership](docs/architecture/membership-and-invitations.md), and
+[Roadmap](docs/roadmap.md).

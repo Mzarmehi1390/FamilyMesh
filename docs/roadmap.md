@@ -11,7 +11,7 @@
 - [x] Basic launch screen and shared theme
 - [x] Unit-test baseline
 - [x] GitHub Actions workflow
-- [ ] Verify build and tests on a clean Android/Gradle environment
+- [x] Verify unit tests and debug APK on the clean GitHub Actions Ubuntu/JDK 17/Gradle 8.13 environment (latest verified run: 2026-11-03)
 - [ ] Add and validate the Gradle Wrapper
 
 ## Milestone 1 — Domain and identity
@@ -43,6 +43,10 @@
 - [x] Add explicit recipient-side fingerprint confirmation and immutable local owner-key pinning
 - [x] Add signed, bounded owner decision artifacts bound to the exact family, request, applicant key, and pinned owner key (portable statement only; no membership grant)
 - [x] Persist verified owner decisions atomically and close the matching pending inbox request (no member creation)
+- [x] Add applicant-signed acceptance bound to the exact approved owner decision
+- [x] Verify owner and applicant signatures on the owner device before finalization
+- [x] Atomically persist an authenticated family-device record and consume the pending request
+- [x] Expose authenticated family-device records for the selected family in the home screen
 - [ ] Complete protocol review for canonical encoding, key identifiers, and persistent replay protection
 - [x] Implement Android Keystore P-256 signing-key storage and public identity retrieval
 - [x] Add explicit local device-identity setup and protection-level status to the home screen
@@ -66,3 +70,23 @@ Build family spaces, conversations, delivery states, accessibility, and localiza
 ## Milestone 5 — Hardening and release
 
 Expand automated tests, threat-model review, privacy review, release signing, and operational documentation.
+
+
+## Current work package
+
+**WP — Identity and trusted enrollment protocol review.** The local proof,
+decision, acceptance, and owner-side finalization flow is implemented and
+covered by unit tests. Do not begin network transport or claim production
+membership authorization until the protocol review gates below are closed.
+
+Required gates:
+- [ ] Review canonical encoding and strict parsing for every signed payload
+- [ ] Finalize versioned public-key serialization and key-ID derivation
+- [ ] Resolve the gap between the proposed COSE ESP256 profile and current
+      JCA ECDSA / X.509 / custom length-prefixed payload implementation
+- [ ] Define replay protection and nonce retention across multiple devices
+- [ ] Define trusted owner ceremony, ownership transfer, revocation, and recovery
+- [ ] Threat-model the complete enrollment flow, including local database
+      tampering, clock skew, compromised devices, and offline peers
+- [ ] Add Android API 31+ Keystore instrumentation coverage
+- [ ] Add Room migration and transactional persistence tests on Android
