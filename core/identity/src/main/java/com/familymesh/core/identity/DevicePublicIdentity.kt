@@ -8,27 +8,31 @@ package com.familymesh.core.identity
  */
 class DevicePublicIdentity(
     val keyId: String,
-    publicKeyBytes: List<Byte>,
+    publicKeyBytes: ByteArray,
     val createdAtEpochMillis: Long,
 ) {
-    val publicKeyBytes: List<Byte> = publicKeyBytes.toList()
+    private val encodedPublicKey: ByteArray = publicKeyBytes.copyOf()
+
+    /** Returns a copy so callers cannot mutate this model's internal bytes. */
+    val publicKeyBytes: ByteArray
+        get() = encodedPublicKey.copyOf()
 
     init {
         require(keyId.isNotBlank()) { "Key ID must not be blank" }
         require(keyId.length <= MAX_KEY_ID_LENGTH) { "Key ID is too long" }
-        require(this.publicKeyBytes.isNotEmpty()) { "Public key must not be empty" }
+        require(encodedPublicKey.isNotEmpty()) { "Public key must not be empty" }
         require(createdAtEpochMillis >= 0L) { "Creation timestamp must not be negative" }
     }
 
     override fun equals(other: Any?): Boolean =
         other is DevicePublicIdentity &&
             keyId == other.keyId &&
-            publicKeyBytes == other.publicKeyBytes &&
+            encodedPublicKey.contentEquals(other.encodedPublicKey) &&
             createdAtEpochMillis == other.createdAtEpochMillis
 
     override fun hashCode(): Int {
         var result = keyId.hashCode()
-        result = 31 * result + publicKeyBytes.hashCode()
+        result = 31 * result + encodedPublicKey.contentHashCode()
         result = 31 * result + createdAtEpochMillis.hashCode()
         return result
     }
