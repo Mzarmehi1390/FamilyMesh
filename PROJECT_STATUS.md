@@ -149,3 +149,13 @@ revocation semantics have been reviewed.
 
 
 - Follow-up test gap: concurrent applicant imports of the same signed FMOD1 with different local receipt times may return one success and one conflict because the Room entity equality includes observer-only `recordedAtEpochMillis`. ADR 0014 now requires an explicit idempotency decision and deterministic concurrency test; no behavior was changed.
+
+
+## Initial Room DAO instrumentation baseline — 2026-11-03
+
+- Added `:core:storage` Android instrumentation configuration and a real Room/SQLite test fixture.
+- Added DAO tests for nonce replay rejection, applicant decision recording and conflict/replay behavior, and owner finalization and conflict/replay behavior.
+- Added a separate emulator-backed CI job that runs `gradle :core:storage:connectedDebugAndroidTest` and uploads reports on success or failure.
+- This is an initial baseline, not complete migration validation: historical migration fixtures, injected rollback failures, concurrent same-artifact import races, and close/reopen durability are still outstanding.
+- Commits: storage test configuration `3b38a2a1`; CI job `e94f00e9`; DAO tests `5868c4a0`. CI runs #41691001137, #41691009090, #41691021028 were queued/in progress at update time.
+- No production runtime, schema, protocol, crypto, or transport behavior changed.
