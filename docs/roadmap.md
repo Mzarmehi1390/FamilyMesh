@@ -47,7 +47,7 @@
 - [x] Verify owner and applicant signatures on the owner device before finalization
 - [x] Atomically persist an authenticated family-device record and consume the pending request
 - [x] Expose authenticated family-device records for the selected family in the home screen
-- [ ] Complete protocol review for canonical encoding, key identifiers, and persistent replay protection
+- [ ] Complete protocol review for canonical encoding, key identifiers, signature canonicality, and persistent replay protection
 - [x] Implement Android Keystore P-256 signing-key storage and public identity retrieval
 - [x] Add explicit local device-identity setup and protection-level status to the home screen
 - [ ] Define trusted initial-owner ceremony and ownership transfer
@@ -80,8 +80,11 @@ covered by unit tests. Do not begin network transport or claim production
 membership authorization until the protocol review gates below are closed.
 
 Required gates:
-- [ ] Review canonical encoding and strict parsing for every signed payload
-- [ ] Finalize versioned public-key serialization and key-ID derivation
+- [x] Review current bounded parsing and reject non-canonical Base64URL aliases across all four transfer envelopes
+- [x] Enforce P-256-only public-key parsing at all enrollment signature-verification boundaries
+- [ ] Select canonical interoperable COSE_Key / COSE_Sign1 wire representation
+- [ ] Define strict ECDSA-to-COSE signature conversion and low-S policy
+- [ ] Finalize versioned public-key serialization and key-ID derivation (current v1 remains SHA-256 over X.509 SPKI with domain separation)
 - [ ] Resolve the gap between the proposed COSE ESP256 profile and current
       JCA ECDSA / X.509 / custom length-prefixed payload implementation
 - [ ] Define replay protection and nonce retention across multiple devices

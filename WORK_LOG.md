@@ -81,3 +81,40 @@ guarantee that the supplied owner key came from the local pin repository.
 This closes the caller-injected trust-record gap. It does not protect against
 compromise or arbitrary modification of the local application database and
 does not replace an independently reviewed trust protocol.
+
+
+## 2026-11-03 — Enrollment protocol boundary hardening
+
+### Canonical transfer encoding
+
+Audit confirmed that all four text envelope decoders used Java's URL-safe
+Base64 decoder directly. The encoders emitted unpadded Base64URL, but the
+decoders did not enforce that single representation. Added
+`CanonicalBase64Url`, which checks the URL-safe alphabet, rejects padding,
+decodes, and round-trips to require exact canonical representation. Applied
+it to FMER1, FMOT1, FMOD1, and FMJA1. Added tests for canonical input,
+padded aliases, and non-URL-safe alphabet input.
+
+### Public-key algorithm constraints
+
+The Android Keystore generator creates P-256 keys, and ADR 0001 proposes
+P-256/SHA-256, but the verification paths previously accepted any EC curve
+supported by the JCA provider. Added `P256PublicKeyParser` and applied it to
+proof, owner trust bundle, owner decision, and applicant acceptance
+verification. Added P-384 rejection and P-256 acceptance tests.
+
+### Verification
+
+- Canonical Base64URL commit: `918b03b75181f6aa541e5df296cc6ad8164c84e6`
+  — CI #41671671596 passed.
+- P-256 verification commit: `36e2d27c0fcac8defe36a116fdd6792e071f011a`
+  — CI #41671944679 passed.
+- Parser block-body cleanup: `21dd7ca4db718ee31416e45319d88ffce9c950c3`
+  — CI #41671995919 passed unit tests, APK assembly, and artifact upload.
+
+### Remaining protocol decisions
+
+COSE_Key serialization, canonical key ID, DER-to-COSE signature conversion,
+low-S policy, cross-language vectors, maximum request lifetime, clock skew,
+distributed replay/freshness, trust ceremony, revocation, and recovery remain
+open. The local custom format is still not a production protocol.

@@ -7,10 +7,10 @@ Default branch: `main`
 ## Last verified repository state
 
 - Branch: `main`
-- Last verified source commit: `60f02eea4abe2d6ff8d9fe1d4c404724f049c1a8`
+- Last verified source commit: `21dd7ca4db718ee31416e45319d88ffce9c950c3`
 - Commit subject: `fix(identity): resolve owner pin inside decision acceptance`
 - Commit timestamp: 2026-11-03T15:48:14Z
-- Latest CI run for that commit: [Android CI #41670679347](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41670679347)
+- Latest source CI run: [Android CI #41671995919](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41671995919)
 - CI result: unit tests passed, debug APK assembled, artifact uploaded.
 - Branch protection: disabled; no open issues or pull requests were present at synchronization.
 
@@ -44,9 +44,18 @@ Default branch: `main`
 - Room v7 authenticated-device record insertion and pending-request consumption
   in one transaction.
 - Home screen lists authenticated devices for the selected family.
-- Decision acceptance service now resolves the owner key from `InitialOwnerPinRepository` internally; UI callers can no longer inject an arbitrary owner trust record.
+- Decision acceptance service resolves the owner key from `InitialOwnerPinRepository` internally; UI callers cannot inject an arbitrary owner trust record.
+- All four enrollment transfer codecs reject non-canonical/padded Base64URL aliases.
+- All enrollment signature verification boundaries reject non-P-256 EC public keys.
 - Added tests rejecting missing, mismatched, and ambiguous owner pins.
 - Unit tests cover domain, identity, and local persistence behavior.
+
+## Latest code changes and verification
+
+- Commits: `918b03b` (canonical Base64URL), `36e2d27` (P-256 enforcement), `21dd7ca` (parser cleanup).
+- CI run #41671671596 passed unit tests, APK assembly, and artifact upload for canonical Base64URL changes.
+- CI run #41671944679 passed unit tests, APK assembly, and artifact upload for P-256 enforcement.
+- CI run #41671995919 passed unit tests, APK assembly, and artifact upload for the current source commit.
 
 ## Current work package
 
@@ -82,7 +91,7 @@ connecting these records to authorization or implementing transport.
 
 ## Next exact engineering action
 
-Audit the signed enrollment chain
+Complete the signed enrollment chain
 (`FMER1.` request → `FMOT1.` owner trust → `FMOD1.` decision →
 `FMJA1.` applicant acceptance). Produce a reviewed decision record covering
 canonical wire encoding, public-key/key-ID format, ECDSA signature encoding,

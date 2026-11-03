@@ -336,3 +336,48 @@ Before this prototype can become a production protocol, review:
 Do not wire the local authenticated-device table into authorization or add
 network transport until the membership authority and consistency model are
 reviewed. The authorization service must remain fail-closed meanwhile.
+
+
+## Protocol review progress — 2026-11-03
+
+A source audit of `FMER1.`, `FMOT1.`, `FMOD1.`, and `FMJA1.` confirmed
+that the current payloads use fixed field order, explicit version integers,
+length-prefixed fields, domain-separated signing bytes, bounded parsers,
+strict UTF-8 decoding, and trailing-data rejection. These are custom v1
+formats; they are not COSE and are not yet approved as an interoperable
+production wire protocol.
+
+Two parser/algorithm-boundary hardenings have now been implemented:
+
+- All four transfer codecs accept only the canonical unpadded Base64URL
+  representation emitted by their encoders. Padding and alternate textual
+  aliases are rejected by a shared decoder.
+- All four signature-verification paths now parse only P-256 EC public keys.
+  P-384 and other EC curves are rejected rather than silently broadening the
+  proposed P-256/SHA-256 profile.
+
+The key ID currently remains
+`SHA-256("FamilyMesh:device-key:v1\\0" || X.509 SubjectPublicKeyInfo)`.
+JCA `SHA256withECDSA` signatures remain in provider DER encoding. A COSE
+implementation will require a separately specified canonical COSE_Key
+representation, stable key-ID derivation over that representation, strict
+DER-to-COSE fixed-width R||S conversion, and a documented low-S/canonical
+signature policy.
+
+Replay protection remains a local Room transaction: a 32-byte random nonce
+is domain-hashed and stored under a unique local primary key alongside the
+pending request; expired rows are pruned when another proof is consumed.
+This does not prevent replay across separate installations or establish
+distributed membership freshness. Timestamp checks currently use strict
+millisecond epoch comparisons without a specified clock-skew tolerance or
+maximum request lifetime.
+
+The owner bundle remains self-signed and requires an independent fingerprint
+comparison before local pinning. The pin is immutable per family on that
+installation, not a globally synchronized authority record. Local database
+tampering, owner transfer, revocation, recovery, and offline-peer freshness
+remain unresolved.
+
+Do not connect these local records to production authorization or transport
+until the wire profile, trust ceremony, replay scope, lifecycle, and threat
+model are approved.
