@@ -149,3 +149,13 @@ revocation, and recovery are also resolved.
 - Existing membership rows lack an exact FMJA1 artifact or complete-payload digest, so do not claim exact replay for legacy records without an explicit compatibility policy.
 - A future additive replay-identity field must be persisted atomically with membership finalization and covered by Room migration, legacy-row, restart, and concurrency tests. Coordinate with ADR 0008/0009.
 - No runtime/schema change was made. ADR 0011 commit: `ede1f826b2a612e32173dc8050b34f7ea6766770`; CI pending.
+
+
+## 2026-11-03 — Unified Room v7-to-v8 persistence handover
+
+- ADR 0012 proposes one additive Room 7 → 8 migration containing both the ADR 0008 owner-issued decision ledger and exact FMJA1 replay digest. Do not create two competing migrations from v7.
+- Digest input is a versioned domain separator ending in NUL plus UTF-8 of `EnrollmentAcceptanceTextCodec.encode(decodedAcceptance)`. The canonical codec includes nested FMOD1 and all acceptance fields. Digest is an idempotency identifier, never a replacement for first-time signature/trust verification.
+- v7 authenticated-device rows migrate with NULL digest. Their original FMJA1 artifact is not recoverable from stored columns; exact-replay success must not be inferred for these legacy rows.
+- ADR 0009 links the unified migration and includes replay identity coverage. No runtime or schema code changed.
+- Before implementation: approve ADR 0008 ledger semantics; review ADR 0012; keep ADR 0006 expiry decisions separate; add emulator/Room migration coverage as required by ADR 0009.
+- ADR 0012: `cd1b3316fe14c572ae06f5c8ad3f53d29cd45212`; ADR 0009 update: `c086128f9f1ee2f0f98197f34d20b1edc375e19d`. CI pending.
