@@ -37,6 +37,7 @@
 - [x] Add public-key signature verification and tamper/expiry tests
 - [x] Add durable one-time nonce-store contract and Room implementation with schema migration
 - [x] Add fail-closed proof acceptance service and replay tests
+- [x] Add bounded, versioned text export/import codec for signed enrollment proofs and public identities
 - [ ] Complete protocol review for canonical encoding, key identifiers, and persistent replay protection
 - [x] Implement Android Keystore P-256 signing-key storage and public identity retrieval
 - [x] Add explicit local device-identity setup and protection-level status to the home screen

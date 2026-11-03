@@ -162,3 +162,14 @@ The design is ready to move toward implementation only when:
   documented expected outcomes;
 - the selected cryptographic building blocks and key lifecycle have been
   reviewed.
+
+
+## Transferable enrollment proof envelope
+
+A versioned `FMER1.` Base64URL text envelope can carry the signed request and
+the claimed public identity between devices (for example, by copy/paste or a
+future QR presentation). Decoding is bounded and rejects unsupported versions,
+malformed fields, and trailing bytes. The receiving side must still recompute
+the public-key fingerprint and verify the signature and expiry. The embedded
+public key is a claim from the requester, not a trust anchor. The envelope is
+not encrypted, is not a secure transport, and does not approve membership.
