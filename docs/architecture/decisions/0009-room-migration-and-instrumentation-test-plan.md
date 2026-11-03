@@ -141,3 +141,8 @@ This ADR does not implement the ledger, change the database schema, select
 the expiry policy, change the v1 wire format or cryptography, introduce
 distributed synchronization, or claim that local Room state is a
 distributed source of truth.
+
+
+## Coordinated replay-identity migration note
+
+ADR 0012 now specifies that, if ADR 0008 is approved, the owner-issued decision ledger and nullable exact-FMJA1 replay digest must be delivered together in one additive Room 7 → 8 migration. Existing v7 finalized rows retain a NULL replay digest; no historical artifact is inferred. Apply ADR 0012's exact-replay and legacy-row test cases in addition to this ADR's migration and instrumentation gates. This note does not approve either schema change or resolve ADR 0006.
