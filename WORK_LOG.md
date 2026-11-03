@@ -207,3 +207,32 @@ model/codec inspection and independent vectors.
 
 - ADR 0004: 10e493a6aec11032a8110c3a9c548d15d2c637fe
 - ADR 0003 parity correction: 63c722224ad1d94244b8824a38c1b3ec1adaa7c9
+
+
+## 2026-11-03 — Source-backed v1 enrollment field inventory
+
+### Work completed
+
+- Inspected the actual Kotlin models and transfer codecs for all four
+  enrollment artifacts, plus DevicePublicIdentity and FamilyRole.
+- Added ADR 0005 with source-backed fields, current constraints, binary/text
+  envelope caps, signed-vs-transfer-only metadata, and migration observations.
+- Confirmed that FMER1 carries identity creation time and X.509 public key
+  outside the proof's signed semantic payload; proof nonce is exactly 32 bytes.
+- Confirmed FMOT1 signs owner public-key bytes; FMOD1 binds family/request/
+  applicant/owner/outcome/time; FMJA1 signs the exact encoded FMOD1 decision,
+  applicant key ID, applicant public key, and acceptance time.
+- Recorded the mismatch between String character limits and UTF-8 byte
+  limits, and that all current timestamps are epoch milliseconds with only
+  non-negative checks and no upper bound.
+
+### Verification limits
+
+No runtime or wire implementation changed. The inventory is documentation
+based on the inspected main-branch Kotlin sources; it does not approve CBOR
+labels, a v2 time policy, or a key migration. CI status for the latest commit
+has not yet been confirmed.
+
+### Commit
+
+- ADR 0005: f784a42afc29c57b8d9ac829ab5755cd998d7521
