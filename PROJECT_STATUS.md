@@ -30,7 +30,7 @@ production authorization are not implemented.
 | Signed owner decision | IMPLEMENTED_AND_TESTED | Service resolves the pin itself; tests reject missing, mismatched, and ambiguous pins |
 | Applicant acceptance + owner finalization | IMPLEMENTED_AND_TESTED | Both signatures verified; local Room v7 record |
 | Production membership authorization | BLOCKED | No trusted resolver; default denies all |
-| Canonical COSE protocol | IN_PROGRESS | Draft v2 profile and one primitive known-answer fixture documented; production implementation and independent interoperability validation not complete |
+| Canonical COSE protocol | IN_PROGRESS | Draft v2 profile, one primitive known-answer fixture, and v1/v2 schema-parity review documented; production implementation and independent interoperability validation not complete |
 | Invitations / revocation / recovery | NOT_STARTED | Requires reviewed lifecycle and authority model |
 | E2EE messaging | NOT_STARTED | No message crypto implementation |
 | BLE / Wi-Fi Direct / internet P2P / relay | NOT_STARTED | No transport implementation |
@@ -50,7 +50,7 @@ This is CI evidence only; it is not a production security review or device
 instrumentation result. The next documentation-only changes require their
 own CI result before being considered verified.
 
-## Immediate priority
+Latest documentation commit 63c7222 has no status entries exposed by the current combined-status query; CI is not confirmed.\n\n## Immediate priority
 
 Complete the Identity & Trusted Enrollment protocol review. Keep authorization
 integration and network transport blocked until canonical encoding, key IDs,
