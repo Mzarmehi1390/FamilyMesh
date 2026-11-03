@@ -10,6 +10,8 @@ import com.familymesh.core.common.domain.PendingEnrollmentRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.Signature
@@ -173,6 +175,9 @@ class EnrollmentFinalizationServiceTest {
     private class FakeFinalizationRepository(initial: PendingEnrollmentRequest?) : EnrollmentFinalizationRepository {
         var pending: PendingEnrollmentRequest? = initial
         var finalized: AuthenticatedFamilyDevice? = null
+
+        override fun observeAuthenticatedDevices(familySpaceId: String): Flow<List<AuthenticatedFamilyDevice>> =
+            MutableStateFlow(listOfNotNull(finalized).filter { it.familySpaceId == familySpaceId })
 
         override suspend fun findPendingRequest(familySpaceId: String, requestId: String) =
             pending?.takeIf { it.familySpaceId == familySpaceId && it.requestId == requestId }
