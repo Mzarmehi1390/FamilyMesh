@@ -461,3 +461,24 @@ Resolve ADR 0006's expiry policy and threat model before centralizing production
 ### Next action
 
 Review the exact-replay compatibility policy for existing finalized rows, then coordinate any replay-identity column with ADR 0008/0009's owner-ledger migration. Keep expiry-policy work separate until ADR 0006 is accepted.
+
+
+## 2026-11-03 — Unified Room v7-to-v8 enrollment persistence design
+
+### Work completed
+
+- Added ADR 0012 to coordinate the proposed owner-issued decision ledger and exact FMJA1 replay identity in one additive Room 7 → 8 migration.
+- Verified the FMJA1 codec deterministically re-encodes decoded acceptances and rejects non-canonical Base64URL and trailing payload bytes.
+- Specified a domain-separated SHA-256 digest over the complete canonical FMJA1 text, including nested FMOD1, applicant key identity/public key, accepted time, and signature.
+- Specified NULL replay digests for migrated v7 rows; legacy artifacts cannot be reconstructed from the fields currently stored and must not be represented as exact replays.
+- Linked ADR 0012 from ADR 0009. No runtime, schema, protocol, or expiry-policy changes were made.
+
+### Verification
+
+- Source audit covered `EnrollmentFinalizationService`, `RoomEnrollmentFinalizationRepository`, `FamilyMeshDatabase`, `EnrollmentFinalizationRepository`, and `EnrollmentAcceptance`.
+- ADR 0011's four Android CI runs completed successfully. ADR 0012 and this log update require their own CI runs.
+- Documentation-only changes; no local tests run.
+
+### Next action
+
+Review/approve ADR 0008 owner-ledger semantics and ADR 0012 migration/legacy replay behavior before any schema implementation. Keep ADR 0006 expiry policy separate.
