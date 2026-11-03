@@ -32,6 +32,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
+import com.familymesh.core.common.domain.DeviceEnrollmentRequest
+import com.familymesh.core.common.domain.FamilyRole
+import com.familymesh.core.identity.DeviceEnrollmentProofAcceptanceService
+import com.familymesh.core.identity.DeviceEnrollmentProofSigner
+import com.familymesh.core.identity.DeviceMessageSigner
+import com.familymesh.core.identity.EnrollmentProofAcceptanceResult
+import com.familymesh.core.identity.EnrollmentProofTextCodec
+import java.util.UUID
 import androidx.compose.ui.unit.dp
 import com.familymesh.core.common.domain.FamilySpace
 import com.familymesh.core.common.domain.FamilySpaceRepository
@@ -52,6 +62,9 @@ fun FamilyMeshHomeScreen() {
     val familySpaceRepository: FamilySpaceRepository = koinInject()
     val deviceKeyManager: DeviceKeyManager = koinInject()
     val keySecurityInfoProvider: DeviceKeySecurityInfoProvider = koinInject()
+    val messageSigner: DeviceMessageSigner = koinInject()
+    val proofAcceptanceService: DeviceEnrollmentProofAcceptanceService = koinInject()
+    val clipboardManager = LocalClipboardManager.current
     val profile by profileRepository.profile.collectAsState(initial = null)
     val familySpaces by familySpaceRepository.observeFamilySpaces().collectAsState(initial = emptyList())
     var displayName by remember(profile?.displayName) { mutableStateOf(profile?.displayName.orEmpty()) }
@@ -60,6 +73,19 @@ fun FamilyMeshHomeScreen() {
     var identityError by remember { mutableStateOf<String?>(null) }
     var keySecurityLevel by remember { mutableStateOf<DeviceKeySecurityLevel?>(null) }
     var isCreatingIdentity by remember { mutableStateOf(false) }
+    var selectedFamilySpaceId by remember { mutableStateOf("") }
+    var generatedProofText by remember { mutableStateOf("") }
+    var importedProofText by remember { mutableStateOf("") }
+    var proofStatus by remember { mutableStateOf<String?>(null) }
+    var isProcessingProof by remember { mutableStateOf(false) }
+
+    LaunchedEffect(familySpaces) {
+        if (selectedFamilySpaceId.isBlank() && familySpaces.isNotEmpty()) {
+            selectedFamilySpaceId = familySpaces.first().id
+        } else if (familySpaces.none { it.id == selectedFamilySpaceId }) {
+            selectedFamilySpaceId = familySpaces.firstOrNull()?.id.orEmpty()
+        }
+    }
 
     LaunchedEffect(deviceKeyManager) {
         try {
@@ -190,6 +216,139 @@ fun FamilyMeshHomeScreen() {
                             Text(if (isCreatingIdentity) "Creating identity…" else "Create device signing identity")
                         }
                     }
+                }
+            }
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+            ) {
+                Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text("Device enrollment proof", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        "Create a short-lived, signed MEMBER request for a family space on this device. Share the code with the family administrator.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    if (familySpaces.isEmpty()) {
+                        Text("Create a family space first. This device can only prepare a request for a locally known family-space ID.")
+                    } else {
+                        Text("Choose family space", style = MaterialTheme.typography.labelLarge)
+                        familySpaces.forEach { space ->
+                            OutlinedButton(
+                                onClick = { selectedFamilySpaceId = space.id; generatedProofText = ""; proofStatus = null },
+                                modifier = Modifier.fillMaxWidth(),
+                                enabled = !isProcessingProof
+                            ) {
+                                Text(if (selectedFamilySpaceId == space.id) "✓ ${space.name}" else space.name)
+                            }
+                        }
+                        Button(
+                            onClick = {
+                                val identity = deviceIdentity
+                                if (identity == null) {
+                                    proofStatus = "Create this device's signing identity first."
+                                } else {
+                                    isProcessingProof = true
+                                    proofStatus = null
+                                    coroutineScope.launch {
+                                        try {
+                                            val now = System.currentTimeMillis().coerceAtLeast(0L)
+                                            val request = DeviceEnrollmentRequest(
+                                                id = UUID.randomUUID().toString(),
+                                                familySpaceId = selectedFamilySpaceId,
+                                                deviceKeyId = identity.keyId,
+                                                requestedRole = FamilyRole.MEMBER,
+                                                createdAtEpochMillis = now,
+                                                expiresAtEpochMillis = now + 15L * 60L * 1000L
+                                            )
+                                            val proof = DeviceEnrollmentProofSigner(messageSigner).sign(request, identity)
+                                            generatedProofText = EnrollmentProofTextCodec.encode(proof, identity)
+                                            proofStatus = "Signed request created. It expires in 15 minutes."
+                                        } catch (_: Exception) {
+                                            proofStatus = "Could not create the signed request. Check the device identity and try again."
+                                        } finally {
+                                            isProcessingProof = false
+                                        }
+                                    }
+                                }
+                            },
+                            enabled = deviceIdentity != null && selectedFamilySpaceId.isNotBlank() && !isProcessingProof,
+                            modifier = Modifier.fillMaxWidth()
+                        ) { Text(if (isProcessingProof) "Creating request…" else "Create signed request") }
+                    }
+                    if (generatedProofText.isNotBlank()) {
+                        OutlinedTextField(
+                            value = generatedProofText,
+                            onValueChange = {},
+                            readOnly = true,
+                            modifier = Modifier.fillMaxWidth(),
+                            label = { Text("Share this enrollment code") },
+                            minLines = 3
+                        )
+                        OutlinedButton(
+                            onClick = {
+                                clipboardManager.setText(AnnotatedString(generatedProofText))
+                                proofStatus = "Enrollment code copied."
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) { Text("Copy enrollment code") }
+                    }
+                    Text("Receive a request", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                    OutlinedTextField(
+                        value = importedProofText,
+                        onValueChange = { importedProofText = it.take(6000) },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Paste enrollment code") },
+                        minLines = 3,
+                        enabled = !isProcessingProof
+                    )
+                    OutlinedButton(
+                        onClick = {
+                            isProcessingProof = true
+                            proofStatus = null
+                            coroutineScope.launch {
+                                try {
+                                    val decoded = EnrollmentProofTextCodec.decode(importedProofText.trim())
+                                    val localFamilyExists = familySpaces.any { it.id == decoded.proof.familySpaceId }
+                                    if (!localFamilyExists) {
+                                        proofStatus = "This code refers to a family space not saved on this device."
+                                    } else if (decoded.proof.requestedRole != FamilyRole.MEMBER) {
+                                        proofStatus = "Only MEMBER requests are accepted by this preview."
+                                    } else {
+                                        when (proofAcceptanceService.accept(
+                                            proof = decoded.proof,
+                                            identity = decoded.identity,
+                                            nowEpochMillis = System.currentTimeMillis().coerceAtLeast(0L)
+                                        )) {
+                                            EnrollmentProofAcceptanceResult.Accepted ->
+                                                proofStatus = "Valid signed request received. It is pending family-owner approval; no membership was added."
+                                            EnrollmentProofAcceptanceResult.InvalidOrExpired ->
+                                                proofStatus = "The signature is invalid or this request has expired."
+                                            EnrollmentProofAcceptanceResult.ReplayDetected ->
+                                                proofStatus = "This request code has already been used on this device."
+                                            EnrollmentProofAcceptanceResult.NonceStoreUnavailable ->
+                                                proofStatus = "Could not safely record this request. Please try again."
+                                        }
+                                    }
+                                } catch (_: Exception) {
+                                    proofStatus = "The enrollment code is malformed or could not be verified."
+                                } finally {
+                                    isProcessingProof = false
+                                }
+                            }
+                        },
+                        enabled = importedProofText.isNotBlank() && !isProcessingProof,
+                        modifier = Modifier.fillMaxWidth()
+                    ) { Text(if (isProcessingProof) "Checking request…" else "Verify received request") }
+                    proofStatus?.let {
+                        Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Text(
+                        "A valid signature proves control of the device key only. This preview does not authenticate the sender, approve membership, or synchronize replay protection between devices.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
 
