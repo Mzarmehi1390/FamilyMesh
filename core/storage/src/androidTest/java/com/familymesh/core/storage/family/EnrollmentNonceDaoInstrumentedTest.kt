@@ -163,6 +163,41 @@ class EnrollmentNonceDaoInstrumentedTest {
         )
     }
 
+    @Test
+    fun sqliteConstraints_enforceDeviceUniquenessAndFamilyCascade() = runBlocking {
+        val firstDevice = AuthenticatedFamilyDeviceEntity(
+            familySpaceId = FAMILY_ID,
+            requestId = "authenticated-request-1",
+            deviceKeyId = "shared-device-key",
+            publicKeyBase64 = "cHVibGlj",
+            role = "MEMBER",
+            joinedAtEpochMillis = 1_600L,
+            acceptanceSignatureBase64 = "c2ln",
+        )
+        val secondDevice = firstDevice.copy(requestId = "authenticated-request-2")
+
+        assertTrue(dao.insertAuthenticatedDevice(firstDevice) > 0L)
+        assertEquals(-1L, dao.insertAuthenticatedDevice(secondDevice))
+        assertTrue(dao.consumeNonce(nonce(), pending(), nowEpochMillis = 1_500L))
+
+        database.openHelper.writableDatabase.execSQL(
+            "DELETE FROM family_spaces WHERE id = ?",
+            arrayOf(FAMILY_ID),
+        )
+
+        assertEquals(0, rowCount("pending_enrollment_requests"))
+        assertEquals(0, rowCount("authenticated_family_devices"))
+    }
+
+    private fun rowCount(tableName: String): Int {
+        database.openHelper.readableDatabase.query(
+            "SELECT COUNT(*) FROM $tableName"
+        ).use { cursor ->
+            check(cursor.moveToFirst())
+            return cursor.getInt(0)
+        }
+    }
+
     private fun nonce(nonceDigest: String = "nonce-digest") = ConsumedEnrollmentNonceEntity(
         nonceDigest = nonceDigest,
         familySpaceId = FAMILY_ID,
