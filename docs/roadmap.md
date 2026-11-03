@@ -17,9 +17,10 @@
 ## Milestone 1 — Domain and identity
 
 - [x] Define immutable family-space and member domain models
-- [x] Define a repository contract for observing and creating family spaces
+- [x] Define repository contract for observing family spaces and members
 - [x] Implement device-local Room persistence for family spaces
-- [ ] Add member enrollment and membership lifecycle
+- [x] Add local member-list persistence (metadata only; not authenticated enrollment)
+- [ ] Define trusted member enrollment and membership lifecycle
 - [ ] Define invitation lifecycle
 - [ ] Threat-model identity and enrollment before implementing network behavior
 

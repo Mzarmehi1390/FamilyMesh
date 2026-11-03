@@ -7,39 +7,41 @@ import org.junit.Test
 class FamilyModelsTest {
     @Test
     fun familySpaceAcceptsValidValues() {
-        val space = FamilySpace(id = "space-1", name = "My family", createdAtEpochMillis = 1_000L)
+        val space = FamilySpace("space-1", "My family", 1_000L)
         assertEquals("My family", space.name)
     }
 
     @Test
     fun familySpaceRejectsBlankName() {
         assertThrows(IllegalArgumentException::class.java) {
-            FamilySpace(id = "space-1", name = "  ", createdAtEpochMillis = 1L)
+            FamilySpace("space-1", "  ", 1L)
         }
     }
 
     @Test
     fun familyMemberRequiresNonBlankFamilyId() {
         assertThrows(IllegalArgumentException::class.java) {
-            FamilyMember(
-                id = "member-1",
-                familySpaceId = " ",
-                displayName = "Alex",
-                role = FamilyRole.MEMBER,
-                joinedAtEpochMillis = 1L
-            )
+            FamilyMember("member-1", " ", "Alex", FamilyRole.MEMBER, 1L)
         }
     }
 
     @Test
     fun familyMemberPreservesRole() {
-        val member = FamilyMember(
-            id = "member-1",
-            familySpaceId = "space-1",
-            displayName = "Alex",
-            role = FamilyRole.ADMIN,
-            joinedAtEpochMillis = 1_000L
-        )
+        val member = FamilyMember("member-1", "space-1", "Alex", FamilyRole.ADMIN, 1_000L)
         assertEquals(FamilyRole.ADMIN, member.role)
+    }
+
+    @Test
+    fun familyMemberRejectsBlankDisplayName() {
+        assertThrows(IllegalArgumentException::class.java) {
+            FamilyMember("member-1", "space-1", "  ", FamilyRole.MEMBER, 1L)
+        }
+    }
+
+    @Test
+    fun familyMemberRejectsNegativeJoinTime() {
+        assertThrows(IllegalArgumentException::class.java) {
+            FamilyMember("member-1", "space-1", "Alex", FamilyRole.MEMBER, -1L)
+        }
     }
 }

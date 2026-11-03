@@ -10,11 +10,14 @@ import kotlinx.coroutines.flow.Flow
  */
 interface FamilySpaceRepository {
     fun observeFamilySpaces(): Flow<List<FamilySpace>>
-
     fun observeMembers(familySpaceId: String): Flow<List<FamilyMember>>
 
-    suspend fun createFamilySpace(
-        name: String,
-        createdAtEpochMillis: Long
-    ): FamilySpace
+    suspend fun createFamilySpace(name: String, createdAtEpochMillis: Long): FamilySpace
+
+    /** Adds a local member-list entry only; this does not authenticate or authorize a device. */
+    suspend fun addLocalMember(
+        familySpaceId: String,
+        displayName: String,
+        joinedAtEpochMillis: Long
+    ): FamilyMember
 }

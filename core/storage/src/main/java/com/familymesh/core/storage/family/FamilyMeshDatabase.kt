@@ -55,6 +55,9 @@ interface FamilySpaceDao {
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertFamilySpace(entity: FamilySpaceEntity)
+
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun insertFamilyMember(entity: FamilyMemberEntity)
 }
 
 @Database(

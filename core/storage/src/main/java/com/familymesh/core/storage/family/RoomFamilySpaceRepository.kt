@@ -11,7 +11,6 @@ import java.util.UUID
 class RoomFamilySpaceRepository(
     private val dao: FamilySpaceDao
 ) : FamilySpaceRepository {
-
     override fun observeFamilySpaces(): Flow<List<FamilySpace>> =
         dao.observeFamilySpaces().map { records -> records.map(FamilySpaceEntity::toDomain) }
 
@@ -22,10 +21,9 @@ class RoomFamilySpaceRepository(
         name: String,
         createdAtEpochMillis: Long
     ): FamilySpace {
-        val normalizedName = name.trim()
         val familySpace = FamilySpace(
             id = UUID.randomUUID().toString(),
-            name = normalizedName,
+            name = name.trim(),
             createdAtEpochMillis = createdAtEpochMillis
         )
         dao.insertFamilySpace(
@@ -37,13 +35,33 @@ class RoomFamilySpaceRepository(
         )
         return familySpace
     }
+
+    override suspend fun addLocalMember(
+        familySpaceId: String,
+        displayName: String,
+        joinedAtEpochMillis: Long
+    ): FamilyMember {
+        val member = FamilyMember(
+            id = UUID.randomUUID().toString(),
+            familySpaceId = familySpaceId.trim(),
+            displayName = displayName.trim(),
+            role = FamilyRole.MEMBER,
+            joinedAtEpochMillis = joinedAtEpochMillis
+        )
+        dao.insertFamilyMember(
+            FamilyMemberEntity(
+                id = member.id,
+                familySpaceId = member.familySpaceId,
+                displayName = member.displayName,
+                role = member.role.name,
+                joinedAtEpochMillis = member.joinedAtEpochMillis
+            )
+        )
+        return member
+    }
 }
 
-private fun FamilySpaceEntity.toDomain() = FamilySpace(
-    id = id,
-    name = name,
-    createdAtEpochMillis = createdAtEpochMillis
-)
+private fun FamilySpaceEntity.toDomain() = FamilySpace(id, name, createdAtEpochMillis)
 
 private fun FamilyMemberEntity.toDomain() = FamilyMember(
     id = id,
