@@ -3,6 +3,9 @@ package com.familymesh.core.identity
 import com.familymesh.core.common.domain.DeviceEnrollmentRequest
 import com.familymesh.core.common.domain.EnrollmentNonceStore
 import com.familymesh.core.common.domain.FamilyRole
+import com.familymesh.core.common.domain.PendingEnrollmentRequest
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import java.security.KeyPairGenerator
 import java.security.Signature
 import java.security.spec.ECGenParameterSpec
@@ -41,13 +44,9 @@ class DeviceEnrollmentProofAcceptanceServiceTest {
     @Test
     fun nonceStoreFailureNeverAcceptsProof() = runBlocking {
         val failingStore = object : EnrollmentNonceStore {
-            override suspend fun consume(
-                nonceDigest: String,
-                familySpaceId: String,
-                requestId: String,
-                consumedAtEpochMillis: Long,
-                expiresAtEpochMillis: Long,
-            ): Boolean = error("database unavailable")
+            override fun observePendingRequests(): Flow<List<PendingEnrollmentRequest>> = emptyFlow()
+            override suspend fun consume(nonceDigest: String, request: PendingEnrollmentRequest): Boolean =
+                error("database unavailable")
         }
         val service = DeviceEnrollmentProofAcceptanceService(failingStore)
         val proof = DeviceEnrollmentProofSigner(signer).sign(request(), identity)
@@ -68,13 +67,13 @@ class DeviceEnrollmentProofAcceptanceServiceTest {
 
     private class InMemoryNonceStore : EnrollmentNonceStore {
         private val consumed = mutableSetOf<String>()
+        private val pending = mutableListOf<PendingEnrollmentRequest>()
         val size: Int get() = consumed.size
-        override suspend fun consume(
-            nonceDigest: String,
-            familySpaceId: String,
-            requestId: String,
-            consumedAtEpochMillis: Long,
-            expiresAtEpochMillis: Long,
-        ): Boolean = consumed.add(nonceDigest)
+        override fun observePendingRequests(): Flow<List<PendingEnrollmentRequest>> = emptyFlow()
+        override suspend fun consume(nonceDigest: String, request: PendingEnrollmentRequest): Boolean {
+            if (!consumed.add(nonceDigest)) return false
+            pending += request
+            return true
+        }
     }
 }

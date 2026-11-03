@@ -173,3 +173,15 @@ malformed fields, and trailing bytes. The receiving side must still recompute
 the public-key fingerprint and verify the signature and expiry. The embedded
 public key is a claim from the requester, not a trust anchor. The envelope is
 not encrypted, is not a secure transport, and does not approve membership.
+
+
+## Local pending-request inbox
+
+The receiving device verifies the signed proof and, in one Room transaction,
+consumes its nonce and persists a minimal pending-request record. A failed
+request insert rolls back nonce consumption; a repeated nonce is rejected.
+The home screen displays received requests as awaiting a trusted owner decision.
+This inbox is local to one database and is not synchronized. It does not
+approve requests, establish the first owner, or create member records. The
+embedded public key and signature are verified before the request is stored;
+the inbox stores request metadata, not private key material.

@@ -67,6 +67,7 @@ fun FamilyMeshHomeScreen() {
     val clipboardManager = LocalClipboardManager.current
     val profile by profileRepository.profile.collectAsState(initial = null)
     val familySpaces by familySpaceRepository.observeFamilySpaces().collectAsState(initial = emptyList())
+    val pendingEnrollmentRequests by proofAcceptanceService.observePendingRequests().collectAsState(initial = emptyList())
     var displayName by remember(profile?.displayName) { mutableStateOf(profile?.displayName.orEmpty()) }
     var familyName by remember { mutableStateOf("") }
     var deviceIdentity by remember { mutableStateOf<DevicePublicIdentity?>(null) }
@@ -343,6 +344,25 @@ fun FamilyMeshHomeScreen() {
                     ) { Text(if (isProcessingProof) "Checking request…" else "Verify received request") }
                     proofStatus?.let {
                         Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    if (pendingEnrollmentRequests.isNotEmpty()) {
+                        Text("Requests awaiting owner review", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                        pendingEnrollmentRequests.forEach { request ->
+                            val familyNameForRequest = familySpaces.firstOrNull { it.id == request.familySpaceId }?.name ?: "Unknown family space"
+                            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                Text(familyNameForRequest, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+                                Text(
+                                    "Role requested: ${request.requestedRole.name} · Device key: ${request.deviceKeyId.take(16)}…",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    "Received locally · Awaiting a trusted owner decision",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
                     }
                     Text(
                         "A valid signature proves control of the device key only. This preview does not authenticate the sender, approve membership, or synchronize replay protection between devices.",

@@ -53,18 +53,46 @@ data class ConsumedEnrollmentNonceEntity(
     val expiresAtEpochMillis: Long,
 )
 
+@Entity(
+    tableName = "pending_enrollment_requests",
+    primaryKeys = ["familySpaceId", "requestId"],
+    foreignKeys = [ForeignKey(entity = FamilySpaceEntity::class, parentColumns = ["id"], childColumns = ["familySpaceId"], onDelete = ForeignKey.CASCADE)],
+    indices = [Index(value = ["receivedAtEpochMillis"]), Index(value = ["deviceKeyId"])]
+)
+data class PendingEnrollmentRequestEntity(
+    val requestId: String,
+    val familySpaceId: String,
+    val deviceKeyId: String,
+    val requestedRole: String,
+    val createdAtEpochMillis: Long,
+    val expiresAtEpochMillis: Long,
+    val receivedAtEpochMillis: Long,
+)
+
 @Dao
 interface EnrollmentNonceDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertNonce(entity: ConsumedEnrollmentNonceEntity): Long
 
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun insertPendingRequest(entity: PendingEnrollmentRequestEntity)
+
+    @Query("SELECT * FROM pending_enrollment_requests ORDER BY receivedAtEpochMillis DESC, requestId ASC")
+    fun observePendingRequests(): Flow<List<PendingEnrollmentRequestEntity>>
+
     @Query("DELETE FROM consumed_enrollment_nonces WHERE expiresAtEpochMillis <= :nowEpochMillis")
     suspend fun deleteExpiredNonces(nowEpochMillis: Long)
 
     @Transaction
-    suspend fun consumeNonce(entity: ConsumedEnrollmentNonceEntity, nowEpochMillis: Long): Boolean {
+    suspend fun consumeNonce(
+        nonce: ConsumedEnrollmentNonceEntity,
+        pending: PendingEnrollmentRequestEntity,
+        nowEpochMillis: Long,
+    ): Boolean {
         deleteExpiredNonces(nowEpochMillis)
-        return insertNonce(entity) != -1L
+        if (insertNonce(nonce) == -1L) return false
+        insertPendingRequest(pending)
+        return true
     }
 }
 
@@ -88,8 +116,8 @@ interface FamilySpaceDao {
 }
 
 @Database(
-    entities = [FamilySpaceEntity::class, FamilyMemberEntity::class, ConsumedEnrollmentNonceEntity::class],
-    version = 2,
+    entities = [FamilySpaceEntity::class, FamilyMemberEntity::class, ConsumedEnrollmentNonceEntity::class, PendingEnrollmentRequestEntity::class],
+    version = 3,
     exportSchema = false
 )
 abstract class FamilyMeshDatabase : RoomDatabase() {
@@ -110,11 +138,26 @@ abstract class FamilyMeshDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(
+                    "CREATE TABLE IF NOT EXISTS pending_enrollment_requests (" +
+                        "requestId TEXT NOT NULL, familySpaceId TEXT NOT NULL, deviceKeyId TEXT NOT NULL, " +
+                        "requestedRole TEXT NOT NULL, createdAtEpochMillis INTEGER NOT NULL, " +
+                        "expiresAtEpochMillis INTEGER NOT NULL, receivedAtEpochMillis INTEGER NOT NULL, " +
+                        "PRIMARY KEY(familySpaceId, requestId), " +
+                        "FOREIGN KEY(familySpaceId) REFERENCES family_spaces(id) ON UPDATE NO ACTION ON DELETE CASCADE)"
+                )
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_pending_enrollment_requests_receivedAtEpochMillis ON pending_enrollment_requests(receivedAtEpochMillis)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_pending_enrollment_requests_deviceKeyId ON pending_enrollment_requests(deviceKeyId)")
+            }
+        }
+
         fun create(context: Context): FamilyMeshDatabase =
             Room.databaseBuilder(
                 context.applicationContext,
                 FamilyMeshDatabase::class.java,
                 "familymesh.db"
-            ).addMigrations(MIGRATION_1_2).build()
+            ).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build()
     }
 }
