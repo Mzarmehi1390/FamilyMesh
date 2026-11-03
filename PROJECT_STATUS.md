@@ -159,3 +159,6 @@ revocation semantics have been reviewed.
 - This is an initial baseline, not complete migration validation: historical migration fixtures, injected rollback failures, concurrent same-artifact import races, and close/reopen durability are still outstanding.
 - Commits: storage test configuration `3b38a2a1`; CI job `e94f00e9`; DAO tests `5868c4a0`. CI runs #41691001137, #41691009090, #41691021028 were queued/in progress at update time.
 - No production runtime, schema, protocol, crypto, or transport behavior changed.
+
+
+- The initial Room suite has since been expanded with transaction rollback verification (failed pending insert must roll back nonce consumption) and file-backed database close/reopen durability. These tests are awaiting the latest emulator CI result.
