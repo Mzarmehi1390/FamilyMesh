@@ -6,8 +6,10 @@ This document defines requirements and a proposed trust model. The
 `:core:identity` module contains a protocol-neutral public identity model,
 a `DeviceKeyManager` interface, and typed expected failure categories. The
 public-key byte array is copied on input and on access to prevent callers from
-mutating the model's contents. The module does not implement key generation,
-Android Keystore access, authentication, signatures, enrollment, or recovery.
+mutating the model's contents. The module includes an Android Keystore-backed P-256 signing-key provider. It
+can create and read public identity metadata and sign caller-supplied bytes
+without exporting the private key. This does not implement enrollment,
+message encryption, protocol serialization, or account recovery.
 FamilyMesh still has local profile IDs and local member metadata only.
 
 ## Separate identifiers
@@ -42,9 +44,13 @@ returns public metadata only and never exposes private key material.
 
 Typed failures distinguish unavailable secure storage, invalidated keys,
 missing key material, an already provisioned identity, unsupported reviewed
-configuration, and corrupt stored public metadata. No production implementation
-is registered or used by the app yet. This abstraction is not proof that a key
-exists, is hardware-backed, or is trusted by a family.
+configuration, and corrupt stored public metadata. `AndroidKeystoreDeviceKeyManager` is registered in app dependency injection.
+It uses a non-exportable Android Keystore EC signing key, stores only a
+public-key fingerprint marker in private app preferences, and refuses to
+silently replace missing or inconsistent key material. Its security-level
+query reports what Android Keystore says for the generated key; software
+backing remains possible. This local key is not proof of family membership
+or remote trust.
 
 ## Local identity lifecycle policy
 
@@ -70,6 +76,26 @@ recovery or re-enrollment decision. A fresh install cannot independently
 prove that it is the same family member as a previous installation. A trusted
 family authority or a separately reviewed recovery mechanism must approve a
 replacement identity. The app must not claim that reinstall preserves identity.
+
+## Implemented local key provider
+
+The Android implementation currently generates an EC key on `secp256r1` with
+`SHA256withECDSA` signing authorization, stores the private key under a
+stable app-specific Android Keystore alias, and exposes only the X.509 Subject
+Public Key Info bytes. The key ID is a versioned SHA-256 fingerprint over
+those encoded public-key bytes. The creation timestamp comes from the
+Keystore-generated certificate validity start. A small private-preferences
+marker detects a missing key after prior provisioning; the private key itself
+is never stored in preferences or backup data.
+
+The provider checks that the public certificate, key marker, and private key
+agree. It maps key invalidation and missing/corrupt state to typed failures.
+Signing is available through a narrow `DeviceMessageSigner` interface and
+returns the JCA ECDSA signature encoding; COSE signature conversion and
+canonical COSE_Key encoding are not implemented yet. Hardware security level
+is reported as an observation and is not assumed. This code has been built
+and unit-tested in CI, but device-specific Keystore behavior still requires
+Android API 31+ instrumentation testing on physical/emulated devices.
 
 ## Proposed trust model
 
