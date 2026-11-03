@@ -357,3 +357,38 @@ separately and is not assumed to have passed.
 - Expiry policy remains deliberately unresolved per ADR 0006. No runtime or
   schema changes were made pending review of the state and timing semantics.
 - No local tests were run; CI status is checked independently.
+
+
+## 2026-11-03 — Room migration and instrumentation coverage plan
+
+### Work completed
+
+- Re-inspected `FamilyMeshDatabase`, its entity/DAO definitions, all
+  registered migrations, the app instrumentation configuration, storage
+  module dependencies, and the GitHub Actions workflow.
+- Confirmed the database is schema version 7 with a continuous migration
+  chain from 1 → 7.
+- Confirmed CI currently runs JVM unit tests and debug APK assembly only;
+  it does not execute Android instrumentation tests. Room schema export is
+  disabled, and the storage module has no dedicated migration-test setup.
+- Added ADR 0009 with an additive 7 → 8 migration strategy for a future
+  owner-issued decision ledger, historical migration fixture requirements,
+  SQLite transaction/rollback/concurrency coverage, and a separate emulator
+  CI job proposal.
+- Kept this as a test/design plan: no database schema, runtime, expiry
+  semantics, or cryptographic behavior changed.
+
+### Verification
+
+- ADR 0009 commit: `96e902f4b869b279dad7928a2e57b92688bfe439`.
+- Prior ADR 0008, Work Log, and Project Status CI runs were checked and
+  completed successfully.
+- No local tests were run for this documentation-only change. CI for ADR
+  0009 must be checked separately; the existing workflow does not execute
+  instrumentation tests.
+
+### Next action
+
+Resolve the expiry policy in ADR 0006 and review ADR 0008's owner-ledger
+semantics before implementing schema version 8. In parallel, add the
+instrumentation test infrastructure as a separately reviewable CI change.
