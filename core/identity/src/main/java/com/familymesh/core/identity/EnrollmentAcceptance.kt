@@ -147,7 +147,7 @@ object EnrollmentAcceptanceTextCodec {
 
     fun decode(text: String): SignedEnrollmentAcceptance {
         require(text.length <= MAX_TEXT_LENGTH && text.startsWith(PREFIX)) { "Unsupported or oversized acceptance." }
-        val raw = Base64.getUrlDecoder().decode(text.removePrefix(PREFIX))
+        val raw = CanonicalBase64Url.decode(text.removePrefix(PREFIX))
         require(raw.isNotEmpty() && raw.size <= MAX_PAYLOAD_BYTES)
         val input = DataInputStream(ByteArrayInputStream(raw))
         require(input.readInt() == SignedEnrollmentAcceptance.VERSION) { "Unsupported acceptance version." }

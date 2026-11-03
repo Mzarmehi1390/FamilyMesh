@@ -142,7 +142,7 @@ object InitialOwnerTrustBundleCodec {
         require(text.length <= MAX_TEXT_LENGTH && text.startsWith(PREFIX)) {
             "Unsupported or oversized owner trust bundle."
         }
-        val raw = Base64.getUrlDecoder().decode(text.removePrefix(PREFIX))
+        val raw = CanonicalBase64Url.decode(text.removePrefix(PREFIX))
         require(raw.size <= MAX_PAYLOAD_BYTES)
         val input = DataInputStream(ByteArrayInputStream(raw))
         require(input.readInt() == VERSION) { "Unsupported owner trust bundle version." }

@@ -57,7 +57,7 @@ object EnrollmentProofTextCodec {
         val payloadText = encoded.substring(PREFIX.length)
         require(payloadText.isNotEmpty()) { "Enrollment proof is empty." }
         val payload = try {
-            Base64.getUrlDecoder().decode(payloadText)
+            CanonicalBase64Url.decode(payloadText)
         } catch (_: IllegalArgumentException) {
             throw IllegalArgumentException("Enrollment proof is not valid Base64URL.")
         }
