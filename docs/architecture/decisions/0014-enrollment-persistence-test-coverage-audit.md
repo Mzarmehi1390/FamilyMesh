@@ -63,3 +63,14 @@ When ADR 0008/0012 are approved, extend the same suite with first-issuance wins,
 ## Non-goals
 
 This audit does not add test dependencies, alter CI, change Room schema, implement the owner ledger, select expiry semantics, or modify protocol, cryptography, transport, or runtime behavior.
+
+
+## Additional concurrency case found during follow-up review
+
+The applicant-side `EnrollmentNonceDao.persistDecision` transaction compares an existing `EnrollmentDecisionEntity` with the incoming entity using full data-class equality. The entity includes `recordedAtEpochMillis`, which is the local import/recording time rather than part of the owner's signed FMOD1 artifact.
+
+The service's sequential replay path checks the signed decision fields and intentionally does not compare the local recording time. However, two concurrent imports of the same signed FMOD1 can both initially observe the pending request, construct records with different local `recordedAtEpochMillis` values, and then serialize at the Room transaction boundary. The first can record; the second can observe the row but compare unequal because its local recording time differs, returning `CONFLICT`.
+
+The intended result for this race should be explicitly decided and tested. If exact signed-artifact re-import is meant to be idempotent regardless of local receipt time, persistence equality should distinguish signed artifact identity from observer metadata. Do not silently change this behavior as part of the owner-issued ledger work; keep applicant import semantics separately reviewed.
+
+Add a deterministic concurrent same-artifact import test with distinct local receipt times, alongside concurrent opposite-artifact conflict coverage.
