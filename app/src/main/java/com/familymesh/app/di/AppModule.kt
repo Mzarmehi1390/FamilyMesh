@@ -40,7 +40,7 @@ val appModule = module {
     single<InitialOwnerTrustRepository> { RoomInitialOwnerTrustRepository(get<FamilyMeshDatabase>().familySpaceDao()) }
     single<InitialOwnerPinRepository> { RoomInitialOwnerPinRepository(get<FamilyMeshDatabase>().familySpaceDao()) }
     single { DeviceEnrollmentProofAcceptanceService(get()) }
-    single { EnrollmentDecisionAcceptanceService(get()) }
+    single { EnrollmentDecisionAcceptanceService(get(), get()) }
     single { EnrollmentFinalizationService(get(), get(), get()) }
     single { InitialOwnerTrustBundleService(get(), get(), get()) }
     single<FamilySpaceRepository> {

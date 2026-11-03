@@ -530,10 +530,7 @@ fun FamilyMeshHomeScreen() {
                             coroutineScope.launch {
                                 try {
                                     val decoded = EnrollmentDecisionTextCodec.decode(importedDecisionText.trim())
-                                    val pinned = trustedOwners.singleOrNull { it.familySpaceId == decoded.familySpaceId }
-                                    decisionStatus = if (pinned == null) {
-                                        "No unique pinned owner key exists. Verify and pin the owner first."
-                                    } else when (decisionAcceptanceService.accept(decoded, pinned, System.currentTimeMillis().coerceAtLeast(0L))) {
+                                    decisionStatus = when (decisionAcceptanceService.accept(decoded, System.currentTimeMillis().coerceAtLeast(0L))) {
                                         EnrollmentDecisionAcceptanceResult.RECORDED ->
                                             if (decoded.outcome == EnrollmentDecisionOutcome.APPROVED)
                                                 "Owner approval verified and saved. Membership has not yet been created."

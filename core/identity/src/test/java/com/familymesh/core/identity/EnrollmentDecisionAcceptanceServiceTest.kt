@@ -3,6 +3,8 @@ package com.familymesh.core.identity
 import com.familymesh.core.common.domain.EnrollmentDecisionPersistenceResult
 import com.familymesh.core.common.domain.EnrollmentDecisionRecord
 import com.familymesh.core.common.domain.EnrollmentDecisionRepository
+import com.familymesh.core.common.domain.InitialOwnerPinRepository
+import com.familymesh.core.common.domain.InitialOwnerPinResult
 import com.familymesh.core.common.domain.FamilyRole
 import com.familymesh.core.common.domain.PendingEnrollmentRequest
 import com.familymesh.core.common.domain.TrustedInitialOwner
@@ -45,8 +47,8 @@ class EnrollmentDecisionAcceptanceServiceTest {
     @Test
     fun validDecisionIsPersistedAndPendingRequestIsRemoved() = runBlocking {
         val repository = FakeRepository(pending)
-        val result = EnrollmentDecisionAcceptanceService(repository)
-            .accept(signedDecision(), trustedOwner, 400L)
+        val result = EnrollmentDecisionAcceptanceService(FakePinRepository(trustedOwner), repository)
+            .accept(signedDecision(), 400L)
 
         assertEquals(EnrollmentDecisionAcceptanceResult.RECORDED, result)
         assertNull(repository.pending.value)
@@ -57,11 +59,11 @@ class EnrollmentDecisionAcceptanceServiceTest {
     @Test
     fun exactReplayIsIdempotent() = runBlocking {
         val repository = FakeRepository(pending)
-        val service = EnrollmentDecisionAcceptanceService(repository)
+        val service = EnrollmentDecisionAcceptanceService(FakePinRepository(trustedOwner), repository)
         val decision = signedDecision()
 
-        assertEquals(EnrollmentDecisionAcceptanceResult.RECORDED, service.accept(decision, trustedOwner, 400L))
-        assertEquals(EnrollmentDecisionAcceptanceResult.ALREADY_RECORDED, service.accept(decision, trustedOwner, 401L))
+        assertEquals(EnrollmentDecisionAcceptanceResult.RECORDED, service.accept(decision, 400L))
+        assertEquals(EnrollmentDecisionAcceptanceResult.ALREADY_RECORDED, service.accept(decision, 401L))
     }
 
     @Test
@@ -73,8 +75,8 @@ class EnrollmentDecisionAcceptanceServiceTest {
             signed.ownerDeviceKeyId, EnrollmentDecisionOutcome.REJECTED,
             signed.decidedAtEpochMillis, signed.signature,
         )
-        val result = EnrollmentDecisionAcceptanceService(repository)
-            .accept(tampered, trustedOwner, 400L)
+        val result = EnrollmentDecisionAcceptanceService(FakePinRepository(trustedOwner), repository)
+            .accept(tampered, 400L)
 
         assertEquals(EnrollmentDecisionAcceptanceResult.INVALID_OR_UNTRUSTED, result)
         assertNotNull(repository.pending.value)
@@ -84,10 +86,54 @@ class EnrollmentDecisionAcceptanceServiceTest {
     @Test
     fun missingPendingRequestAndDecisionIsReported() = runBlocking {
         val repository = FakeRepository(null)
-        val result = EnrollmentDecisionAcceptanceService(repository)
-            .accept(signedDecision(), trustedOwner, 400L)
+        val result = EnrollmentDecisionAcceptanceService(FakePinRepository(trustedOwner), repository)
+            .accept(signedDecision(), 400L)
 
         assertEquals(EnrollmentDecisionAcceptanceResult.REQUEST_NOT_PENDING, result)
+    }
+
+    @Test
+    fun decisionIsRejectedWhenNoOwnerIsPinnedForTheFamily() = runBlocking {
+        val repository = FakeRepository(pending)
+        val result = EnrollmentDecisionAcceptanceService(FakePinRepository(null), repository)
+            .accept(signedDecision(), 400L)
+
+        assertEquals(EnrollmentDecisionAcceptanceResult.INVALID_OR_UNTRUSTED, result)
+        assertNotNull(repository.pending.value)
+        assertNull(repository.decision.value)
+    }
+
+    @Test
+    fun decisionIsRejectedWhenDifferentOwnerKeyIsPinned() = runBlocking {
+        val otherPair = KeyPairGenerator.getInstance("EC").run {
+            initialize(ECGenParameterSpec("secp256r1"))
+            generateKeyPair()
+        }
+        val otherOwner = trustedOwner.copy(
+            ownerDeviceKeyId = DeviceKeyFingerprint.fromEncodedPublicKey(otherPair.public.encoded),
+            ownerPublicKeyBase64 = Base64.getEncoder().encodeToString(otherPair.public.encoded),
+        )
+        val repository = FakeRepository(pending)
+        val result = EnrollmentDecisionAcceptanceService(FakePinRepository(otherOwner), repository)
+            .accept(signedDecision(), 400L)
+
+        assertEquals(EnrollmentDecisionAcceptanceResult.INVALID_OR_UNTRUSTED, result)
+        assertNotNull(repository.pending.value)
+        assertNull(repository.decision.value)
+    }
+
+    @Test
+    fun ambiguousOwnerPinsAreRejected() = runBlocking {
+        val repository = FakeRepository(pending)
+        val pins = FakePinRepository(trustedOwner).apply {
+            owners.value = listOf(trustedOwner, trustedOwner)
+        }
+        val result = EnrollmentDecisionAcceptanceService(pins, repository)
+            .accept(signedDecision(), 400L)
+
+        assertEquals(EnrollmentDecisionAcceptanceResult.INVALID_OR_UNTRUSTED, result)
+        assertNotNull(repository.pending.value)
+        assertNull(repository.decision.value)
     }
 
     private fun signedDecision(): SignedEnrollmentDecision {
@@ -104,6 +150,22 @@ class EnrollmentDecisionAcceptanceServiceTest {
             unsigned.familySpaceId, unsigned.requestId, unsigned.applicantDeviceKeyId,
             unsigned.ownerDeviceKeyId, unsigned.outcome, unsigned.decidedAtEpochMillis, signature,
         )
+    }
+
+    private class FakePinRepository(initial: TrustedInitialOwner?) : InitialOwnerPinRepository {
+        val owners = MutableStateFlow(listOfNotNull(initial))
+
+        override fun observeTrustedOwners(): Flow<List<TrustedInitialOwner>> = owners
+
+        override suspend fun pinInitialOwner(
+            familySpaceId: String,
+            ownerMemberId: String,
+            ownerDeviceKeyId: String,
+            ownerPublicKeyBase64: String,
+            establishedAtEpochMillis: Long,
+            confirmedFingerprint: String,
+            pinnedAtEpochMillis: Long,
+        ): InitialOwnerPinResult = error("Pinning is not used by this test fake.")
     }
 
     private class FakeRepository(initial: PendingEnrollmentRequest?) : EnrollmentDecisionRepository {
