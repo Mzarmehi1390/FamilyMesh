@@ -152,3 +152,8 @@ A future implementation should:
 This proposal does not implement distributed synchronization, change FMER1 /
 FMOD1 / FMJA1 wire formats, change cryptographic algorithms, authorize
 membership through a production resolver, or decide the expiry policy.
+
+
+## Follow-up audit
+
+ADR 0013 confirms from current source that owner issuance is transient, multiple opposite FMOD1 artifacts can be signed for the same pending request, and finalization does not compare the nested artifact with a durable owner-issued record. The implementation invariant in this proposal is therefore security-relevant to decision consistency: persist the first exact artifact, make conflicting issuance fail, and require exact ledger match at finalization. ADR 0013 is an audit, not approval to implement.
