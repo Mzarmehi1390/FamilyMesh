@@ -58,9 +58,11 @@ can validate the signature against the supplied public identity and check the
 validity window. This proves possession of the joining device's key only; it
 does not authenticate the inviter, authorize the requested role, grant
 membership, or prevent replay across devices. The requested role must still
-be approved by a trusted authority. Persistent one-time nonce tracking,
-authenticated authority, and distributed replay protection remain
-unimplemented.
+be approved by a trusted authority. A durable Room-backed nonce store now provides atomic one-time consumption
+on the local authority device, expiring old nonce records only after their
+signed request expiry. This is local replay protection for a single database;
+it is not distributed replay protection and does not authenticate the
+approving authority.
 
 ## Security requirements before implementation
 
