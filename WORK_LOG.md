@@ -178,3 +178,32 @@ payload/time/replay/authority lifecycle semantics.
 
 - Vector fixture commit: `ba150159ca8b1bb10412345caa0fd78b596bdfe8`.
 - Documentation synchronization and CI verification are pending.
+
+
+## 2026-11-03 — COSE v2 schema parity review
+
+### Work completed
+
+- Added ADR 0004 to compare all four v1 signed artifacts with the draft v2
+  requirements before assigning CBOR labels.
+- Identified a concrete parity omission: v1 ApplicantAcceptance carries the
+  applicant public key, while the initial ADR 0003 acceptance field list did
+  not mention it.
+- Updated ADR 0003 to require explicit review and preservation of the
+  applicant public COSE_Key unless a separately reviewed decision removes it.
+- Recorded that exact-decision embedding and digest binding need a deliberate
+  choice; a digest cannot be introduced without fixing its algorithm and
+  canonical input bytes.
+
+### Verification limits
+
+No Kotlin source, runtime, persistence schema, transport, or authorization
+behavior changed. The current GitHub combined-status endpoint reports no
+status entries for the latest documentation commit; CI completion is
+therefore not confirmed. The schema remains unapproved pending direct source
+model/codec inspection and independent vectors.
+
+### Commits
+
+- ADR 0004: 10e493a6aec11032a8110c3a9c548d15d2c637fe
+- ADR 0003 parity correction: 63c722224ad1d94244b8824a38c1b3ec1adaa7c9
