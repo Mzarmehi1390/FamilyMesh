@@ -150,3 +150,31 @@ Documentation changes were committed as a cohesive update in
 `be4a85cd7d2b357e3fb356c2834d94491c59db95`. CI must pass on that commit
 before this documentation package is considered verified. No cryptographic protocol implementation or authorization/
 networking behavior was changed in this work package.
+
+
+## 2026-11-03 — COSE v2 primitive known-answer fixture
+
+### Work completed
+
+- Added `docs/architecture/decisions/vectors/cose-v2-primitive-kat-0001.md`.
+- Fixture covers deterministic CBOR COSE_Key bytes, v2 key-ID derivation,
+  protected headers, artifact-specific external AAD, COSE Sig_structure,
+  SHA-256 digest, P-256 ECDSA R||S, proposed low-S normalization, and complete
+  tagged COSE_Sign1 encoding.
+- Uses the deliberately public private scalar 1 only as a reproducible
+  mathematical test fixture; explicitly prohibited for any device identity.
+- Generated an RFC 6979 HMAC-SHA-256 deterministic signature and verified it
+  against the exact Sig_structure using an independent cryptographic library.
+
+### Verification limits
+
+This is one primitive vector, not the four final artifact vectors and not
+cross-implementation interoperability evidence. No Android source code or
+runtime behavior was changed. The next gates remain independent reproduction,
+negative-vector corpus, Android Keystore instrumentation, and final review of
+payload/time/replay/authority lifecycle semantics.
+
+### Commit
+
+- Vector fixture commit: `ba150159ca8b1bb10412345caa0fd78b596bdfe8`.
+- Documentation synchronization and CI verification are pending.
