@@ -505,3 +505,24 @@ Review/approve ADR 0008 owner-ledger semantics and ADR 0012 migration/legacy rep
 ### Next action
 
 Review ADR 0013 together with ADR 0008 and ADR 0012. Implement only after approval of the owner-ledger invariant and the ADR 0006 expiry policy. The implementation must enforce the invariant in Room transactions, not only in Compose UI.
+
+
+## 2026-11-03 — Enrollment persistence test-coverage audit
+
+### Work completed
+
+- Added ADR 0014 after inspecting the current Android CI workflow, the complete repository test-source tree, identity service tests, Room DAO transactions, and storage module dependencies.
+- Confirmed current CI runs unit tests and APK assembly only; it does not execute Android instrumentation or Room migration tests.
+- Confirmed `:core:storage` has no test/androidTest source sets or test dependencies, and Room schema export is disabled.
+- Confirmed enrollment service tests use fake repositories, so they do not validate actual SQLite rollback, uniqueness races, foreign keys, or close/reopen durability.
+- Recorded a staged validation plan covering Room DAO tests, historical migration fixtures, emulator instrumentation, CI reporting, and the future ADR 0008/0012 ledger/replay cases.
+- No test code, CI, runtime, schema, protocol, cryptographic, or transport changes were made.
+
+### Verification
+
+- Five CI runs for ADR 0013 and its coordinated documentation updates (#41689232031, #41689300728, #41689312246, #41689319946, #41689327795) completed successfully.
+- ADR 0014 is documentation-only; its CI and the follow-up status-document CI runs must be checked.
+
+### Next action
+
+Add real Room/SQLite test infrastructure only after reviewing ADR 0014's scope and agreeing on the required Android test environment. Keep the owner-ledger implementation gated on ADR 0008/0012 approval and ADR 0006 expiry-policy resolution.
