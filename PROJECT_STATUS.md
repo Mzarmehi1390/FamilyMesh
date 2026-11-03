@@ -146,3 +146,6 @@ revocation semantics have been reviewed.
 - ADR 0014 proposes staged Room DAO tests, historical migration fixtures, emulator instrumentation, and a separate CI instrumentation job. No test infrastructure or CI changes have yet been made.
 - Five CI runs for ADR 0013 and its coordinated docs all succeeded: #41689232031, #41689300728, #41689312246, #41689319946, #41689327795.
 - No runtime, Room schema, protocol, crypto, or transport changes. ADR 0008/0012 approval and ADR 0006 expiry-policy resolution remain gates for persistence implementation.
+
+
+- Follow-up test gap: concurrent applicant imports of the same signed FMOD1 with different local receipt times may return one success and one conflict because the Room entity equality includes observer-only `recordedAtEpochMillis`. ADR 0014 now requires an explicit idempotency decision and deterministic concurrency test; no behavior was changed.
