@@ -48,3 +48,36 @@ reported passing tests are from the already completed GitHub Actions run
 
 Audit the signed enrollment chain and document a reviewed protocol decision
 before implementing authorization integration or network transport.
+
+
+## 2026-11-03 — Close owner-pin trust-boundary gap
+
+### Finding
+
+`EnrollmentDecisionAcceptanceService` previously accepted a
+`TrustedInitialOwner` supplied by its caller. The current UI checked the
+pin before calling the service, but the service boundary itself did not
+guarantee that the supplied owner key came from the local pin repository.
+
+### Change
+
+- Injected `InitialOwnerPinRepository` into the acceptance service.
+- The service now resolves exactly one pin for the decision's family before
+  checking or persisting the decision.
+- Removed the caller-supplied trust parameter from the service API and UI.
+- Updated Koin wiring.
+- Added three tests: missing pin, different pinned key, and ambiguous pins.
+
+### Verification
+
+- Commit: `60f02eea4abe2d6ff8d9fe1d4c404724f049c1a8`
+- CI run: [#41670679347](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41670679347)
+- Unit tests: passed.
+- Debug APK assembly: passed.
+- Artifact upload: passed.
+
+### Remaining limitation
+
+This closes the caller-injected trust-record gap. It does not protect against
+compromise or arbitrary modification of the local application database and
+does not replace an independently reviewed trust protocol.

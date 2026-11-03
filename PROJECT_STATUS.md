@@ -3,7 +3,7 @@
 Last verified: 2026-11-03
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
 Branch: `main`
-Last verified commit: `5d1afe394178ead84d8f54219e28ee3ccf7c1675`
+Last verified source commit: `60f02eea4abe2d6ff8d9fe1d4c404724f049c1a8`
 
 ## Overall state
 
@@ -26,7 +26,7 @@ production authorization are not implemented.
 | Signed enrollment proof | IMPLEMENTED_AND_TESTED | Bounded local codec and verifier tests |
 | Local nonce replay protection | IMPLEMENTED_AND_TESTED | One database only; not distributed |
 | Initial-owner trust bootstrap/pinning | IMPLEMENTED_AND_TESTED | Manual out-of-band fingerprint comparison |
-| Signed owner decision | IMPLEMENTED_AND_TESTED | Local pinned-owner verification and atomic persistence |
+| Signed owner decision | IMPLEMENTED_AND_TESTED | Service resolves the pin itself; tests reject missing, mismatched, and ambiguous pins |
 | Applicant acceptance + owner finalization | IMPLEMENTED_AND_TESTED | Both signatures verified; local Room v7 record |
 | Production membership authorization | BLOCKED | No trusted resolver; default denies all |
 | Canonical COSE protocol | IN_PROGRESS | ADR proposed; custom v1 payloads currently used |
@@ -39,7 +39,7 @@ production authorization are not implemented.
 
 ## Latest verification
 
-The latest CI run for commit `5d1afe394178ead84d8f54219e28ee3ccf7c1675` succeeded:
+The latest CI run for source commit `60f02eea4abe2d6ff8d9fe1d4c404724f049c1a8` ([run #41670679347](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41670679347)) succeeded:
 - `testDebugUnitTest`
 - `assembleDebug`
 - debug APK artifact upload

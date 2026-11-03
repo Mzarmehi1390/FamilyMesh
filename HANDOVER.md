@@ -7,10 +7,10 @@ Default branch: `main`
 ## Last verified repository state
 
 - Branch: `main`
-- Last verified pre-handover commit: `5d1afe394178ead84d8f54219e28ee3ccf7c1675`
-- Commit subject: `fix(members): initialize selected family before observing devices`
+- Last verified source commit: `60f02eea4abe2d6ff8d9fe1d4c404724f049c1a8`
+- Commit subject: `fix(identity): resolve owner pin inside decision acceptance`
 - Commit timestamp: 2026-11-03T15:48:14Z
-- Latest CI run for that commit: [Android CI #41667652277](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41667652277)
+- Latest CI run for that commit: [Android CI #41670679347](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41670679347)
 - CI result: unit tests passed, debug APK assembled, artifact uploaded.
 - Branch protection: disabled; no open issues or pull requests were present at synchronization.
 
@@ -27,7 +27,7 @@ Default branch: `main`
   resolver exists.
 - Do not silently replace a lost/invalidated device key.
 
-## Completed implementation visible at the last verified commit
+## Completed implementation visible at the last verified source commit
 
 - Native Android foundation, Compose UI, Koin dependency injection.
 - Room family-space and local member metadata persistence; Preferences
@@ -44,6 +44,8 @@ Default branch: `main`
 - Room v7 authenticated-device record insertion and pending-request consumption
   in one transaction.
 - Home screen lists authenticated devices for the selected family.
+- Decision acceptance service now resolves the owner key from `InitialOwnerPinRepository` internally; UI callers can no longer inject an arbitrary owner trust record.
+- Added tests rejecting missing, mismatched, and ambiguous owner pins.
 - Unit tests cover domain, identity, and local persistence behavior.
 
 ## Current work package
