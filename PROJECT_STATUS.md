@@ -3,7 +3,8 @@
 Last verified: 2026-11-03
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
 Branch: `main`
-Last verified source commit: `21dd7ca4db718ee31416e45319d88ffce9c950c3`
+Latest verified source commit: `21dd7ca4db718ee31416e45319d88ffce9c950c3`
+Latest verified documentation baseline: `acbb3d46a729925cf346b42731443173af7a9b3e`
 
 ## Overall state
 
@@ -29,7 +30,7 @@ production authorization are not implemented.
 | Signed owner decision | IMPLEMENTED_AND_TESTED | Service resolves the pin itself; tests reject missing, mismatched, and ambiguous pins |
 | Applicant acceptance + owner finalization | IMPLEMENTED_AND_TESTED | Both signatures verified; local Room v7 record |
 | Production membership authorization | BLOCKED | No trusted resolver; default denies all |
-| Canonical COSE protocol | IN_PROGRESS | Bounded custom v1 codecs hardened; canonical COSE_Key/Sign1 and signature conversion not implemented |
+| Canonical COSE protocol | IN_PROGRESS | Draft v2 profile documented; canonical COSE_Key/Sign1 and signature conversion not implemented |
 | Invitations / revocation / recovery | NOT_STARTED | Requires reviewed lifecycle and authority model |
 | E2EE messaging | NOT_STARTED | No message crypto implementation |
 | BLE / Wi-Fi Direct / internet P2P / relay | NOT_STARTED | No transport implementation |
@@ -39,13 +40,15 @@ production authorization are not implemented.
 
 ## Latest verification
 
-The latest CI run for source commit `21dd7ca4db718ee31416e45319d88ffce9c950c3` ([run #41671995919](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41671995919)) succeeded:
+CI run [#41672460808](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41672460808)
+completed successfully for the documentation baseline:
 - `testDebugUnitTest`
 - `assembleDebug`
 - debug APK artifact upload
 
 This is CI evidence only; it is not a production security review or device
-instrumentation result.
+instrumentation result. The next documentation-only changes require their
+own CI result before being considered verified.
 
 ## Immediate priority
 
@@ -54,13 +57,14 @@ integration and network transport blocked until canonical encoding, key IDs,
 signature representation, replay scope, trust ceremony, and recovery/
 revocation semantics have been reviewed.
 
-
 ## Protocol audit progress
 
-- Four signed v1 envelope decoders now enforce canonical unpadded Base64URL.
-- All four signature verification paths now reject non-P-256 EC keys.
-- Custom fixed-order payloads remain non-COSE and are not yet approved as the
+- Four signed v1 envelope decoders enforce canonical unpadded Base64URL.
+- All four signature verification paths reject non-P-256 EC keys.
+- Custom fixed-order payloads remain non-COSE and are not approved as the
   production wire format.
 - Current key IDs are domain-separated SHA-256 fingerprints over X.509 SPKI;
   JCA ECDSA signatures remain DER encoded.
 - Nonce replay storage is atomic but installation-local.
+- ADR 0003 provides a concrete draft profile for COSE v2; it is not yet an
+  accepted production protocol.
