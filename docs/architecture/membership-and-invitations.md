@@ -51,11 +51,16 @@ approved, rejected, revoked, or expired. Approval, rejection, and revocation
 are disallowed at or after expiry; expiration is allowed only at or after the
 expiry timestamp. Terminal states cannot transition again.
 
-This model is not an invitation token, signature, authenticated approval, or
-membership grant. The proposed role must be assigned by a trusted inviter or
-authority, never trusted merely because a joining client supplied it. Atomic
-single-use redemption, authenticated authority, and distributed replay
-protection remain unimplemented and require a reviewed protocol.
+A signed request envelope is now available in `:core:identity`. It signs the
+request ID, family ID, device-key ID, requested role, creation/expiry times,
+protocol version, and a random nonce with the device's P-256 key. A verifier
+can validate the signature against the supplied public identity and check the
+validity window. This proves possession of the joining device's key only; it
+does not authenticate the inviter, authorize the requested role, grant
+membership, or prevent replay across devices. The requested role must still
+be approved by a trusted authority. Persistent one-time nonce tracking,
+authenticated authority, and distributed replay protection remain
+unimplemented.
 
 ## Security requirements before implementation
 

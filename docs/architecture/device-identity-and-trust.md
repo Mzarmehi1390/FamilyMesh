@@ -91,8 +91,14 @@ is never stored in preferences or backup data.
 The provider checks that the public certificate, key marker, and private key
 agree. It maps key invalidation and missing/corrupt state to typed failures.
 Signing is available through a narrow `DeviceMessageSigner` interface and
-returns the JCA ECDSA signature encoding; COSE signature conversion and
-canonical COSE_Key encoding are not implemented yet. Hardware security level
+returns the JCA ECDSA signature encoding. A signed enrollment-request envelope
+now binds request ID, family-space ID, device-key ID, requested role, creation
+and expiry times, protocol version, and a fresh 32-byte nonce using a fixed
+order, length-prefixed v1 payload. Verification checks the public-key
+fingerprint, signature, and validity window. This envelope is not COSE, does
+not prove the requested role was authorized, and has no persistent replay
+cache; an approving family authority and one-time nonce store are still
+required. Hardware security level
 is reported as an observation and is not assumed. This code has been built
 and unit-tested in CI, but device-specific Keystore behavior still requires
 Android API 31+ instrumentation testing on physical/emulated devices.

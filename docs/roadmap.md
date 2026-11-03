@@ -33,7 +33,9 @@
 - [x] Add fail-closed default membership resolver and tests
 - [x] Make authorization fail closed on resolver errors and preserve coroutine cancellation
 - [x] Record proposed device-authentication signature profile (P-256 ECDSA/SHA-256 with COSE ESP256); implementation review gates remain open
-- [ ] Complete protocol review for canonical encoding, key identifiers, and replay protection
+- [x] Add signed device-enrollment request envelope with nonce and expiry binding
+- [x] Add public-key signature verification and tamper/expiry tests
+- [ ] Complete protocol review for canonical encoding, key identifiers, and persistent replay protection
 - [ ] Implement and test Android-backed key storage after protocol review
 - [ ] Define trusted initial-owner ceremony and ownership transfer
 - [ ] Define trusted device enrollment, revocation, and recovery
