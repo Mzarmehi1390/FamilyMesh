@@ -97,3 +97,20 @@ Sig_structure, and ECDSA DER/R||S conversion. Then add parser and malformed
 input tests before any migration implementation. Keep networking and
 authorization integration blocked until replay scope, trust lifecycle,
 revocation, and recovery are also resolved.
+
+
+## Latest lifecycle audit (documentation proposal)
+
+- ADR 0007 traces the separate applicant and owner Room stores through FMER1,
+  FMOD1, and FMJA1. Applicant-side decision import deleting its local pending
+  row does not remove the owner's independent request row.
+- A concrete owner-inbox gap remains: creating FMOD1 does not persist an
+  owner-side decision or update inbox status. Rejected requests remain
+  labelled as awaiting review; approved requests remain indistinguishable
+  until the owner receives FMJA1 and finalizes.
+- Pending-request expiry cleanup is still absent. Do not delete owner pending
+  rows on approval issuance until a reviewed design preserves the request
+  facts required by FMJA1 verification.
+- ADR 0007 is an audit/design proposal only. No runtime or schema change was
+  made. Required next work: decide owner-side lifecycle states, then implement
+  cross-device state tests and Room instrumentation tests.
