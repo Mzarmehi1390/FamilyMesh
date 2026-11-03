@@ -392,3 +392,30 @@ separately and is not assumed to have passed.
 Resolve the expiry policy in ADR 0006 and review ADR 0008's owner-ledger
 semantics before implementing schema version 8. In parallel, add the
 instrumentation test infrastructure as a separately reviewable CI change.
+
+
+## 2026-11-03 — Expiry semantics review clarification
+
+### Work completed
+
+- Corrected the malformed literal newline sequences in ADR 0006's T3
+  signed-event versus local-receipt section.
+- Added a structured comparison of owner-receipt-deadline and signed-event-
+  deadline policies, including offline-delivery tradeoffs, clock assumptions,
+  required product/security inputs, and implementation invariants.
+- Explicitly kept numeric TTL, skew, grace period, cleanup, and EXPIRED-state
+  behavior undecided. No v1 runtime behavior was changed.
+
+### Verification
+
+- ADR 0006 clarification commit: `e72009183eaebf8bbcf75ebb0af3828b882899c0`.
+- The ADR 0009 and Work Log CI runs completed successfully:
+  #41678430461 and #41678451624.
+- No local tests were run; this is a documentation-only change.
+- CI for the ADR 0006 clarification must be checked separately.
+
+### Next action
+
+Obtain product/security answers to the five questions in ADR 0006 before
+selecting expiry semantics. Then implement owner-ledger persistence and
+Room instrumentation in separately reviewable changes.
