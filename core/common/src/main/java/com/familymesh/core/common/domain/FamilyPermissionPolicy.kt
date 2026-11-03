@@ -36,3 +36,56 @@ object FamilyPermissionPolicy {
         FamilyAction.REVOKE_MEMBER,
     )
 }
+
+
+/**
+ * A domain-level authorization outcome. The supplied role is only an input
+ * to this pure policy; callers must not treat an untrusted/local role as proof.
+ */
+sealed interface FamilyAuthorizationDecision {
+    data class Allowed(
+        val actorRole: FamilyRole,
+        val action: FamilyAction,
+    ) : FamilyAuthorizationDecision
+
+    data class Denied(
+        val actorRole: FamilyRole,
+        val action: FamilyAction,
+    ) : FamilyAuthorizationDecision
+}
+
+/**
+ * Evaluates a proposed action without performing it or accessing persistence.
+ *
+ * This helper is suitable for use-case composition and tests, but is not a
+ * security boundary until actorRole comes from verified membership state and
+ * every state-changing operation checks it at its trusted boundary.
+ */
+object FamilyActionAuthorizer {
+    fun evaluate(
+        actorRole: FamilyRole,
+        action: FamilyAction,
+    ): FamilyAuthorizationDecision =
+        if (FamilyPermissionPolicy.canPerform(actorRole, action)) {
+            FamilyAuthorizationDecision.Allowed(actorRole, action)
+        } else {
+            FamilyAuthorizationDecision.Denied(actorRole, action)
+        }
+
+    fun requireAllowed(actorRole: FamilyRole, action: FamilyAction) {
+        when (val decision = evaluate(actorRole, action)) {
+            is FamilyAuthorizationDecision.Allowed -> Unit
+            is FamilyAuthorizationDecision.Denied ->
+                throw FamilyActionNotPermittedException(
+                    actorRole = decision.actorRole,
+                    action = decision.action,
+                )
+        }
+    }
+}
+
+/** Typed denial for a role-policy check; it does not imply actor authentication. */
+class FamilyActionNotPermittedException(
+    val actorRole: FamilyRole,
+    val action: FamilyAction,
+) : IllegalStateException("Role $actorRole is not permitted to perform $action")

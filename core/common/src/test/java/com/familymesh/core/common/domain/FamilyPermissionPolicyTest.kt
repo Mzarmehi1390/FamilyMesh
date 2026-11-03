@@ -71,3 +71,56 @@ class FamilyPermissionPolicyTest {
         }
     }
 }
+
+
+class FamilyActionAuthorizerTest {
+    @Test
+    fun evaluate_returnsAllowedForPermittedAction() {
+        assertEquals(
+            FamilyAuthorizationDecision.Allowed(
+                FamilyRole.ADMIN,
+                FamilyAction.CREATE_INVITATION,
+            ),
+            FamilyActionAuthorizer.evaluate(
+                FamilyRole.ADMIN,
+                FamilyAction.CREATE_INVITATION,
+            ),
+        )
+    }
+
+    @Test
+    fun evaluate_returnsDeniedForForbiddenAction() {
+        assertEquals(
+            FamilyAuthorizationDecision.Denied(
+                FamilyRole.ADMIN,
+                FamilyAction.TRANSFER_OWNERSHIP,
+            ),
+            FamilyActionAuthorizer.evaluate(
+                FamilyRole.ADMIN,
+                FamilyAction.TRANSFER_OWNERSHIP,
+            ),
+        )
+    }
+
+    @Test
+    fun requireAllowed_returnsNormallyForPermittedAction() {
+        FamilyActionAuthorizer.requireAllowed(
+            FamilyRole.OWNER,
+            FamilyAction.TRANSFER_OWNERSHIP,
+        )
+    }
+
+    @Test
+    fun requireAllowed_throwsTypedExceptionForForbiddenAction() {
+        try {
+            FamilyActionAuthorizer.requireAllowed(
+                FamilyRole.MEMBER,
+                FamilyAction.CREATE_INVITATION,
+            )
+            throw AssertionError("Expected FamilyActionNotPermittedException")
+        } catch (error: FamilyActionNotPermittedException) {
+            assertEquals(FamilyRole.MEMBER, error.actorRole)
+            assertEquals(FamilyAction.CREATE_INVITATION, error.action)
+        }
+    }
+}
