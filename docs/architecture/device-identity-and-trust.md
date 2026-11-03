@@ -227,3 +227,22 @@ full key fingerprint with the owner through an independent trusted channel
 (for example, an in-person comparison). The bundle is not encrypted, does not
 provide confidentiality, does not synchronize trust automatically, and does
 not yet implement remote pin storage or signed membership decisions.
+
+
+## Recipient-side initial-owner pinning
+
+A receiving device can decode an `FMOT1.` bundle and validate its self-signature,
+key fingerprint, and bounded encoding. The app displays the complete
+fingerprint and requires the user to enter the value independently compared
+with the owner over a separate trusted channel. Only after this explicit
+confirmation is the owner public key pinned locally.
+
+Pins are immutable per family-space ID in this preview: attempting to pin a
+different owner key for the same family returns a conflict and does not
+replace the existing record. Room schema version 5 persists the public key,
+owner identifiers, establishment time, and local pin time. This is a
+device-local trust decision; there is no automatic network distribution,
+owner rotation, recovery, or membership approval yet. The UI cannot guarantee
+that an out-of-band comparison was performed honestly; it makes the required
+comparison explicit and blocks accidental trust based only on a valid
+self-signature.

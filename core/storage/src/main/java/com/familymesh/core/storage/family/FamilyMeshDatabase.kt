@@ -109,6 +109,16 @@ data class InitialOwnerTrustEntity(
     val establishedAtEpochMillis: Long,
 )
 
+@Entity(tableName = "trusted_initial_owners", primaryKeys = ["familySpaceId"], indices = [Index(value = ["ownerDeviceKeyId"])])
+data class TrustedInitialOwnerEntity(
+    val familySpaceId: String,
+    val ownerMemberId: String,
+    val ownerDeviceKeyId: String,
+    val ownerPublicKeyBase64: String,
+    val establishedAtEpochMillis: Long,
+    val pinnedAtEpochMillis: Long,
+)
+
 @Dao
 interface FamilySpaceDao {
     @Query("SELECT * FROM family_spaces ORDER BY createdAtEpochMillis DESC, id ASC")
@@ -139,11 +149,20 @@ interface FamilySpaceDao {
         insertFamilyMember(owner)
         return true
     }
+
+    @Query("SELECT * FROM trusted_initial_owners ORDER BY pinnedAtEpochMillis ASC, familySpaceId ASC")
+    fun observeTrustedOwners(): Flow<List<TrustedInitialOwnerEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertTrustedOwner(entity: TrustedInitialOwnerEntity): Long
+
+    @Query("SELECT * FROM trusted_initial_owners WHERE familySpaceId = :familySpaceId LIMIT 1")
+    suspend fun getTrustedOwner(familySpaceId: String): TrustedInitialOwnerEntity?
 }
 
 @Database(
-    entities = [FamilySpaceEntity::class, FamilyMemberEntity::class, ConsumedEnrollmentNonceEntity::class, PendingEnrollmentRequestEntity::class, InitialOwnerTrustEntity::class],
-    version = 4,
+    entities = [FamilySpaceEntity::class, FamilyMemberEntity::class, ConsumedEnrollmentNonceEntity::class, PendingEnrollmentRequestEntity::class, InitialOwnerTrustEntity::class, TrustedInitialOwnerEntity::class],
+    version = 5,
     exportSchema = false
 )
 abstract class FamilyMeshDatabase : RoomDatabase() {
@@ -191,11 +210,18 @@ abstract class FamilyMeshDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("CREATE TABLE IF NOT EXISTS trusted_initial_owners (familySpaceId TEXT NOT NULL PRIMARY KEY, ownerMemberId TEXT NOT NULL, ownerDeviceKeyId TEXT NOT NULL, ownerPublicKeyBase64 TEXT NOT NULL, establishedAtEpochMillis INTEGER NOT NULL, pinnedAtEpochMillis INTEGER NOT NULL)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_trusted_initial_owners_ownerDeviceKeyId ON trusted_initial_owners(ownerDeviceKeyId)")
+            }
+        }
+
         fun create(context: Context): FamilyMeshDatabase =
             Room.databaseBuilder(
                 context.applicationContext,
                 FamilyMeshDatabase::class.java,
                 "familymesh.db"
-            ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build()
+            ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5).build()
     }
 }

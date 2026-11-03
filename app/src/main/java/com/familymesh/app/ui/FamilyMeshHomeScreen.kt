@@ -38,12 +38,17 @@ import androidx.compose.ui.text.AnnotatedString
 import com.familymesh.core.common.domain.DeviceEnrollmentRequest
 import com.familymesh.core.common.domain.FamilyRole
 import com.familymesh.core.common.domain.InitialOwnerTrustRepository
+import com.familymesh.core.common.domain.InitialOwnerPinRepository
+import com.familymesh.core.common.domain.InitialOwnerPinResult
 import com.familymesh.core.identity.DeviceEnrollmentProofAcceptanceService
 import com.familymesh.core.identity.DeviceEnrollmentProofSigner
 import com.familymesh.core.identity.DeviceMessageSigner
 import com.familymesh.core.identity.EnrollmentProofAcceptanceResult
 import com.familymesh.core.identity.EnrollmentProofTextCodec
+import com.familymesh.core.identity.InitialOwnerTrustBundleCodec
+import com.familymesh.core.identity.InitialOwnerTrustBundle
 import java.util.UUID
+import java.util.Base64
 import androidx.compose.ui.unit.dp
 import com.familymesh.core.common.domain.FamilySpace
 import com.familymesh.core.common.domain.FamilySpaceRepository
@@ -67,11 +72,13 @@ fun FamilyMeshHomeScreen() {
     val messageSigner: DeviceMessageSigner = koinInject()
     val proofAcceptanceService: DeviceEnrollmentProofAcceptanceService = koinInject()
     val initialOwnerTrustRepository: InitialOwnerTrustRepository = koinInject()
+    val initialOwnerPinRepository: InitialOwnerPinRepository = koinInject()
     val clipboardManager = LocalClipboardManager.current
     val profile by profileRepository.profile.collectAsState(initial = null)
     val familySpaces by familySpaceRepository.observeFamilySpaces().collectAsState(initial = emptyList())
     val pendingEnrollmentRequests by proofAcceptanceService.observePendingRequests().collectAsState(initial = emptyList())
     val initialOwners by initialOwnerTrustRepository.observeInitialOwners().collectAsState(initial = emptyList())
+    val trustedOwners by initialOwnerPinRepository.observeTrustedOwners().collectAsState(initial = emptyList())
     var displayName by remember(profile?.displayName) { mutableStateOf(profile?.displayName.orEmpty()) }
     var familyName by remember { mutableStateOf("") }
     var deviceIdentity by remember { mutableStateOf<DevicePublicIdentity?>(null) }
@@ -85,6 +92,11 @@ fun FamilyMeshHomeScreen() {
     var isProcessingProof by remember { mutableStateOf(false) }
     var bootstrapFamilySpaceId by remember { mutableStateOf<String?>(null) }
     var isEstablishingOwner by remember { mutableStateOf(false) }
+    var importedOwnerBundleText by remember { mutableStateOf("") }
+    var ownerFingerprintConfirmation by remember { mutableStateOf("") }
+    var ownerBundlePreview by remember { mutableStateOf<InitialOwnerTrustBundle?>(null) }
+    var ownerBundleStatus by remember { mutableStateOf<String?>(null) }
+    var isPinningOwner by remember { mutableStateOf(false) }
 
     LaunchedEffect(familySpaces) {
         if (selectedFamilySpaceId.isBlank() && familySpaces.isNotEmpty()) {
@@ -422,6 +434,79 @@ fun FamilyMeshHomeScreen() {
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                }
+            }
+
+            Card(modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
+                Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("Verify and trust a family owner", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Text("Paste the owner's FMOT1 code. Its signature proves possession of the included key only. Compare the complete fingerprint with the owner through a separate trusted channel before pinning.",
+                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    OutlinedTextField(value = importedOwnerBundleText,
+                        onValueChange = { importedOwnerBundleText = it.take(4000); ownerBundlePreview = null; ownerBundleStatus = null },
+                        modifier = Modifier.fillMaxWidth(), label = { Text("Paste owner trust bundle (FMOT1)") },
+                        minLines = 3, enabled = !isPinningOwner)
+                    OutlinedButton(onClick = {
+                        try {
+                            val decoded = InitialOwnerTrustBundleCodec.decode(importedOwnerBundleText.trim())
+                            if (familySpaces.none { it.id == decoded.familySpaceId }) {
+                                ownerBundlePreview = null
+                                ownerBundleStatus = "This family space is not saved on this device."
+                            } else {
+                                ownerBundlePreview = decoded
+                                ownerFingerprintConfirmation = ""
+                                ownerBundleStatus = "Signature valid. Independent fingerprint comparison is still required."
+                            }
+                        } catch (_: Exception) {
+                            ownerBundlePreview = null
+                            ownerBundleStatus = "The bundle is malformed or its signature is invalid."
+                        }
+                    }, enabled = importedOwnerBundleText.isNotBlank() && !isPinningOwner,
+                        modifier = Modifier.fillMaxWidth()) { Text("Verify owner bundle") }
+                    ownerBundlePreview?.let { bundle ->
+                        Text("Family ID: ${bundle.familySpaceId}", style = MaterialTheme.typography.bodySmall)
+                        Text("Owner key fingerprint — compare every character:", style = MaterialTheme.typography.labelMedium)
+                        Text(bundle.ownerDeviceKeyId, style = MaterialTheme.typography.bodySmall)
+                        OutlinedTextField(value = ownerFingerprintConfirmation,
+                            onValueChange = { ownerFingerprintConfirmation = it.take(128) },
+                            modifier = Modifier.fillMaxWidth(),
+                            label = { Text("Enter independently confirmed fingerprint") },
+                            singleLine = true, enabled = !isPinningOwner)
+                        Button(onClick = {
+                            isPinningOwner = true
+                            coroutineScope.launch {
+                                try {
+                                    val result = initialOwnerPinRepository.pinInitialOwner(
+                                        familySpaceId = bundle.familySpaceId,
+                                        ownerMemberId = bundle.ownerMemberId,
+                                        ownerDeviceKeyId = bundle.ownerDeviceKeyId,
+                                        ownerPublicKeyBase64 = Base64.getEncoder().encodeToString(bundle.publicKeyBytes),
+                                        establishedAtEpochMillis = bundle.establishedAtEpochMillis,
+                                        confirmedFingerprint = ownerFingerprintConfirmation,
+                                        pinnedAtEpochMillis = System.currentTimeMillis().coerceAtLeast(bundle.establishedAtEpochMillis)
+                                    )
+                                    ownerBundleStatus = when (result) {
+                                        InitialOwnerPinResult.PINNED -> "Owner key pinned locally."
+                                        InitialOwnerPinResult.ALREADY_PINNED -> "This exact owner key is already pinned."
+                                        InitialOwnerPinResult.CONFLICT -> "A different owner key is already pinned. Replacement is blocked."
+                                    }
+                                } catch (_: Exception) {
+                                    ownerBundleStatus = "Fingerprint mismatch or local storage error."
+                                } finally { isPinningOwner = false }
+                            }
+                        }, enabled = !isPinningOwner &&
+                            ownerFingerprintConfirmation.trim().equals(bundle.ownerDeviceKeyId, ignoreCase = true),
+                            modifier = Modifier.fillMaxWidth()) {
+                            Text(if (isPinningOwner) "Saving…" else "Confirm fingerprint and pin owner")
+                        }
+                    }
+                    trustedOwners.forEach { owner ->
+                        Text("Pinned owner · ${owner.familySpaceId.take(12)}… · ${owner.ownerDeviceKeyId.take(16)}…",
+                            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    ownerBundleStatus?.let { Text(it, style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant) }
                 }
             }
 
