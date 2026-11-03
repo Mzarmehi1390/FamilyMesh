@@ -533,3 +533,26 @@ Add real Room/SQLite test infrastructure only after reviewing ADR 0014's scope a
 - A second pass over `EnrollmentDecisionAcceptanceService` and `EnrollmentNonceDao.persistDecision` found that the DAO's existing-row comparison includes local `recordedAtEpochMillis`, while the service's sequential replay comparison does not.
 - Concurrent imports of the same signed FMOD1 with different local receipt times may therefore yield one record and one conflict. This race is not covered by current tests.
 - Added the required concurrency case and design question to ADR 0014. No runtime behavior changed.
+
+
+## 2026-11-03 — Initial Room DAO instrumentation baseline
+
+### Work completed
+
+- Added Android instrumentation configuration to `:core:storage` using the repository's existing JUnit and AndroidX test catalog entries.
+- Added SQLite-backed Room instrumentation tests for nonce replay rejection, applicant decision persistence/idempotent replay/conflict, and owner finalization/idempotent replay/conflict.
+- Added a dedicated emulator-backed `storage-instrumentation` CI job, separate from unit tests and APK assembly, with reports uploaded even on failure.
+- The tests use an in-memory Room database and exercise the actual DAO transaction implementations rather than fake repositories.
+- This is an initial transaction baseline only; historical migration fixtures, injected rollback failures, concurrent import races, and close/reopen durability remain outstanding.
+- No production runtime, database schema, protocol, cryptographic, or transport behavior changed.
+
+### Verification
+
+- Storage Gradle configuration commit: `3b38a2a1a685cc77324520cf9b010614039f440a`.
+- Instrumentation CI workflow commit: `e94f00e98443780c55e2e15959c94fc07b0bf86f`.
+- DAO instrumentation tests commit: `5868c4a098707548321aee53519dec8fe6efad10`.
+- CI runs #41691001137, #41691009090, and #41691021028 were queued/in progress at the time of this log update.
+
+### Next action
+
+Resolve any compile/emulator failures from the first instrumentation run. Then add historical migration fixtures and deterministic race/rollback/reopen tests before considering the suite sufficient for the ADR 0008/0012 schema work.
