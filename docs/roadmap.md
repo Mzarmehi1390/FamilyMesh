@@ -32,7 +32,8 @@
 - [x] Define authorization-service boundary that resolves membership by device identity (contract and tests only)
 - [x] Add fail-closed default membership resolver and tests
 - [x] Make authorization fail closed on resolver errors and preserve coroutine cancellation
-- [ ] Select and review cryptographic identity protocol and public-key format
+- [x] Record proposed device-authentication signature profile (P-256 ECDSA/SHA-256 with COSE ESP256); implementation review gates remain open
+- [ ] Complete protocol review for canonical encoding, key identifiers, and replay protection
 - [ ] Implement and test Android-backed key storage after protocol review
 - [ ] Define trusted initial-owner ceremony and ownership transfer
 - [ ] Define trusted device enrollment, revocation, and recovery

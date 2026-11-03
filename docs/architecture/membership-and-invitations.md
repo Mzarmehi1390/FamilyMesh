@@ -134,7 +134,7 @@ are specified.
 
 - Is there a trusted initial owner, and how is that authority established?
 - Is enrollment peer-to-peer, relay-assisted, or both?
-- What cryptographic protocol and key lifecycle will bind a device to a member?
+- How will the proposed P-256/COSE device-signature profile be integrated with membership, replay protection, and key lifecycle?
 - Are invitations bearer tokens, public-key-bound requests, or a two-step
   approval exchange?
 - What is the recovery path when every enrolled device is lost?
