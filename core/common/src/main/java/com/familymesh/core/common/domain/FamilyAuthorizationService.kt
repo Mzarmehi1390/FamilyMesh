@@ -1,5 +1,7 @@
 package com.familymesh.core.common.domain
 
+import kotlinx.coroutines.CancellationException
+
 /**
  * A request to authorize an operation for a specific device in one family.
  *
@@ -68,6 +70,11 @@ sealed interface FamilyAuthorizationResult {
     data class ActorNotVerified(
         val request: FamilyAuthorizationRequest,
     ) : FamilyAuthorizationResult
+
+    /** The trusted resolver failed; callers must not treat this as permission. */
+    data class ResolverUnavailable(
+        val request: FamilyAuthorizationRequest,
+    ) : FamilyAuthorizationResult
 }
 
 /**
@@ -78,15 +85,21 @@ sealed interface FamilyAuthorizationResult {
  * result at every state-changing boundary.
  */
 class FamilyAuthorizationService(
-    private val membershipResolver: TrustedFamilyMembershipResolver,
+    private val membershipResolver: TrustedFamilyMembershipResolver = DenyAllFamilyMembershipResolver,
 ) {
     suspend fun authorize(
         request: FamilyAuthorizationRequest,
     ): FamilyAuthorizationResult {
-        val actor = membershipResolver.resolveActor(
-            familySpaceId = request.familySpaceId,
-            actorDeviceKeyId = request.actorDeviceKeyId,
-        ) ?: return FamilyAuthorizationResult.ActorNotVerified(request)
+        val actor = try {
+            membershipResolver.resolveActor(
+                familySpaceId = request.familySpaceId,
+                actorDeviceKeyId = request.actorDeviceKeyId,
+            )
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (_: Exception) {
+            return FamilyAuthorizationResult.ResolverUnavailable(request)
+        } ?: return FamilyAuthorizationResult.ActorNotVerified(request)
 
         if (
             actor.familySpaceId != request.familySpaceId ||

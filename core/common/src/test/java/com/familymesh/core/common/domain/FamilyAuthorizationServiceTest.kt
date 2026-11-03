@@ -1,5 +1,6 @@
 package com.familymesh.core.common.domain
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -78,6 +79,67 @@ class FamilyAuthorizationServiceTest {
             TrustedFamilyMembershipResolver { _, _ -> mismatchedActor },
         )
 
+        val request = FamilyAuthorizationRequest(
+            familySpaceId = "family-1",
+            actorDeviceKeyId = "device-key-1",
+            action = FamilyAction.CREATE_INVITATION,
+        )
+
+        assertEquals(FamilyAuthorizationResult.ActorNotVerified(request), service.authorize(request))
+    }
+
+    @Test
+    fun authorize_rejectsResolverResultForDifferentFamily() = runBlocking {
+        val mismatchedActor = actor.copy(familySpaceId = "other-family")
+        val service = FamilyAuthorizationService(
+            TrustedFamilyMembershipResolver { _, _ -> mismatchedActor },
+        )
+        val request = FamilyAuthorizationRequest(
+            familySpaceId = "family-1",
+            actorDeviceKeyId = "device-key-1",
+            action = FamilyAction.CREATE_INVITATION,
+        )
+
+        assertEquals(FamilyAuthorizationResult.ActorNotVerified(request), service.authorize(request))
+    }
+
+    @Test
+    fun authorize_returnsResolverUnavailable_whenResolverThrows() = runBlocking {
+        val service = FamilyAuthorizationService(
+            TrustedFamilyMembershipResolver { _, _ -> error("membership store unavailable") },
+        )
+        val request = FamilyAuthorizationRequest(
+            familySpaceId = "family-1",
+            actorDeviceKeyId = "device-key-1",
+            action = FamilyAction.CREATE_INVITATION,
+        )
+
+        assertEquals(FamilyAuthorizationResult.ResolverUnavailable(request), service.authorize(request))
+    }
+
+    @Test
+    fun authorize_propagatesCoroutineCancellation() = runBlocking {
+        val service = FamilyAuthorizationService(
+            TrustedFamilyMembershipResolver { _, _ -> throw CancellationException("cancelled") },
+        )
+
+        try {
+            service.authorize(
+                FamilyAuthorizationRequest(
+                    familySpaceId = "family-1",
+                    actorDeviceKeyId = "device-key-1",
+                    action = FamilyAction.CREATE_INVITATION,
+                ),
+            )
+            throw AssertionError("Expected coroutine cancellation to propagate")
+        } catch (_: CancellationException) {
+            // Expected.
+        }
+    }
+
+    @Test
+    fun authorizationService_usesDenyAllResolverByDefault() = runBlocking {
+        val service = FamilyAuthorizationService()
         val request = FamilyAuthorizationRequest(
             familySpaceId = "family-1",
             actorDeviceKeyId = "device-key-1",

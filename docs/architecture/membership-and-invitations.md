@@ -114,13 +114,18 @@ action; it deliberately does not accept a caller-selected role. Its injected
 `TrustedFamilyMembershipResolver` must verify the device identity and resolve
 its current membership and role for that exact family. The service rejects a
 missing membership or a resolver result whose family/device identifiers do
-not match the request, then applies the proposed role policy.
+not match the request, then applies the proposed role policy. Resolver
+failures produce an explicit `ResolverUnavailable` result and never grant
+access; coroutine cancellation is propagated rather than swallowed. The
+service defaults to `DenyAllFamilyMembershipResolver` when no resolver is
+provided.
 
 No production resolver exists yet, and the current local Room member records
 are not trusted membership evidence. A `DenyAllFamilyMembershipResolver` is
-provided as a fail-closed default: it always reports no verified actor, so the
-authorization service cannot grant access until a reviewed resolver is
-implemented. The service is not wired to membership mutations, invitation
+provided as a fail-closed default and is also the constructor default: it
+always reports no verified actor, so the authorization service cannot grant
+access until a reviewed resolver is implemented. Resolver exceptions are
+reported as unavailable, not authorized. The service is not wired to membership mutations, invitation
 operations, or UI. The next implementation must supply a resolver only after
 identity verification, membership authority, and staleness/version semantics
 are specified.
