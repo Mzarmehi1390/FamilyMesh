@@ -42,6 +42,7 @@ class EnrollmentNonceDaoInstrumentedTest {
     @After
     fun tearDown() {
         database.close()
+        context.deleteDatabase(DATABASE_NAME)
     }
 
     @Test
@@ -115,7 +116,6 @@ class EnrollmentNonceDaoInstrumentedTest {
                 nowEpochMillis = 1_500L,
             )
         )
-        context.deleteDatabase(DATABASE_NAME)
     }
 
     @Test
