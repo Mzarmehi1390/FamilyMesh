@@ -49,14 +49,13 @@ reported passing tests are from the already completed GitHub Actions run
 Audit the signed enrollment chain and document a reviewed protocol decision
 before implementing authorization integration or network transport.
 
-
 ## 2026-11-03 — Close owner-pin trust-boundary gap
 
 ### Finding
 
 `EnrollmentDecisionAcceptanceService` previously accepted a
-`TrustedInitialOwner` supplied by its caller. The current UI checked the
-pin before calling the service, but the service boundary itself did not
+`TrustedInitialOwner` supplied by its caller. The current UI checked
+the pin before calling the service, but the service boundary itself did not
 guarantee that the supplied owner key came from the local pin repository.
 
 ### Change
@@ -81,7 +80,6 @@ guarantee that the supplied owner key came from the local pin repository.
 This closes the caller-injected trust-record gap. It does not protect against
 compromise or arbitrary modification of the local application database and
 does not replace an independently reviewed trust protocol.
-
 
 ## 2026-11-03 — Enrollment protocol boundary hardening
 
@@ -118,3 +116,37 @@ COSE_Key serialization, canonical key ID, DER-to-COSE signature conversion,
 low-S policy, cross-language vectors, maximum request lifetime, clock skew,
 distributed replay/freshness, trust ceremony, revocation, and recovery remain
 open. The local custom format is still not a production protocol.
+
+## 2026-11-03 — Protocol profile research and handover refresh
+
+### Standards review
+
+- Confirmed RFC 9864 (October 2025) registers ESP256 as COSE algorithm -9,
+  fully specifying ECDSA with P-256 and SHA-256, and marks polymorphic COSE
+  ES256 (-7) deprecated.
+- Confirmed RFC 9053 encodes ECDSA signatures as fixed-width R || S, each
+  coordinate padded to the curve byte width (32 bytes for P-256).
+- Confirmed RFC 9052 COSE_Sign1 signs the Sig_structure with context
+  "Signature1", protected-header bytes, external AAD, and payload.
+- Confirmed RFC 9053 requires EC2/P-256 key type/curve consistency.
+- Confirmed RFC 8949 core deterministic CBOR uses preferred serialization,
+  forbids indefinite-length items, and sorts map keys by bytewise
+  lexicographic order of deterministic encodings.
+
+### Documentation work
+
+- Updated ADR 0001 to cite RFC 9864 and distinguish ESP256 from deprecated
+  polymorphic ES256.
+- Added ADR 0003 as a draft v2 COSE profile, with explicit proposals for
+  key encoding, key IDs, protected headers, external AAD, signature
+  conversion, and migration boundaries.
+- Refreshed roadmap, handover, and project status to reflect the verified
+  CI state and current source/documentation distinction.
+- Corrected the stale literal "\\n" formatting defect in the roadmap.
+
+### Verification
+
+Documentation changes are being committed as a cohesive update. CI must pass
+on the resulting commit before this documentation package is considered
+verified. No cryptographic protocol implementation or authorization/
+networking behavior was changed in this work package.
