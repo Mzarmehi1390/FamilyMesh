@@ -46,6 +46,20 @@ configuration, and corrupt stored public metadata. No production implementation
 is registered or used by the app yet. This abstraction is not proof that a key
 exists, is hardware-backed, or is trusted by a family.
 
+## Local identity lifecycle policy
+
+The identity module includes a pure policy that reconciles stored public metadata
+with the observed platform-key state. Matching metadata and a present key are
+`READY`; both artifacts absent are `NOT_PROVISIONED`; any mismatch, corrupt
+metadata, or invalidated key is `RECOVERY_REQUIRED`; an unavailable Keystore is
+`TEMPORARILY_UNAVAILABLE`. The policy does not create or repair keys.
+
+`NOT_PROVISIONED` describes only the artifacts visible to the current
+installation. It cannot prove that the app has never belonged to a family:
+a reinstall may remove both local metadata and the app's Keystore key. A fresh
+installation therefore still needs a trusted enrollment decision before it can
+join an existing family.
+
 ## Reinstall and restore considerations
 
 Android Keystore key material is tied to the app/device security environment;
