@@ -342,3 +342,18 @@ Documentation-only audit. No Kotlin, Room schema, UI, or runtime behavior
 changed. No local tests were run. The current CI workflow does not run Android
 instrumentation tests. CI for this documentation commit must be checked
 separately and is not assumed to have passed.
+
+
+## 2026-11-03 — Owner-side decision persistence design
+
+- Inspected the current Room schema and repository semantics. The existing
+  `enrollment_decisions` table is used by applicant-side decision acceptance;
+  it is not an owner-side issuance ledger.
+- Confirmed the owner Compose action signs FMOD1 into transient UI state and
+  has no durable owner-side issuance operation.
+- Added ADR 0008 proposing a separate owner-issued decision ledger, explicit
+  inbox lifecycle states, exact-artifact retention, atomic persistence,
+  conflict/replay behavior, and fail-closed matching during FMJA1 finalization.
+- Expiry policy remains deliberately unresolved per ADR 0006. No runtime or
+  schema changes were made pending review of the state and timing semantics.
+- No local tests were run; CI status is checked independently.
