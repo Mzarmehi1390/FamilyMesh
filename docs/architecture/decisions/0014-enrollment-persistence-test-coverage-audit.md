@@ -74,3 +74,40 @@ The service's sequential replay path checks the signed decision fields and inten
 The intended result for this race should be explicitly decided and tested. If exact signed-artifact re-import is meant to be idempotent regardless of local receipt time, persistence equality should distinguish signed artifact identity from observer metadata. Do not silently change this behavior as part of the owner-issued ledger work; keep applicant import semantics separately reviewed.
 
 Add a deterministic concurrent same-artifact import test with distinct local receipt times, alongside concurrent opposite-artifact conflict coverage.
+
+
+## 2026-11-03 follow-up — instrumentation baseline and migration provenance
+
+The initial Room/SQLite baseline is now present in the repository:
+
+- `:core:storage` has Android instrumentation dependencies and an AndroidJUnitRunner.
+- `EnrollmentNonceDaoInstrumentedTest` covers nonce replay rejection, applicant decision persistence/replay/conflict, owner finalization/replay/conflict, nonce rollback when pending insertion fails, and file-backed close/reopen durability.
+- `.github/workflows/android-ci.yml` has a separate `storage-instrumentation` job that invokes `gradle :core:storage:connectedDebugAndroidTest` and attempts to upload reports even after failure.
+- This is five DAO tests, not comprehensive persistence validation. Foreign-key cascade, historical migration preservation, and deterministic concurrent races remain uncovered.
+
+### CI result and emulator diagnosis
+
+The `verify` job passed in run #41693826071, but `storage-instrumentation` did not reach Gradle or execute any test. The Android Emulator process was launched with API 35 / Google APIs / x86_64 and SwiftShader, but `sys.boot_completed` never became true; the runner ended with `Timeout waiting for emulator to boot`. Emulator output also reported a missing color buffer. This is an environment boot failure, not a test assertion failure, and it provides no pass/fail evidence about the Room tests.
+
+The workflow was adjusted in commit `49a7082ed14c6d415f2996682f8485c10cc587f2` to use API 34 and the SwiftShader renderer, while retaining the bounded boot timeout and diagnostics-oriented options. Its CI result must be checked before treating the emulator setup as resolved.
+
+### Historical migration provenance
+
+A Git-history audit of `FamilyMeshDatabase.kt` found committed source snapshots corresponding to Room versions 1 through 7. The historical entity sets corroborate the version progression:
+
+- v1: family spaces and members;
+- v2: consumed enrollment nonces;
+- v3: pending enrollment requests;
+- v4: initial owner trust;
+- v5: trusted initial owners;
+- v6: enrollment decisions;
+- v7: authenticated family devices.
+
+This establishes source provenance for the versioned entity evolution, but it does not by itself provide Room-exported historical schema JSON or prove every historical SQLite table/index/FK definition. `exportSchema` remains false. Do not create purported historical Room schema fixtures by guessing from current entities or by treating Git source snapshots as exported schema files. A migration test fixture must be generated from a reproducible historical build/schema export or another independently verifiable historical database artifact.
+
+### Remaining acceptance work
+
+1. Obtain a successful emulator boot and execute the existing instrumentation suite.
+2. Establish reproducible, verifiable historical SQLite schemas for versions 1–7 before asserting migration preservation.
+3. Test each supported migration path, representative row preservation, indexes, and foreign keys against those real fixtures.
+4. Add foreign-key cascade tests and deterministic concurrency tests for same-artifact applicant imports with distinct local receipt times and conflicting owner outcomes, without changing runtime semantics until the relevant ADR decisions are approved.
