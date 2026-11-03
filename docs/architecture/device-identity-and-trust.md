@@ -209,3 +209,21 @@ remote attestation, does not synchronize to other devices, and does not yet
 provide signed owner approvals or recovery. A person with database write
 access could alter local state; the table alone is not a cross-device
 authorization proof.
+
+
+## Transferable initial-owner trust bundle
+
+The identity module can now export a bounded `FMOT1.` text bundle containing
+the family-space ID, owner-member ID, owner device-key ID, establishment
+timestamp, public key, and a signature over a domain-separated, versioned
+payload. The bundle is generated only when the current Keystore identity
+matches the local initial-owner trust record. Its decoder validates field
+bounds, exact payload consumption, key fingerprint, and signature.
+
+A valid bundle is **self-signed**, not self-authenticating: it proves that the
+included key signed the statement, but does not prove that the key belongs to
+the intended family owner. Before pinning it, another device must compare the
+full key fingerprint with the owner through an independent trusted channel
+(for example, an in-person comparison). The bundle is not encrypted, does not
+provide confidentiality, does not synchronize trust automatically, and does
+not yet implement remote pin storage or signed membership decisions.
