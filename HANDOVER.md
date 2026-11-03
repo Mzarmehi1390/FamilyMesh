@@ -55,7 +55,7 @@ Default branch: `main`
 - Commits: `918b03b` (canonical Base64URL), `36e2d27` (P-256 enforcement), `21dd7ca` (parser cleanup).
 - CI #41671671596 and #41671944679 passed their respective security-hardening changes.
 - CI #41671995919 passed unit tests, APK assembly, and artifact upload for the latest source commit.
-- CI #41672460808 also completed successfully for the documentation baseline.
+- CI #41672460808 completed successfully for the earlier documentation baseline. Later docs commits through ADR 0005 have no status entries exposed by the available status/PR-run queries; CI is unconfirmed.
 
 ## Current work package
 
