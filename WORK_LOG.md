@@ -292,3 +292,28 @@ CI for the documentation commit is unconfirmed.
 ### Commit
 
 - ADR 0006 clarification: ec33dae03dd6d5e331a8af69fb67e317b88240c2
+
+
+## 2026-11-03 — Pending-request expiry lifecycle audit
+
+### Work completed
+
+- Inspected the Room DAO transaction implementations, not just the domain
+  services.
+- Confirmed expired nonce rows are pruned during new nonce consumption, but
+  pending enrollment rows have no corresponding expiry cleanup query.
+- Confirmed owner finalization validates the applicant-signed acceptance
+  timestamp against request expiry, but does not compare the actual receive
+  time to expiry. A still-pending owner-side row can therefore remain
+  finalizable after expiry if the acceptance claims an in-window timestamp.
+- Extended ADR 0006 with this persistence-level lifecycle gap and explicit
+  requirements for pending-row expiration and post-expiry eligibility tests.
+
+### Verification limits
+
+This is a source audit and documentation change, not a runtime fix. No local
+tests were run. CI for these documentation commits remains unconfirmed.
+
+### Commit
+
+- ADR 0006 lifecycle clarification: d8cd41c265e0602e164da7a39f1ec5e184d6994d
