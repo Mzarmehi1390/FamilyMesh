@@ -94,20 +94,23 @@ class InitialOwnerTrustBundleService(
 
 /** Validates internal consistency and self-signature, not external owner trust. */
 object InitialOwnerTrustBundleVerifier {
-    fun verify(bundle: InitialOwnerTrustBundle): Boolean = try {
-        if (DeviceKeyFingerprint.fromEncodedPublicKey(bundle.publicKeyBytes) != bundle.ownerDeviceKeyId) {
-            return false
+    fun verify(bundle: InitialOwnerTrustBundle): Boolean {
+        return try {
+            if (DeviceKeyFingerprint.fromEncodedPublicKey(bundle.publicKeyBytes) != bundle.ownerDeviceKeyId) {
+                false
+            } else {
+                val publicKey = KeyFactory.getInstance("EC").generatePublic(
+                    X509EncodedKeySpec(bundle.publicKeyBytes),
+                )
+                Signature.getInstance("SHA256withECDSA").run {
+                    initVerify(publicKey)
+                    update(bundle.signingBytes())
+                    verify(bundle.signature)
+                }
+            }
+        } catch (_: Exception) {
+            false
         }
-        val publicKey = KeyFactory.getInstance("EC").generatePublic(
-            X509EncodedKeySpec(bundle.publicKeyBytes),
-        )
-        Signature.getInstance("SHA256withECDSA").run {
-            initVerify(publicKey)
-            update(bundle.signingBytes())
-            verify(bundle.signature)
-        }
-    } catch (_: Exception) {
-        false
     }
 }
 
