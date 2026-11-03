@@ -21,10 +21,10 @@
 - [x] Implement device-local Room persistence for family spaces
 - [x] Add local member-list persistence (metadata only; not authenticated enrollment)
 - [x] Document proposed invitation and membership lifecycle
-- [x] Record identity, role, replay, revocation, and offline-state design questions
-- [ ] Define trusted initial-owner identity and device enrollment
-- [ ] Select and review invitation and membership cryptographic protocol
-- [ ] Implement trusted member enrollment and membership lifecycle
+- [x] Document device identity, initial trust, key lifecycle, and recovery requirements
+- [ ] Select and review cryptographic identity protocol and public-key format
+- [ ] Define trusted initial-owner ceremony and ownership transfer
+- [ ] Define trusted device enrollment, revocation, and recovery
 - [ ] Implement invitation lifecycle only after protocol review
 - [ ] Threat-model identity and enrollment before implementing network behavior
 

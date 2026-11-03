@@ -27,6 +27,7 @@ introduced only when a concrete use case needs them.
 - No cryptographic protocol, trusted identity system, invitation protocol, key
   storage scheme, or peer discovery mechanism is implemented. These require
   dedicated design and review before production use.
+- Local profile IDs and member-list entries are metadata, not credentials.
 
 ## Persistence
 
