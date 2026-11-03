@@ -50,6 +50,10 @@ import com.familymesh.core.identity.EnrollmentDecisionOutcome
 import com.familymesh.core.identity.EnrollmentDecisionTextCodec
 import com.familymesh.core.identity.EnrollmentDecisionAcceptanceService
 import com.familymesh.core.identity.EnrollmentDecisionAcceptanceResult
+import com.familymesh.core.identity.EnrollmentAcceptanceSigner
+import com.familymesh.core.identity.EnrollmentAcceptanceTextCodec
+import com.familymesh.core.identity.EnrollmentFinalizationService
+import com.familymesh.core.identity.EnrollmentFinalizationOutcome
 import com.familymesh.core.identity.InitialOwnerTrustBundleCodec
 import com.familymesh.core.identity.InitialOwnerTrustBundle
 import java.util.UUID
@@ -80,6 +84,7 @@ fun FamilyMeshHomeScreen() {
     val initialOwnerTrustRepository: InitialOwnerTrustRepository = koinInject()
     val initialOwnerPinRepository: InitialOwnerPinRepository = koinInject()
     val decisionAcceptanceService: EnrollmentDecisionAcceptanceService = koinInject()
+    val enrollmentFinalizationService: EnrollmentFinalizationService = koinInject()
     val clipboardManager = LocalClipboardManager.current
     val profile by profileRepository.profile.collectAsState(initial = null)
     val familySpaces by familySpaceRepository.observeFamilySpaces().collectAsState(initial = emptyList())
@@ -108,6 +113,11 @@ fun FamilyMeshHomeScreen() {
     var importedDecisionText by remember { mutableStateOf("") }
     var decisionStatus by remember { mutableStateOf<String?>(null) }
     var isProcessingDecision by remember { mutableStateOf(false) }
+    var importedApprovalForAcceptance by remember { mutableStateOf("") }
+    var generatedAcceptanceText by remember { mutableStateOf("") }
+    var importedAcceptanceText by remember { mutableStateOf("") }
+    var acceptanceStatus by remember { mutableStateOf<String?>(null) }
+    var isProcessingAcceptance by remember { mutableStateOf(false) }
 
     LaunchedEffect(familySpaces) {
         if (selectedFamilySpaceId.isBlank() && familySpaces.isNotEmpty()) {
@@ -539,6 +549,129 @@ fun FamilyMeshHomeScreen() {
                             }
                         }) { Text(if (isProcessingDecision) "Verifying…" else "Verify and save decision") }
                     decisionStatus?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                }
+            }
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+            ) {
+                Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text("Complete device enrollment", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        "On the applicant device, paste the owner's approved FMOD1 decision and sign an acceptance. Then transfer the FMJA1 acceptance back to the initial-owner device to create the authenticated membership record.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    OutlinedTextField(
+                        value = importedApprovalForAcceptance,
+                        onValueChange = {
+                            importedApprovalForAcceptance = it.take(4000)
+                            generatedAcceptanceText = ""
+                            acceptanceStatus = null
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Approved owner decision (FMOD1)") },
+                        minLines = 3,
+                        enabled = !isProcessingAcceptance
+                    )
+                    Button(
+                        onClick = {
+                            isProcessingAcceptance = true
+                            coroutineScope.launch {
+                                try {
+                                    val decision = EnrollmentDecisionTextCodec.decode(importedApprovalForAcceptance.trim())
+                                    val identity = deviceKeyManager.getPublicIdentity()
+                                        ?: throw IllegalStateException("Device identity is unavailable.")
+                                    val signed = EnrollmentAcceptanceSigner(messageSigner).sign(
+                                        decision = decision,
+                                        applicantIdentity = identity,
+                                        acceptedAtEpochMillis = System.currentTimeMillis().coerceAtLeast(0L)
+                                    )
+                                    generatedAcceptanceText = EnrollmentAcceptanceTextCodec.encode(signed)
+                                    acceptanceStatus = "Applicant acceptance signed. Transfer the FMJA1 code to the initial-owner device."
+                                } catch (cancelled: CancellationException) {
+                                    throw cancelled
+                                } catch (_: Exception) {
+                                    acceptanceStatus = "Could not sign acceptance. Check that this is an approved decision addressed to this device."
+                                } finally {
+                                    isProcessingAcceptance = false
+                                }
+                            }
+                        },
+                        enabled = importedApprovalForAcceptance.isNotBlank() && deviceIdentity != null && !isProcessingAcceptance,
+                        modifier = Modifier.fillMaxWidth()
+                    ) { Text(if (isProcessingAcceptance) "Signing acceptance…" else "Sign applicant acceptance") }
+                    if (generatedAcceptanceText.isNotBlank()) {
+                        OutlinedTextField(
+                            value = generatedAcceptanceText,
+                            onValueChange = {},
+                            readOnly = true,
+                            modifier = Modifier.fillMaxWidth(),
+                            label = { Text("Signed acceptance code (FMJA1)") },
+                            minLines = 3
+                        )
+                        OutlinedButton(
+                            onClick = {
+                                clipboardManager.setText(AnnotatedString(generatedAcceptanceText))
+                                acceptanceStatus = "Acceptance code copied."
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) { Text("Copy FMJA1 acceptance") }
+                    }
+                    androidx.compose.material3.HorizontalDivider()
+                    Text("Owner: import applicant acceptance", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                    OutlinedTextField(
+                        value = importedAcceptanceText,
+                        onValueChange = {
+                            importedAcceptanceText = it.take(7000)
+                            acceptanceStatus = null
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Paste signed acceptance (FMJA1)") },
+                        minLines = 3,
+                        enabled = !isProcessingAcceptance
+                    )
+                    OutlinedButton(
+                        onClick = {
+                            isProcessingAcceptance = true
+                            coroutineScope.launch {
+                                try {
+                                    val acceptance = EnrollmentAcceptanceTextCodec.decode(importedAcceptanceText.trim())
+                                    acceptanceStatus = when (
+                                        enrollmentFinalizationService.finalize(
+                                            acceptance = acceptance,
+                                            nowEpochMillis = System.currentTimeMillis().coerceAtLeast(0L)
+                                        )
+                                    ) {
+                                        EnrollmentFinalizationOutcome.Finalized ->
+                                            "Membership finalized and saved atomically on this device."
+                                        EnrollmentFinalizationOutcome.AlreadyFinalized ->
+                                            "This exact acceptance was already finalized."
+                                        EnrollmentFinalizationOutcome.InvalidOrUntrusted ->
+                                            "Acceptance or owner trust verification failed."
+                                        EnrollmentFinalizationOutcome.RequestNotPending ->
+                                            "No matching pending request exists on this owner device."
+                                        EnrollmentFinalizationOutcome.Conflict ->
+                                            "A conflicting enrollment record already exists."
+                                        EnrollmentFinalizationOutcome.StorageUnavailable ->
+                                            "Could not safely finalize enrollment. Try again later."
+                                    }
+                                } catch (cancelled: CancellationException) {
+                                    throw cancelled
+                                } catch (_: Exception) {
+                                    acceptanceStatus = "The FMJA1 code is malformed or could not be processed."
+                                } finally {
+                                    isProcessingAcceptance = false
+                                }
+                            }
+                        },
+                        enabled = importedAcceptanceText.isNotBlank() && !isProcessingAcceptance,
+                        modifier = Modifier.fillMaxWidth()
+                    ) { Text(if (isProcessingAcceptance) "Finalizing…" else "Verify and finalize membership") }
+                    acceptanceStatus?.let {
+                        Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 }
             }
 
