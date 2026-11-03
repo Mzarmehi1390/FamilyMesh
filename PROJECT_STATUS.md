@@ -4,7 +4,7 @@ Last verified: 2026-11-03
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
 Branch: `main`
 Latest verified source commit: `21dd7ca4db718ee31416e45319d88ffce9c950c3`
-Latest documentation commit: `be4a85cd7d2b357e3fb356c2834d94491c59db95`
+Protocol review draft: ADR 0003 (proposal only; not production-approved)
 
 ## Overall state
 
