@@ -169,3 +169,13 @@ revocation, and recovery are also resolved.
 - Required invariant: persist one authoritative exact FMOD1 per family/request; exact reissue returns stored text; a different artifact/outcome conflicts; finalization requires exact match to the stored approval. Do not solve with a UI-only flag or by deleting request facts.
 - This is distinct from FMJA1 replay identity in ADR 0011/0012. Coordinate both in the single v7 → v8 migration proposal. Keep ADR 0006 expiry decisions separate.
 - No runtime/schema/protocol/crypto/transport changes. ADR 0013: `99df7d830ca6cad0d3c54723de7c262041160b6d`; CI pending.
+
+
+## 2026-11-03 — Enrollment persistence test-coverage handover
+
+- ADR 0014 audits the actual validation boundary: current CI runs unit tests and debug APK assembly, not instrumentation or Room migration tests.
+- `:core:storage` currently has no test/androidTest source sets or test dependencies; Room schema export is disabled.
+- The enrollment identity service tests use fake repositories. Do not treat them as evidence for SQLite transaction rollback, concurrent uniqueness, foreign-key behavior, migrations, or database reopen durability.
+- ADR 0014 defines the required sequence: add Room DAO tests, build historical schema fixtures for versions 1–7, test migrations/constraints, then run emulator instrumentation as a separate CI check.
+- Five CI runs for ADR 0013 and its coordinated documentation updates succeeded (#41689232031, #41689300728, #41689312246, #41689319946, #41689327795).
+- ADR 0014 is documentation-only. No runtime, schema, CI, protocol, crypto, or transport changes were made. Before implementing owner-issued persistence, review ADR 0008/0012 and resolve ADR 0006 expiry policy.
