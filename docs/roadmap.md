@@ -39,7 +39,8 @@
 - [x] Add fail-closed proof acceptance service and replay tests
 - [x] Add bounded, versioned text export/import codec for signed enrollment proofs and public identities
 - [x] Persist verified incoming enrollment requests atomically with nonce consumption and expose a local review inbox
-- [x] Add explicit, one-per-family local initial-owner bootstrap bound to the current device key\n- [x] Add signed, bounded initial-owner trust bundle export/verification primitives (manual out-of-band fingerprint check still required)
+- [x] Add explicit, one-per-family local initial-owner bootstrap bound to the current device key
+- [x] Add signed, bounded initial-owner trust bundle export/verification primitives (manual out-of-band fingerprint check still required)
 - [x] Add explicit recipient-side fingerprint confirmation and immutable local owner-key pinning
 - [x] Add signed, bounded owner decision artifacts bound to the exact family, request, applicant key, and pinned owner key (portable statement only; no membership grant)
 - [x] Persist verified owner decisions atomically and close the matching pending inbox request (no member creation)
@@ -71,13 +72,12 @@ Build family spaces, conversations, delivery states, accessibility, and localiza
 
 Expand automated tests, threat-model review, privacy review, release signing, and operational documentation.
 
-
 ## Current work package
 
 **WP — Identity and trusted enrollment protocol review.** The local proof,
 decision, acceptance, and owner-side finalization flow is implemented and
 covered by unit tests. Do not begin network transport or claim production
-membership authorization until the protocol review gates below are closed.
+membership authorization until the protocol review gates are closed.
 
 Required gates:
 - [x] Review current bounded parsing and reject non-canonical Base64URL aliases across all four transfer envelopes
@@ -85,11 +85,13 @@ Required gates:
 - [ ] Select canonical interoperable COSE_Key / COSE_Sign1 wire representation
 - [ ] Define strict ECDSA-to-COSE signature conversion and low-S policy
 - [ ] Finalize versioned public-key serialization and key-ID derivation (current v1 remains SHA-256 over X.509 SPKI with domain separation)
-- [ ] Resolve the gap between the proposed COSE ESP256 profile and current
-      JCA ECDSA / X.509 / custom length-prefixed payload implementation
+- [ ] Resolve the gap between the proposed COSE ESP256 profile and current JCA ECDSA / X.509 / custom length-prefixed payload implementation
 - [ ] Define replay protection and nonce retention across multiple devices
 - [ ] Define trusted owner ceremony, ownership transfer, revocation, and recovery
-- [ ] Threat-model the complete enrollment flow, including local database
-      tampering, clock skew, compromised devices, and offline peers
+- [ ] Threat-model the complete enrollment flow, including local database tampering, clock skew, compromised devices, and offline peers
 - [ ] Add Android API 31+ Keystore instrumentation coverage
 - [ ] Add Room migration and transactional persistence tests on Android
+
+A draft COSE v2 profile and migration considerations are being developed in
+ADR 0003. Its proposals are not production decisions until interoperability
+vectors, platform tests, and security review are complete.
