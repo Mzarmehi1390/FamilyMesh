@@ -92,6 +92,6 @@ Required gates:
 - [ ] Add Android API 31+ Keystore instrumentation coverage
 - [ ] Add Room migration and transactional persistence tests on Android
 
-A draft COSE v2 profile and migration considerations are being developed in
+A draft COSE v2 profile and migration considerations are documented in
 ADR 0003. Its proposals are not production decisions until interoperability
 vectors, platform tests, and security review are complete.
