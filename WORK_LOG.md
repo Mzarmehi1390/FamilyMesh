@@ -146,7 +146,7 @@ open. The local custom format is still not a production protocol.
 
 ### Verification
 
-Documentation changes are being committed as a cohesive update. CI must pass
-on the resulting commit before this documentation package is considered
-verified. No cryptographic protocol implementation or authorization/
+Documentation changes were committed as a cohesive update in
+`be4a85cd7d2b357e3fb356c2834d94491c59db95`. CI must pass on that commit
+before this documentation package is considered verified. No cryptographic protocol implementation or authorization/
 networking behavior was changed in this work package.
