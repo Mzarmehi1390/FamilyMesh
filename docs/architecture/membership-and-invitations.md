@@ -42,6 +42,21 @@ stored role as proof of identity or permission.
 7. **Expire and consume** — Expired, revoked, or already-consumed invitations
    are rejected. Redemption must be atomic to prevent concurrent reuse.
 
+## Local enrollment-request state model
+
+The common domain module now defines a protocol-neutral enrollment request
+bound to one family-space ID, one device-key ID, a proposed role, and an
+explicit expiry. Its local lifecycle permits only a pending request to become
+approved, rejected, revoked, or expired. Approval, rejection, and revocation
+are disallowed at or after expiry; expiration is allowed only at or after the
+expiry timestamp. Terminal states cannot transition again.
+
+This model is not an invitation token, signature, authenticated approval, or
+membership grant. The proposed role must be assigned by a trusted inviter or
+authority, never trusted merely because a joining client supplied it. Atomic
+single-use redemption, authenticated authority, and distributed replay
+protection remain unimplemented and require a reviewed protocol.
+
 ## Security requirements before implementation
 
 - Bind every invitation to exactly one family-space identifier.

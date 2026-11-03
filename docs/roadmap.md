@@ -26,6 +26,7 @@
 - [x] Define explicit read-versus-create identity operations and typed lifecycle failures
 - [x] Document reinstall and missing-key recovery constraints
 - [x] Add pure identity-artifact reconciliation policy and unit tests
+- [x] Add protocol-neutral enrollment-request lifecycle model and unit tests
 - [ ] Select and review cryptographic identity protocol and public-key format
 - [ ] Implement and test Android-backed key storage after protocol review
 - [ ] Define trusted initial-owner ceremony and ownership transfer
