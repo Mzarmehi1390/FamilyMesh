@@ -102,3 +102,15 @@ class FamilyAuthorizationService(
         }
     }
 }
+
+
+/**
+ * Fail-closed resolver for builds that have no reviewed identity/membership
+ * verifier configured. It never grants membership based on local metadata.
+ */
+object DenyAllFamilyMembershipResolver : TrustedFamilyMembershipResolver {
+    override suspend fun resolveActor(
+        familySpaceId: String,
+        actorDeviceKeyId: String,
+    ): ResolvedFamilyActor? = null
+}

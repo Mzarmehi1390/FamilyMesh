@@ -117,10 +117,13 @@ missing membership or a resolver result whose family/device identifiers do
 not match the request, then applies the proposed role policy.
 
 No production resolver exists yet, and the current local Room member records
-are not trusted membership evidence. The service is not wired to membership
-mutations, invitation operations, or UI. The next implementation must supply
-a resolver only after identity verification, membership authority, and
-staleness/version semantics are specified.
+are not trusted membership evidence. A `DenyAllFamilyMembershipResolver` is
+provided as a fail-closed default: it always reports no verified actor, so the
+authorization service cannot grant access until a reviewed resolver is
+implemented. The service is not wired to membership mutations, invitation
+operations, or UI. The next implementation must supply a resolver only after
+identity verification, membership authority, and staleness/version semantics
+are specified.
 
 ## Open design decisions
 

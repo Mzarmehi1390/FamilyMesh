@@ -114,3 +114,32 @@ class FamilyAuthorizationServiceTest {
         }
     }
 }
+
+
+class DenyAllFamilyMembershipResolverTest {
+    @Test
+    fun resolverNeverReturnsAnActor() = runBlocking {
+        assertEquals(
+            null,
+            DenyAllFamilyMembershipResolver.resolveActor(
+                familySpaceId = "family-1",
+                actorDeviceKeyId = "device-key-1",
+            ),
+        )
+    }
+
+    @Test
+    fun authorizationServiceFailsClosedWithDefaultResolver() = runBlocking {
+        val service = FamilyAuthorizationService(DenyAllFamilyMembershipResolver)
+        val request = FamilyAuthorizationRequest(
+            familySpaceId = "family-1",
+            actorDeviceKeyId = "device-key-1",
+            action = FamilyAction.CREATE_INVITATION,
+        )
+
+        assertEquals(
+            FamilyAuthorizationResult.ActorNotVerified(request),
+            service.authorize(request),
+        )
+    }
+}
