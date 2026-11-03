@@ -482,3 +482,26 @@ Review the exact-replay compatibility policy for existing finalized rows, then c
 ### Next action
 
 Review/approve ADR 0008 owner-ledger semantics and ADR 0012 migration/legacy replay behavior before any schema implementation. Keep ADR 0006 expiry policy separate.
+
+
+## 2026-11-03 — Owner decision issuance consistency audit
+
+### Work completed
+
+- Added ADR 0013 after tracing the owner Compose approve/reject actions, applicant-side decision acceptance transaction, and owner-side FMJA1 finalization service.
+- Confirmed owner issuance currently signs and displays FMOD1 in transient Compose state without persisting an authoritative decision.
+- Confirmed the owner can issue distinct opposite outcomes for the same still-pending request; finalization currently validates the embedded owner signature and request binding but does not compare FMOD1 with an owner-issued ledger.
+- Identified the resulting consistency gap: a previously issued valid approval can still finalize while the owner request remains pending even if a later rejection was also signed. This is not a signature forgery; it is missing authoritative-decision state.
+- Confirmed applicant-side decision import deletes only the applicant installation's pending row in its own transaction and does not synchronize owner-side state.
+- Specified one-authoritative-artifact, idempotent re-export, conflict-on-different-issuance, exact-ledger-match-at-finalization, restart, failure, and concurrency invariants.
+- No runtime, Room schema, protocol, cryptographic, or transport changes were made.
+
+### Verification
+
+- Reviewed `FamilyMeshHomeScreen.kt`, `EnrollmentDecisionAcceptanceService.kt`, `RoomEnrollmentDecisionRepository.kt`, `EnrollmentFinalizationService.kt`, `RoomEnrollmentFinalizationRepository.kt`, and the Room DAO transaction definitions.
+- Prior ADR 0012 / ADR 0009 / status-document CI runs all succeeded. ADR 0013 and follow-up documentation CI pending.
+- Documentation-only audit; no local tests run.
+
+### Next action
+
+Review ADR 0013 together with ADR 0008 and ADR 0012. Implement only after approval of the owner-ledger invariant and the ADR 0006 expiry policy. The implementation must enforce the invariant in Room transactions, not only in Compose UI.
