@@ -60,6 +60,65 @@ class EnrollmentNonceDaoInstrumentedTest {
     }
 
     @Test
+    fun consumeNonce_rollsBackNonceWhenPendingInsertFails() = runBlocking {
+        assertTrue(dao.consumeNonce(nonce(), pending(), nowEpochMillis = 1_500L))
+
+        val retryableNonce = nonce(nonceDigest = "nonce-digest-2")
+        try {
+            dao.consumeNonce(
+                retryableNonce,
+                pending(requestId = REQUEST_ID, deviceKeyId = "different-device"),
+                nowEpochMillis = 1_500L,
+            )
+            throw AssertionError("Expected duplicate pending-request insertion to fail.")
+        } catch (_: android.database.sqlite.SQLiteConstraintException) {
+            // The @Transaction must roll back the nonce insert as well.
+        }
+
+        assertTrue(
+            dao.consumeNonce(
+                retryableNonce,
+                pending(requestId = "request-2", deviceKeyId = "device-2"),
+                nowEpochMillis = 1_500L,
+            )
+        )
+    }
+
+    @Test
+    fun databaseReopen_preservesPendingEnrollmentAndNonceReplayState() = runBlocking {
+        database.close()
+        context.deleteDatabase(DATABASE_NAME)
+        database = Room.databaseBuilder(
+            context,
+            FamilyMeshDatabase::class.java,
+            DATABASE_NAME,
+        ).build()
+        dao = database.enrollmentNonceDao()
+        database.familySpaceDao().insertFamilySpace(
+            FamilySpaceEntity(FAMILY_ID, "Test family", 1_000L)
+        )
+        assertTrue(dao.consumeNonce(nonce(), pending(), nowEpochMillis = 1_500L))
+        database.close()
+
+        database = Room.databaseBuilder(
+            context,
+            FamilyMeshDatabase::class.java,
+            DATABASE_NAME,
+        ).build()
+        dao = database.enrollmentNonceDao()
+
+        assertEquals(pending(), dao.getPendingRequest(FAMILY_ID, REQUEST_ID))
+        assertFalse(
+            dao.consumeNonce(
+                nonce(),
+                pending(requestId = "request-2", deviceKeyId = "device-2"),
+                nowEpochMillis = 1_500L,
+            )
+        )
+        context.deleteDatabase(DATABASE_NAME)
+    }
+
+    @Test
     fun persistDecision_recordsAndResolvesPendingRequestAtomically() = runBlocking {
         assertTrue(dao.consumeNonce(nonce(), pending(), nowEpochMillis = 1_500L))
 
@@ -104,8 +163,8 @@ class EnrollmentNonceDaoInstrumentedTest {
         )
     }
 
-    private fun nonce() = ConsumedEnrollmentNonceEntity(
-        nonceDigest = "nonce-digest",
+    private fun nonce(nonceDigest: String = "nonce-digest") = ConsumedEnrollmentNonceEntity(
+        nonceDigest = nonceDigest,
         familySpaceId = FAMILY_ID,
         requestId = REQUEST_ID,
         consumedAtEpochMillis = 1_500L,
@@ -139,5 +198,6 @@ class EnrollmentNonceDaoInstrumentedTest {
     private companion object {
         const val FAMILY_ID = "family-1"
         const val REQUEST_ID = "request-1"
+        const val DATABASE_NAME = "room-enrollment-reopen-test.db"
     }
 }
