@@ -108,3 +108,11 @@ revocation semantics have been reviewed.
 - Signed event time remains distinct from local receipt/recording time. A plain clock wrapper improves consistency/testability but is not a tamper-resistance mechanism.
 - ADR 0006 expiry semantics remain unresolved. No runtime, protocol, or Room schema change was made.
 - CI #41680089589 (ADR 0006 clarification) and #41680127933 (Work Log) passed. ADR 0010 commit: `0d7271217f308d7f854555bc7b5871b5628550a8`.
+
+
+## Finalization replay exactness audit — 2026-11-03
+
+- ADR 0011 documents a confirmed idempotency/result-integrity gap in the owner finalization fast path: current replay matching uses applicant key ID plus signature bytes before validating the complete FMJA1 artifact.
+- Existing membership rows do not preserve the exact FMJA1 artifact or its complete-payload digest. A changed envelope retaining the same key ID/signature can therefore be reported as `ALREADY_FINALIZED`; this does not create a second membership row, but does not establish exact replay.
+- Proposed remedy is to persist a canonical artifact/digest atomically for new records and define fail-closed or explicit legacy behavior for older rows. No runtime or Room schema change was made.
+- ADR 0011 commit: `ede1f826b2a612e32173dc8050b34f7ea6766770`; CI pending.
