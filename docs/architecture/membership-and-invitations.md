@@ -86,6 +86,27 @@ there can be multiple owners, and how ownership transfer and last-owner
 removal work. No UI should imply that these permissions are enforced before
 that policy and its enforcement are implemented.
 
+## Initial role-permission policy (proposed)
+
+The common domain module now contains a pure policy for review and testing.
+The proposed baseline is deliberately conservative:
+
+| Action | OWNER | ADMIN | MEMBER |
+|---|---:|---:|---:|
+| Create invitation | Yes | Yes | No |
+| Approve regular-member enrollment | Yes | Yes | No |
+| Assign or revoke MEMBER role | Yes | Yes | No |
+| Assign or revoke ADMIN role | Yes | No | No |
+| Transfer ownership | Yes | No | No |
+| Remove an OWNER | No | No | No |
+
+Ownership changes must use the explicit transfer operation; an owner cannot
+be removed through the ordinary member-removal operation. ADMIN cannot grant,
+remove, or transfer administrative authority. This is a proposed product
+policy, not a claim that the app currently enforces permissions. The policy
+must be checked against an authenticated actor and current trusted membership
+at every state-changing boundary before it can provide security.
+
 ## Open design decisions
 
 - Is there a trusted initial owner, and how is that authority established?
