@@ -4,7 +4,7 @@ Private, decentralized, end-to-end encrypted family messaging for Android.
 
 ## Project status
 
-Milestone 0 establishes the native Android foundation. The repository is being built from scratch.
+Milestone 0 establishes the native Android foundation. The repository is being built from scratch. The initial unit-test and debug-APK CI checks pass.
 
 ## Platform and stack
 
@@ -19,12 +19,14 @@ Milestone 0 establishes the native Android foundation. The repository is being b
 
 ## Build
 
-Open the repository in a current Android Studio installation with Android SDK 36 installed. The Gradle Wrapper will be added and verified in the next setup pass; until then, a compatible local Gradle 8.13 installation can run:
+Open the repository in a current Android Studio installation with Android SDK 36 installed. A Gradle Wrapper is not included yet; until it is added, install a compatible Gradle 8.13 distribution and run:
 
 ```bash
 gradle testDebugUnitTest
 gradle assembleDebug
 ```
+
+Successful CI runs publish the debug APK as the `familymesh-debug-apk` workflow artifact for seven days.
 
 ## Security notes
 
