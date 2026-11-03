@@ -16,17 +16,19 @@ import java.security.spec.X509EncodedKeySpec
  * curves at verification boundaries would silently broaden that profile.
  */
 internal object P256PublicKeyParser {
-    fun decode(encoded: ByteArray): ECPublicKey? = try {
-        val key = KeyFactory.getInstance("EC")
-            .generatePublic(X509EncodedKeySpec(encoded)) as? ECPublicKey
-            ?: return null
-        val expected = AlgorithmParameters.getInstance("EC").run {
-            init(ECGenParameterSpec("secp256r1"))
-            getParameterSpec(ECParameterSpec::class.java)
+    fun decode(encoded: ByteArray): ECPublicKey? {
+        return try {
+            val key = KeyFactory.getInstance("EC")
+                .generatePublic(X509EncodedKeySpec(encoded)) as? ECPublicKey
+                ?: return null
+            val expected = AlgorithmParameters.getInstance("EC").run {
+                init(ECGenParameterSpec("secp256r1"))
+                getParameterSpec(ECParameterSpec::class.java)
+            }
+            if (key.params.isP256EquivalentTo(expected)) key else null
+        } catch (_: Exception) {
+            null
         }
-        if (key.params.isP256EquivalentTo(expected)) key else null
-    } catch (_: Exception) {
-        null
     }
 
     private fun ECParameterSpec.isP256EquivalentTo(expected: ECParameterSpec): Boolean {
