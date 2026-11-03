@@ -191,3 +191,6 @@ revocation, and recovery are also resolved.
 - This does not yet satisfy all ADR 0009/0014 acceptance criteria. Still required: real historical schema fixtures for versions 1–7, injected rollback failures, concurrent import/issuance cases, and database close/reopen durability.
 - Initial commits: `3b38a2a1` (storage test configuration), `e94f00e9` (CI), `5868c4a0` (DAO tests). Verify the first emulator CI results before extending the suite.
 - No production runtime, schema, protocol, cryptographic, or transport changes.
+
+
+- The instrumentation suite was expanded after the baseline: it now checks rollback of nonce insertion when pending insertion fails and verifies pending/nonce state after closing and reopening a file-backed database. Verify the latest emulator run before treating these cases as validated.
