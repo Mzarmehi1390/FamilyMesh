@@ -159,3 +159,13 @@ revocation, and recovery are also resolved.
 - ADR 0009 links the unified migration and includes replay identity coverage. No runtime or schema code changed.
 - Before implementation: approve ADR 0008 ledger semantics; review ADR 0012; keep ADR 0006 expiry decisions separate; add emulator/Room migration coverage as required by ADR 0009.
 - ADR 0012: `cd1b3316fe14c572ae06f5c8ad3f53d29cd45212`; ADR 0009 update: `c086128f9f1ee2f0f98197f34d20b1edc375e19d`. CI pending.
+
+
+## 2026-11-03 — Owner decision issuance consistency handover
+
+- ADR 0013: owner approve/reject actions currently sign FMOD1 into transient Compose state; they do not persist the issued decision. The owner can sign opposite outcomes for the same pending request.
+- Applicant-side import deletes only the applicant-local pending row. It does not update the owner installation.
+- Owner finalization validates the nested FMOD1 signature/request binding but does not compare it with a durable owner-issued artifact. Therefore an earlier signed approval may still finalize after a later rejection was also issued, while the owner pending row remains.
+- Required invariant: persist one authoritative exact FMOD1 per family/request; exact reissue returns stored text; a different artifact/outcome conflicts; finalization requires exact match to the stored approval. Do not solve with a UI-only flag or by deleting request facts.
+- This is distinct from FMJA1 replay identity in ADR 0011/0012. Coordinate both in the single v7 → v8 migration proposal. Keep ADR 0006 expiry decisions separate.
+- No runtime/schema/protocol/crypto/transport changes. ADR 0013: `99df7d830ca6cad0d3c54723de7c262041160b6d`; CI pending.
