@@ -61,6 +61,12 @@ revocation semantics have been reviewed.
 
 ## Protocol audit progress
 
+- ADR 0008 proposes a separate owner-issued FMOD1 ledger. The existing
+  `enrollment_decisions` table is applicant-side acceptance state and must
+  not be repurposed. Proposed lifecycle states and exact-artifact matching
+  at FMJA1 finalization are documented; no runtime/schema change has been
+  made. Expiry policy remains unresolved under ADR 0006.
+
 - ADR 0007 traces the separate applicant and owner Room stores. Applicant-side
   decision import and owner-side finalization use independent local rows; the
   apparent same-database conflict is not real. A separate owner-inbox gap is
