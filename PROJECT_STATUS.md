@@ -126,3 +126,13 @@ revocation semantics have been reviewed.
 - ADR 0009 now links the unified migration and adds its exact-replay/legacy-row test requirements.
 - No runtime, database schema, protocol, or expiry-policy changes were made. ADR 0008 approval and ADR 0006 policy resolution remain separate gates.
 - ADR 0012 commit: `cd1b3316fe14c572ae06f5c8ad3f53d29cd45212`; ADR 0009 coordination commit: `c086128f9f1ee2f0f98197f34d20b1edc375e19d`. CI pending.
+
+
+## Owner decision issuance consistency audit — 2026-11-03
+
+- ADR 0013 confirms owner FMOD1 issuance is currently transient in Compose and not persisted as an authoritative owner decision.
+- The owner can issue distinct opposite decisions for the same pending request. Owner-side FMJA1 finalization verifies the nested decision signature and request binding but does not compare it with a durable owner-issued artifact. A previously signed approval may therefore still finalize while a later rejection has also been issued.
+- Applicant-side decision import deletes only the applicant installation's pending row; it does not synchronize the owner installation.
+- Required future invariant: one durable authoritative FMOD1 per family/request; exact reissue returns stored artifact; conflicting issuance fails; finalization requires exact match to the stored approval. This is distinct from ADR 0011/0012 exact-FMJA1 replay identity.
+- No runtime/schema/protocol/crypto/transport changes. ADR 0008 approval and ADR 0006 expiry policy remain gates.
+- ADR 0013 commit: `99df7d830ca6cad0d3c54723de7c262041160b6d`. CI pending.
