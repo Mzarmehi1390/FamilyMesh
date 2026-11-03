@@ -59,11 +59,11 @@ jobs:
       - name: Run Room storage tests on emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 35
+          api-level: 34
           target: google_apis
           arch: x86_64
           profile: pixel_2
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -no-metrics
+          emulator-options: -no-window -gpu swiftshader -no-snapshot -noaudio -no-boot-anim -no-metrics
           disable-animations: true
           emulator-boot-timeout: 600
           script: gradle :core:storage:connectedDebugAndroidTest
