@@ -7,12 +7,11 @@ Default branch: `main`
 ## Last verified repository state
 
 - Branch: `main`
-- Last verified source commit: `21dd7ca4db718ee31416e45319d88ffce9c950c3`
-- Commit subject: `fix(identity): resolve owner pin inside decision acceptance`
-- Commit timestamp: 2026-11-03T15:48:14Z
-- Latest source CI run: [Android CI #41671995919](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41671995919)
-- CI result: unit tests passed, debug APK assembled, artifact uploaded.
-- Branch protection: disabled; no open issues or pull requests were present at synchronization.
+- Latest documentation baseline before this handover refresh: `acbb3d46a729925cf346b42731443173af7a9b3e`
+- Latest verified source commit: `21dd7ca4db718ee31416e45319d88ffce9c950c3`
+- Latest CI run checked: [Android CI #41672460808](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41672460808)
+- CI result: completed successfully; unit tests, debug APK assembly, and artifact upload all passed.
+- Branch protection: disabled; no open issues or pull requests were present at the prior synchronization.
 
 ## Product and architecture invariants
 
@@ -27,7 +26,7 @@ Default branch: `main`
   resolver exists.
 - Do not silently replace a lost/invalidated device key.
 
-## Completed implementation visible at the last verified source commit
+## Completed implementation visible at the latest verified source commit
 
 - Native Android foundation, Compose UI, Koin dependency injection.
 - Room family-space and local member metadata persistence; Preferences
@@ -44,32 +43,33 @@ Default branch: `main`
 - Room v7 authenticated-device record insertion and pending-request consumption
   in one transaction.
 - Home screen lists authenticated devices for the selected family.
-- Decision acceptance service resolves the owner key from `InitialOwnerPinRepository` internally; UI callers cannot inject an arbitrary owner trust record.
+- Decision acceptance service resolves the owner key from
+  `InitialOwnerPinRepository` internally; UI callers cannot inject an
+  arbitrary owner trust record.
 - All four enrollment transfer codecs reject non-canonical/padded Base64URL aliases.
 - All enrollment signature verification boundaries reject non-P-256 EC public keys.
-- Added tests rejecting missing, mismatched, and ambiguous owner pins.
 - Unit tests cover domain, identity, and local persistence behavior.
 
 ## Latest code changes and verification
 
 - Commits: `918b03b` (canonical Base64URL), `36e2d27` (P-256 enforcement), `21dd7ca` (parser cleanup).
-- CI run #41671671596 passed unit tests, APK assembly, and artifact upload for canonical Base64URL changes.
-- CI run #41671944679 passed unit tests, APK assembly, and artifact upload for P-256 enforcement.
-- CI run #41671995919 passed unit tests, APK assembly, and artifact upload for the current source commit.
+- CI #41671671596 and #41671944679 passed their respective security-hardening changes.
+- CI #41671995919 passed unit tests, APK assembly, and artifact upload for the latest source commit.
+- CI #41672460808 also completed successfully for the documentation baseline.
 
 ## Current work package
 
 **WP — Identity and trusted enrollment protocol review.**
 
 The local enrollment prototype is implemented, but its custom binary payloads
-are not the proposed interoperable COSE protocol. The exact next action is to
-complete a security review of canonical encoding, key identifiers, signature
-representation, replay semantics, and enrollment trust/lifecycle before
-connecting these records to authorization or implementing transport.
+are not the proposed interoperable COSE protocol. ADR 0003 now records a
+draft v2 profile to make the open encoding and signature decisions concrete.
+It remains a proposal: no protocol migration or authorization integration
+should be implemented until independent vectors and platform tests validate it.
 
 ## Open blockers and risks
 
-1. ADR 0001 is still proposed: code uses JCA P-256 / SHA256withECDSA and
+1. ADR 0001 remains proposed: code uses JCA P-256 / SHA256withECDSA and
    X.509 public-key bytes with custom domain-separated length-prefixed
    payloads; COSE ESP256 serialization/conversion is not implemented.
 2. Nonce consumption is local to one Room database; it is not distributed
@@ -91,10 +91,9 @@ connecting these records to authorization or implementing transport.
 
 ## Next exact engineering action
 
-Complete the signed enrollment chain
-(`FMER1.` request → `FMOT1.` owner trust → `FMOD1.` decision →
-`FMJA1.` applicant acceptance). Produce a reviewed decision record covering
-canonical wire encoding, public-key/key-ID format, ECDSA signature encoding,
-nonce/replay scope, clock assumptions, and cross-device test vectors. Keep
-networking and authorization integration blocked until those decisions are
-resolved and documented.
+Review ADR 0003's COSE v2 profile and produce cross-language known-answer
+vectors for the key representation, protected headers, external AAD,
+Sig_structure, and ECDSA DER/R||S conversion. Then add parser and malformed
+input tests before any migration implementation. Keep networking and
+authorization integration blocked until replay scope, trust lifecycle,
+revocation, and recovery are also resolved.
