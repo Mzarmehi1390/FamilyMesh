@@ -84,3 +84,18 @@ revocation semantics have been reviewed.
 - Nonce replay storage is atomic but installation-local.
 - ADR 0003 provides a concrete draft profile for COSE v2; it is not yet an
   accepted production protocol.
+
+
+## Room validation and expiry-policy update — 2026-11-03
+
+- ADR 0009 documents the verified Room schema v7 migration chain and the
+  missing SQLite instrumentation coverage in CI. It proposes, but does not
+  implement, an additive v7 → v8 migration for a future owner-issued
+  decision ledger.
+- ADR 0006 now explicitly compares owner-receipt-deadline and signed-event-
+  deadline expiry policies, including offline-delivery consequences and
+  required product/security decisions. Neither policy is selected.
+- Corrected the malformed T3 formatting in ADR 0006.
+- ADR 0009 CI #41678430461 and Work Log CI #41678451624 passed. The ADR 0006
+  clarification is a newer commit and its CI result remains to be checked.
+- No runtime, Room schema, protocol, or v1 expiry behavior changed.
