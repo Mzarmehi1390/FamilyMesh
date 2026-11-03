@@ -141,3 +141,11 @@ revocation, and recovery are also resolved.
 - Keep signed event timestamps separate from local receipt/recording timestamps.
 - Do not change expiry/finalization behavior or add cleanup until ADR 0006's policy and threat model are accepted. Then review ADR 0008/0009 before implementing owner ledger/schema work.
 - ADR 0006 clarification CI #41680089589 and Work Log CI #41680127933 passed. ADR 0010: `0d7271217f308d7f854555bc7b5871b5628550a8`.
+
+
+## 2026-11-03 — Finalization replay audit handover
+
+- ADR 0011 records that the current owner-side already-finalized path compares applicant key ID and signature bytes before validating the complete FMJA1 artifact. This can report a changed envelope as an already-finalized replay if those two values are retained.
+- Existing membership rows lack an exact FMJA1 artifact or complete-payload digest, so do not claim exact replay for legacy records without an explicit compatibility policy.
+- A future additive replay-identity field must be persisted atomically with membership finalization and covered by Room migration, legacy-row, restart, and concurrency tests. Coordinate with ADR 0008/0009.
+- No runtime/schema change was made. ADR 0011 commit: `ede1f826b2a612e32173dc8050b34f7ea6766770`; CI pending.
