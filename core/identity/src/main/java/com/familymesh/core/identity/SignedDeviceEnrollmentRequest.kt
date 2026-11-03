@@ -123,10 +123,7 @@ object DeviceEnrollmentProofVerifier {
             if (DeviceKeyFingerprint.fromEncodedPublicKey(identity.publicKeyBytes) != identity.keyId) {
                 return false
             }
-            val publicKey = java.security.KeyFactory.getInstance("EC").generatePublic(
-                java.security.spec.X509EncodedKeySpec(identity.publicKeyBytes),
-            )
-            if (!publicKey.algorithm.equals("EC", ignoreCase = true)) return false
+            val publicKey = P256PublicKeyParser.decode(identity.publicKeyBytes) ?: return false
             java.security.Signature.getInstance(SIGNATURE_ALGORITHM).run {
                 initVerify(publicKey)
                 update(proof.signingBytes())

@@ -110,7 +110,8 @@ object EnrollmentAcceptanceVerifier {
                 if (DeviceKeyFingerprint.fromEncodedPublicKey(publicKeyBytes) != request.deviceKeyId) {
                     false
                 } else {
-                    val publicKey = KeyFactory.getInstance("EC").generatePublic(X509EncodedKeySpec(publicKeyBytes))
+                    val publicKey = P256PublicKeyParser.decode(publicKeyBytes)
+                        ?: return false
                     Signature.getInstance("SHA256withECDSA").run {
                         initVerify(publicKey)
                         update(acceptance.signingBytes())

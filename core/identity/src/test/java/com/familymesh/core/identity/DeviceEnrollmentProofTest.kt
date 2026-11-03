@@ -102,6 +102,41 @@ class DeviceEnrollmentProofTest {
         }
     }
 
+    @Test
+    fun proofSignedByNonP256EcKeyIsRejected() = runBlocking {
+        val p384 = KeyPairGenerator.getInstance("EC").run {
+            initialize(ECGenParameterSpec("secp384r1"))
+            generateKeyPair()
+        }
+        val otherIdentity = DevicePublicIdentity(
+            keyId = DeviceKeyFingerprint.fromEncodedPublicKey(p384.public.encoded),
+            publicKeyBytes = p384.public.encoded,
+            createdAtEpochMillis = 1_000L,
+        )
+        val unsigned = SignedDeviceEnrollmentRequest(
+            requestId = "request-1",
+            familySpaceId = "family-1",
+            deviceKeyId = otherIdentity.keyId,
+            requestedRole = FamilyRole.MEMBER,
+            createdAtEpochMillis = 1_000L,
+            expiresAtEpochMillis = 2_000L,
+            nonce = ByteArray(SignedDeviceEnrollmentRequest.NONCE_LENGTH) { it.toByte() },
+            signature = byteArrayOf(1),
+        )
+        val signature = Signature.getInstance("SHA256withECDSA").run {
+            initSign(p384.private)
+            update(unsigned.signingBytes())
+            sign()
+        }
+        val proof = SignedDeviceEnrollmentRequest(
+            unsigned.requestId, unsigned.familySpaceId, unsigned.deviceKeyId,
+            unsigned.requestedRole, unsigned.createdAtEpochMillis,
+            unsigned.expiresAtEpochMillis, unsigned.nonce, signature,
+        )
+
+        assertFalse(DeviceEnrollmentProofVerifier.verifySignature(proof, otherIdentity))
+    }
+
     private fun request() = DeviceEnrollmentRequest(
         id = "request-1",
         familySpaceId = "family-1",

@@ -99,9 +99,8 @@ object InitialOwnerTrustBundleVerifier {
             if (DeviceKeyFingerprint.fromEncodedPublicKey(bundle.publicKeyBytes) != bundle.ownerDeviceKeyId) {
                 false
             } else {
-                val publicKey = KeyFactory.getInstance("EC").generatePublic(
-                    X509EncodedKeySpec(bundle.publicKeyBytes),
-                )
+                val publicKey = P256PublicKeyParser.decode(bundle.publicKeyBytes)
+                    ?: return false
                 Signature.getInstance("SHA256withECDSA").run {
                     initVerify(publicKey)
                     update(bundle.signingBytes())

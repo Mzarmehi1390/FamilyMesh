@@ -111,7 +111,7 @@ object EnrollmentDecisionVerifier {
         if (DeviceKeyFingerprint.fromEncodedPublicKey(publicKeyBytes) != trustedOwner.ownerDeviceKeyId) {
             return false
         }
-        val publicKey = KeyFactory.getInstance("EC").generatePublic(X509EncodedKeySpec(publicKeyBytes))
+        val publicKey = P256PublicKeyParser.decode(publicKeyBytes) ?: return false
         Signature.getInstance("SHA256withECDSA").run {
             initVerify(publicKey)
             update(decision.signingBytes())
