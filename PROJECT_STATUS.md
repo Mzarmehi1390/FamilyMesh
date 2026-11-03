@@ -30,7 +30,7 @@ production authorization are not implemented.
 | Signed owner decision | IMPLEMENTED_AND_TESTED | Service resolves the pin itself; tests reject missing, mismatched, and ambiguous pins |
 | Applicant acceptance + owner finalization | IMPLEMENTED_AND_TESTED | Both signatures verified; local Room v7 record |
 | Production membership authorization | BLOCKED | No trusted resolver; default denies all |
-| Canonical COSE protocol | IN_PROGRESS | Draft v2 profile documented; canonical COSE_Key/Sign1 and signature conversion not implemented |
+| Canonical COSE protocol | IN_PROGRESS | Draft v2 profile and one primitive known-answer fixture documented; production implementation and independent interoperability validation not complete |
 | Invitations / revocation / recovery | NOT_STARTED | Requires reviewed lifecycle and authority model |
 | E2EE messaging | NOT_STARTED | No message crypto implementation |
 | BLE / Wi-Fi Direct / internet P2P / relay | NOT_STARTED | No transport implementation |
