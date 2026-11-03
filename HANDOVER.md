@@ -63,7 +63,7 @@ Default branch: `main`
 
 The local enrollment prototype is implemented, but its custom binary payloads
 are not the proposed interoperable COSE protocol. ADR 0003 records a
-draft v2 profile to make the open encoding and signature decisions concrete.
+draft v2 profile; primitive KAT 0001 now provides a reproducible signature/encoding fixture.
 It remains a proposal: no protocol migration or authorization integration
 should be implemented until independent vectors and platform tests validate it.
 
