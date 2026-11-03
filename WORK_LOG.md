@@ -236,3 +236,29 @@ has not yet been confirmed.
 ### Commit
 
 - ADR 0005: f784a42afc29c57b8d9ac829ab5755cd998d7521
+
+
+## 2026-11-03 — v2 time and text semantics proposal
+
+### Work completed
+
+- Re-inspected v1 applicant proof signing/verification, acceptance verification,
+  codec UTF-8 handling, domain request constraints, and Room nonce consumption.
+- Added ADR 0006 as a proposal covering epoch-millisecond bounds, validity
+  interval semantics, decision/acceptance ordering, strict Unicode encoding,
+  byte-based limits, and identifier-profile review.
+- Recorded an encoder-side Unicode edge case: malformed UTF-16 input is not
+  explicitly rejected before Kotlin UTF-8 conversion, even though decoders
+  reject malformed UTF-8.
+- Kept numeric TTL/skew values and all protocol schema choices unapproved
+  pending product/security review and identifier-generator inventory.
+
+### Verification limits
+
+Documentation only; no runtime or v1 behavior changed. No local tests were
+run. CI for this and subsequent documentation commits remains unconfirmed
+until a matching workflow result is observed.
+
+### Commit
+
+- ADR 0006: ba7543def504bd7157cd1617c9fb96b5a2e730ae
