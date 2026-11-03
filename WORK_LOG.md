@@ -419,3 +419,25 @@ instrumentation test infrastructure as a separately reviewable CI change.
 Obtain product/security answers to the five questions in ADR 0006 before
 selecting expiry semantics. Then implement owner-ledger persistence and
 Room instrumentation in separately reviewable changes.
+
+
+## 2026-11-03 — Enrollment clock trust-boundary audit
+
+### Work completed
+
+- Added ADR 0010 after tracing all three time-accepting enrollment services to their current Compose call sites.
+- Confirmed proof receipt, owner-decision import, and owner-side finalization receive `System.currentTimeMillis().coerceAtLeast(0L)` from the UI.
+- Confirmed the service APIs themselves accept caller-supplied `nowEpochMillis`; they do not independently acquire or authenticate the time source.
+- Distinguished this caller-controlled wall-clock boundary from signed event timestamps and local receipt/recording timestamps.
+- Documented clock rollback/forward implications and implementation/test requirements without changing runtime behavior.
+
+### Verification
+
+- ADR 0006 clarification CI #41680089589: success.
+- Work Log CI #41680127933: success.
+- ADR 0010 commit: `0d7271217f308d7f854555bc7b5871b5628550a8`.
+- No runtime or database changes; no local tests run for this documentation-only audit.
+
+### Next action
+
+Resolve ADR 0006's expiry policy and threat model before centralizing production clock acquisition or changing finalization behavior. Review ADR 0008/0009 before any owner-ledger schema implementation.
