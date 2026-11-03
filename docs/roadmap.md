@@ -16,7 +16,10 @@
 
 ## Milestone 1 — Domain and identity
 
-Define user, device, family, membership, and invitation models. Threat-model identity and enrollment before implementing network behavior.
+- [x] Define immutable family-space and member domain models
+- [x] Define a repository contract for observing and creating family spaces
+- [ ] Define user, device, membership, and invitation lifecycle
+- [ ] Threat-model identity and enrollment before implementing network behavior
 
 ## Milestone 2 — Secure messaging foundations
 

@@ -11,3 +11,11 @@ profile ID must not be treated as a network identity or cryptographic key.
 No persistence, invitation flow, remote synchronization, or network behavior is
 implemented by this model. Those concerns require explicit enrollment and
 security design before implementation.
+
+## Repository boundary
+
+`FamilySpaceRepository` defines the read/create boundary for a future data
+implementation. It exposes observable family-space and member lists and a
+suspending create operation. No concrete repository is wired yet; persistence,
+ID generation, membership authorization, invitations, and synchronization
+remain intentionally unimplemented.

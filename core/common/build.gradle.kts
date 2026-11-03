@@ -12,4 +12,7 @@ android {
     }
     kotlinOptions { jvmTarget = "17" }
 }
-dependencies { testImplementation(libs.junit) }
+dependencies {
+    api(libs.kotlinx.coroutines.core)
+    testImplementation(libs.junit)
+}
