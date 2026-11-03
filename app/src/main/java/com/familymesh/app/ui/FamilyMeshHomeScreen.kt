@@ -63,6 +63,7 @@ import com.familymesh.core.identity.DeviceKeyManagerException
 import com.familymesh.core.identity.DeviceKeySecurityInfoProvider
 import com.familymesh.core.identity.DeviceKeySecurityLevel
 import com.familymesh.core.identity.DevicePublicIdentity
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
@@ -472,6 +473,8 @@ fun FamilyMeshHomeScreen() {
                                                 .sign(request, EnrollmentDecisionOutcome.APPROVED, System.currentTimeMillis().coerceAtLeast(0L))
                                             generatedDecisionText = EnrollmentDecisionTextCodec.encode(signed)
                                             decisionStatus = "Signed approval created. Copy it and send it to the applicant."
+                                        } catch (cancelled: CancellationException) {
+                                            throw cancelled
                                         } catch (_: Exception) {
                                             decisionStatus = "Could not sign: this device must be the trusted initial owner and the request must be valid."
                                         } finally { isProcessingDecision = false }
@@ -528,6 +531,8 @@ fun FamilyMeshHomeScreen() {
                                         EnrollmentDecisionAcceptanceResult.CONFLICT -> "A conflicting decision is already recorded."
                                         EnrollmentDecisionAcceptanceResult.STORAGE_UNAVAILABLE -> "Could not safely save the decision."
                                     }
+                                } catch (cancelled: CancellationException) {
+                                    throw cancelled
                                 } catch (_: Exception) {
                                     decisionStatus = "The decision code is malformed or could not be verified."
                                 } finally { isProcessingDecision = false }
