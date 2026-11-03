@@ -526,3 +526,10 @@ Review ADR 0013 together with ADR 0008 and ADR 0012. Implement only after approv
 ### Next action
 
 Add real Room/SQLite test infrastructure only after reviewing ADR 0014's scope and agreeing on the required Android test environment. Keep the owner-ledger implementation gated on ADR 0008/0012 approval and ADR 0006 expiry-policy resolution.
+
+
+### Follow-up finding — concurrent applicant decision import
+
+- A second pass over `EnrollmentDecisionAcceptanceService` and `EnrollmentNonceDao.persistDecision` found that the DAO's existing-row comparison includes local `recordedAtEpochMillis`, while the service's sequential replay comparison does not.
+- Concurrent imports of the same signed FMOD1 with different local receipt times may therefore yield one record and one conflict. This race is not covered by current tests.
+- Added the required concurrency case and design question to ADR 0014. No runtime behavior changed.
