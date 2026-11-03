@@ -14,6 +14,6 @@ interface DeviceKeySecurityInfoProvider {
 }
 
 /** Signs application-defined messages without exposing private key bytes. */
-interface DeviceMessageSigner {
+fun interface DeviceMessageSigner {
     suspend fun sign(message: ByteArray): ByteArray
 }
