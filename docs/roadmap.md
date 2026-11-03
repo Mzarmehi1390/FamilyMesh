@@ -38,7 +38,8 @@
 - [x] Add durable one-time nonce-store contract and Room implementation with schema migration
 - [x] Add fail-closed proof acceptance service and replay tests
 - [ ] Complete protocol review for canonical encoding, key identifiers, and persistent replay protection
-- [ ] Implement and test Android-backed key storage after protocol review
+- [x] Implement Android Keystore P-256 signing-key storage and public identity retrieval
+- [x] Add explicit local device-identity setup and protection-level status to the home screen
 - [ ] Define trusted initial-owner ceremony and ownership transfer
 - [ ] Define trusted device enrollment, revocation, and recovery
 - [ ] Implement invitation lifecycle only after protocol review

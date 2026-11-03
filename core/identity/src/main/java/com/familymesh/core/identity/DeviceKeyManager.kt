@@ -1,7 +1,7 @@
 package com.familymesh.core.identity
 
 /**
- * Boundary for a future platform-backed device key provider.
+ * Boundary for a platform-backed device key provider.
  *
  * Implementations must keep private key material inside the platform's
  * protected key boundary and must never return or persist it through this API.
