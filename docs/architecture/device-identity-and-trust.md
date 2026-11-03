@@ -192,3 +192,20 @@ solve recovery and revocation.
 
 Until these decisions are reviewed, the application must continue to label
 local profile and member data as local-only metadata.
+
+
+## Implemented local initial-owner bootstrap
+
+The app offers an explicit confirmation to bind a locally saved family space
+to the current Android Keystore device-key ID as its initial owner. Room
+persists the initial-owner record and corresponding OWNER member row in one
+transaction. A family-space primary key on the trust record prevents a second
+local bootstrap; a failed owner-member insert rolls back the trust row. The
+UI displays the stored owner key ID and does not silently assign ownership
+when a family space is created.
+
+This is only a local trust anchor on the current installation. It is not a
+remote attestation, does not synchronize to other devices, and does not yet
+provide signed owner approvals or recovery. A person with database write
+access could alter local state; the table alone is not a cross-device
+authorization proof.

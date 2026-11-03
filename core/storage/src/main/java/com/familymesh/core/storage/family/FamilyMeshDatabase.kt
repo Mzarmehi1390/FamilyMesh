@@ -96,6 +96,19 @@ interface EnrollmentNonceDao {
     }
 }
 
+@Entity(
+    tableName = "initial_owner_trust",
+    primaryKeys = ["familySpaceId"],
+    foreignKeys = [ForeignKey(entity = FamilySpaceEntity::class, parentColumns = ["id"], childColumns = ["familySpaceId"], onDelete = ForeignKey.CASCADE)],
+    indices = [Index(value = ["ownerDeviceKeyId"])]
+)
+data class InitialOwnerTrustEntity(
+    val familySpaceId: String,
+    val ownerMemberId: String,
+    val ownerDeviceKeyId: String,
+    val establishedAtEpochMillis: Long,
+)
+
 @Dao
 interface FamilySpaceDao {
     @Query("SELECT * FROM family_spaces ORDER BY createdAtEpochMillis DESC, id ASC")
@@ -113,11 +126,24 @@ interface FamilySpaceDao {
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertFamilyMember(entity: FamilyMemberEntity)
+
+    @Query("SELECT * FROM initial_owner_trust ORDER BY establishedAtEpochMillis ASC, familySpaceId ASC")
+    fun observeInitialOwners(): Flow<List<InitialOwnerTrustEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertInitialOwnerTrust(entity: InitialOwnerTrustEntity): Long
+
+    @Transaction
+    suspend fun establishInitialOwner(trust: InitialOwnerTrustEntity, owner: FamilyMemberEntity): Boolean {
+        if (insertInitialOwnerTrust(trust) == -1L) return false
+        insertFamilyMember(owner)
+        return true
+    }
 }
 
 @Database(
-    entities = [FamilySpaceEntity::class, FamilyMemberEntity::class, ConsumedEnrollmentNonceEntity::class, PendingEnrollmentRequestEntity::class],
-    version = 3,
+    entities = [FamilySpaceEntity::class, FamilyMemberEntity::class, ConsumedEnrollmentNonceEntity::class, PendingEnrollmentRequestEntity::class, InitialOwnerTrustEntity::class],
+    version = 4,
     exportSchema = false
 )
 abstract class FamilyMeshDatabase : RoomDatabase() {
@@ -153,11 +179,23 @@ abstract class FamilyMeshDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(
+                    "CREATE TABLE IF NOT EXISTS initial_owner_trust (" +
+                        "familySpaceId TEXT NOT NULL PRIMARY KEY, ownerMemberId TEXT NOT NULL, " +
+                        "ownerDeviceKeyId TEXT NOT NULL, establishedAtEpochMillis INTEGER NOT NULL, " +
+                        "FOREIGN KEY(familySpaceId) REFERENCES family_spaces(id) ON UPDATE NO ACTION ON DELETE CASCADE)"
+                )
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_initial_owner_trust_ownerDeviceKeyId ON initial_owner_trust(ownerDeviceKeyId)")
+            }
+        }
+
         fun create(context: Context): FamilyMeshDatabase =
             Room.databaseBuilder(
                 context.applicationContext,
                 FamilyMeshDatabase::class.java,
                 "familymesh.db"
-            ).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build()
+            ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build()
     }
 }

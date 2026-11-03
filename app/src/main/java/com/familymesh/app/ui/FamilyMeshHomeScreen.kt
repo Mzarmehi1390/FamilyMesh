@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -36,6 +37,7 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import com.familymesh.core.common.domain.DeviceEnrollmentRequest
 import com.familymesh.core.common.domain.FamilyRole
+import com.familymesh.core.common.domain.InitialOwnerTrustRepository
 import com.familymesh.core.identity.DeviceEnrollmentProofAcceptanceService
 import com.familymesh.core.identity.DeviceEnrollmentProofSigner
 import com.familymesh.core.identity.DeviceMessageSigner
@@ -64,10 +66,12 @@ fun FamilyMeshHomeScreen() {
     val keySecurityInfoProvider: DeviceKeySecurityInfoProvider = koinInject()
     val messageSigner: DeviceMessageSigner = koinInject()
     val proofAcceptanceService: DeviceEnrollmentProofAcceptanceService = koinInject()
+    val initialOwnerTrustRepository: InitialOwnerTrustRepository = koinInject()
     val clipboardManager = LocalClipboardManager.current
     val profile by profileRepository.profile.collectAsState(initial = null)
     val familySpaces by familySpaceRepository.observeFamilySpaces().collectAsState(initial = emptyList())
     val pendingEnrollmentRequests by proofAcceptanceService.observePendingRequests().collectAsState(initial = emptyList())
+    val initialOwners by initialOwnerTrustRepository.observeInitialOwners().collectAsState(initial = emptyList())
     var displayName by remember(profile?.displayName) { mutableStateOf(profile?.displayName.orEmpty()) }
     var familyName by remember { mutableStateOf("") }
     var deviceIdentity by remember { mutableStateOf<DevicePublicIdentity?>(null) }
@@ -79,6 +83,8 @@ fun FamilyMeshHomeScreen() {
     var importedProofText by remember { mutableStateOf("") }
     var proofStatus by remember { mutableStateOf<String?>(null) }
     var isProcessingProof by remember { mutableStateOf(false) }
+    var bootstrapFamilySpaceId by remember { mutableStateOf<String?>(null) }
+    var isEstablishingOwner by remember { mutableStateOf(false) }
 
     LaunchedEffect(familySpaces) {
         if (selectedFamilySpaceId.isBlank() && familySpaces.isNotEmpty()) {
@@ -117,6 +123,53 @@ fun FamilyMeshHomeScreen() {
                 .padding(contentPadding).padding(horizontal = 24.dp, vertical = 20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
+            bootstrapFamilySpaceId?.let { familyId ->
+                val targetSpace = familySpaces.firstOrNull { it.id == familyId }
+                AlertDialog(
+                    onDismissRequest = { if (!isEstablishingOwner) bootstrapFamilySpaceId = null },
+                    title = { Text("Establish initial owner?") },
+                    text = {
+                        Text(
+                            "This records this device's signing key as the first owner of ${targetSpace?.name ?: "this family space"} on this installation only. It does not prove ownership to other devices."
+                        )
+                    },
+                    confirmButton = {
+                        Button(
+                            enabled = !isEstablishingOwner && deviceIdentity != null && displayName.isNotBlank(),
+                            onClick = {
+                                val identity = deviceIdentity ?: return@Button
+                                isEstablishingOwner = true
+                                coroutineScope.launch {
+                                    try {
+                                        val established = initialOwnerTrustRepository.establishInitialOwner(
+                                            familySpaceId = familyId,
+                                            ownerDeviceKeyId = identity.keyId,
+                                            displayName = displayName,
+                                            establishedAtEpochMillis = System.currentTimeMillis().coerceAtLeast(0L),
+                                        )
+                                        snackbarHostState.showSnackbar(
+                                            if (established) "Initial owner recorded locally."
+                                            else "An initial owner is already recorded for this family space."
+                                        )
+                                    } catch (_: Exception) {
+                                        snackbarHostState.showSnackbar("Could not establish the initial owner.")
+                                    } finally {
+                                        isEstablishingOwner = false
+                                        bootstrapFamilySpaceId = null
+                                    }
+                                }
+                            }
+                        ) { Text(if (isEstablishingOwner) "Saving…" else "Confirm initial owner") }
+                    },
+                    dismissButton = {
+                        OutlinedButton(
+                            enabled = !isEstablishingOwner,
+                            onClick = { bootstrapFamilySpaceId = null }
+                        ) { Text("Cancel") }
+                    }
+                )
+            }
+
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text("FamilyMesh", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
                 Text("A private space for your family", style = MaterialTheme.typography.bodyLarge,
@@ -394,7 +447,26 @@ fun FamilyMeshHomeScreen() {
                             color = MaterialTheme.colorScheme.onSurface
                         )
                     }
-                    familySpaces.forEach { space -> FamilySpaceRow(space) }
+                    familySpaces.forEach { space ->
+                        FamilySpaceRow(space)
+                        val trust = initialOwners.firstOrNull { it.familySpaceId == space.id }
+                        if (trust == null) {
+                            OutlinedButton(
+                                onClick = { bootstrapFamilySpaceId = space.id },
+                                enabled = deviceIdentity != null && !isEstablishingOwner && displayName.isNotBlank(),
+                                modifier = Modifier.fillMaxWidth()
+                            ) { Text("Set this device as initial owner") }
+                            if (deviceIdentity == null) {
+                                Text("Create a device signing identity before setting an initial owner.", style = MaterialTheme.typography.bodySmall)
+                            }
+                        } else {
+                            Text(
+                                "Initial owner set on this device · key ${trust.ownerDeviceKeyId.take(16)}…",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    }
                 }
             }
 

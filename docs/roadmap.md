@@ -39,6 +39,7 @@
 - [x] Add fail-closed proof acceptance service and replay tests
 - [x] Add bounded, versioned text export/import codec for signed enrollment proofs and public identities
 - [x] Persist verified incoming enrollment requests atomically with nonce consumption and expose a local review inbox
+- [x] Add explicit, one-per-family local initial-owner bootstrap bound to the current device key
 - [ ] Complete protocol review for canonical encoding, key identifiers, and persistent replay protection
 - [x] Implement Android Keystore P-256 signing-key storage and public identity retrieval
 - [x] Add explicit local device-identity setup and protection-level status to the home screen
