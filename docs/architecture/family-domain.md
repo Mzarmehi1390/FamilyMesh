@@ -1,21 +1,21 @@
-# Family domain model
+# Family Domain
 
-The first domain layer contains immutable representations of a family space and
-its member records. Constructors enforce basic shape constraints (non-blank IDs
-and names, bounded display-name lengths, and non-negative timestamps).
-
-These records are **not** proof of identity, authorization, or membership.
-IDs are supplied by a future enrollment/repository layer. The local device
-profile ID must not be treated as a network identity or cryptographic key.
-
-No persistence, invitation flow, remote synchronization, or network behavior is
-implemented by this model. Those concerns require explicit enrollment and
-security design before implementation.
+Family-space and member records are immutable domain values. A local profile ID
+must not be treated as a network identity or cryptographic key.
 
 ## Repository boundary
 
-`FamilySpaceRepository` defines the read/create boundary for a future data
-implementation. It exposes observable family-space and member lists and a
-suspending create operation. No concrete repository is wired yet; persistence,
-ID generation, membership authorization, invitations, and synchronization
-remain intentionally unimplemented.
+`FamilySpaceRepository` exposes observable family-space and member lists and a
+suspending create operation.
+
+## Local Room implementation
+
+The storage module now provides a Room-backed implementation for family-space
+records. Creating a space trims and validates its name, generates a random
+local UUID, and persists the record. Family-space and member lists are exposed
+as observable flows. The member table is prepared with a foreign key to its
+family space, but no member-enrollment or member-write operation exists yet.
+
+This is device-local storage only. It does not establish family membership,
+authenticate a person or device, create invitations, synchronize with another
+device, or provide end-to-end encryption. No network behavior is implemented.

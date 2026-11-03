@@ -7,7 +7,7 @@
 - [x] Android 12 minimum platform policy (API 31)
 - [x] Dependency injection bootstrap
 - [x] Preferences DataStore foundation
-- [x] Room runtime dependency foundation
+- [x] Room runtime and compiler foundation
 - [x] Basic launch screen and shared theme
 - [x] Unit-test baseline
 - [x] GitHub Actions workflow
@@ -18,7 +18,9 @@
 
 - [x] Define immutable family-space and member domain models
 - [x] Define a repository contract for observing and creating family spaces
-- [ ] Define user, device, membership, and invitation lifecycle
+- [x] Implement device-local Room persistence for family spaces
+- [ ] Add member enrollment and membership lifecycle
+- [ ] Define invitation lifecycle
 - [ ] Threat-model identity and enrollment before implementing network behavior
 
 ## Milestone 2 — Secure messaging foundations
