@@ -317,3 +317,28 @@ tests were run. CI for these documentation commits remains unconfirmed.
 ### Commit
 
 - ADR 0006 lifecycle clarification: d8cd41c265e0602e164da7a39f1ec5e184d6994d
+
+
+## 2026-11-03 — Cross-device enrollment lifecycle audit
+
+### Work completed
+
+- Traced the actual Compose owner/applicant actions, decision and acceptance
+  services, repository implementations, Room transactions, and unit tests.
+- Resolved an apparent contradiction: applicant-side FMOD1 import deletes
+  only the applicant installation's pending row; owner-side FMJA1 finalization
+  uses a separate owner-local pending row. The two stores do not synchronize.
+- Found a concrete owner-inbox lifecycle gap: issuing FMOD1 does not persist
+  an owner-side decision or update the owner pending row. Rejected requests
+  therefore remain displayed as awaiting owner review; approved requests
+  also remain indistinguishable from unreviewed requests until finalization.
+- Confirmed pending-row expiry cleanup is absent, while nonce cleanup exists.
+- Added ADR 0007 with the cross-device state trace, source-backed gap,
+  design constraints, and required integration/instrumentation test matrix.
+
+### Verification limits
+
+Documentation-only audit. No Kotlin, Room schema, UI, or runtime behavior
+changed. No local tests were run. The current CI workflow does not run Android
+instrumentation tests. CI for this documentation commit must be checked
+separately and is not assumed to have passed.
