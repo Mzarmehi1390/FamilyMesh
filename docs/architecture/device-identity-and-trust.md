@@ -3,12 +3,12 @@
 ## Status
 
 This document defines requirements and a proposed trust model. The
-`:core:identity` module contains a protocol-neutral public identity model
-and a `DeviceKeyManager` interface only. The public-key byte array is copied
-on input and on access to prevent callers from mutating the model's contents.
-The module does not implement key generation, Android Keystore access,
-authentication, signatures, enrollment, or recovery. FamilyMesh still has
-local profile IDs and local member metadata only.
+`:core:identity` module contains a protocol-neutral public identity model,
+a `DeviceKeyManager` interface, and typed expected failure categories. The
+public-key byte array is copied on input and on access to prevent callers from
+mutating the model's contents. The module does not implement key generation,
+Android Keystore access, authentication, signatures, enrollment, or recovery.
+FamilyMesh still has local profile IDs and local member metadata only.
 
 ## Separate identifiers
 
@@ -35,9 +35,13 @@ The byte encoding is intentionally unspecified until a protocol is selected.
 
 `DeviceKeyManager` is the future provider boundary. Its contract returns
 public identity metadata only; it has no method that exposes private key
-material. No production implementation is registered or used by the app yet.
-This abstraction is not proof that a key exists, is hardware-backed, or is
-trusted by a family.
+material. It specifies that successful repeated reads should return the same
+identity and that key invalidation must not trigger silent key replacement.
+Typed failures distinguish unavailable secure storage, invalidated keys,
+unsupported reviewed configuration, and corrupt stored public metadata.
+No production implementation is registered or used by the app yet. This
+abstraction is not proof that a key exists, is hardware-backed, or is trusted
+by a family.
 
 ## Proposed trust model
 
@@ -93,6 +97,8 @@ Do not promise account recovery until a tested recovery protocol exists.
   claiming equivalent security.
 - Treat app reinstall, device restore, OS upgrade, and key invalidation as
   expected lifecycle events.
+- Never silently generate a replacement key after invalidation or metadata
+  corruption; require an explicit recovery or re-enrollment decision.
 - Keep cryptographic implementation behind a narrow interface so it can be
   tested and reviewed independently from UI and persistence.
 - Never invent a custom cryptographic protocol or implement primitives from
