@@ -45,6 +45,11 @@ import com.familymesh.core.identity.DeviceEnrollmentProofSigner
 import com.familymesh.core.identity.DeviceMessageSigner
 import com.familymesh.core.identity.EnrollmentProofAcceptanceResult
 import com.familymesh.core.identity.EnrollmentProofTextCodec
+import com.familymesh.core.identity.EnrollmentDecisionSigner
+import com.familymesh.core.identity.EnrollmentDecisionOutcome
+import com.familymesh.core.identity.EnrollmentDecisionTextCodec
+import com.familymesh.core.identity.EnrollmentDecisionAcceptanceService
+import com.familymesh.core.identity.EnrollmentDecisionAcceptanceResult
 import com.familymesh.core.identity.InitialOwnerTrustBundleCodec
 import com.familymesh.core.identity.InitialOwnerTrustBundle
 import java.util.UUID
@@ -73,6 +78,7 @@ fun FamilyMeshHomeScreen() {
     val proofAcceptanceService: DeviceEnrollmentProofAcceptanceService = koinInject()
     val initialOwnerTrustRepository: InitialOwnerTrustRepository = koinInject()
     val initialOwnerPinRepository: InitialOwnerPinRepository = koinInject()
+    val decisionAcceptanceService: EnrollmentDecisionAcceptanceService = koinInject()
     val clipboardManager = LocalClipboardManager.current
     val profile by profileRepository.profile.collectAsState(initial = null)
     val familySpaces by familySpaceRepository.observeFamilySpaces().collectAsState(initial = emptyList())
@@ -97,6 +103,10 @@ fun FamilyMeshHomeScreen() {
     var ownerBundlePreview by remember { mutableStateOf<InitialOwnerTrustBundle?>(null) }
     var ownerBundleStatus by remember { mutableStateOf<String?>(null) }
     var isPinningOwner by remember { mutableStateOf(false) }
+    var generatedDecisionText by remember { mutableStateOf("") }
+    var importedDecisionText by remember { mutableStateOf("") }
+    var decisionStatus by remember { mutableStateOf<String?>(null) }
+    var isProcessingDecision by remember { mutableStateOf(false) }
 
     LaunchedEffect(familySpaces) {
         if (selectedFamilySpaceId.isBlank() && familySpaces.isNotEmpty()) {
@@ -434,6 +444,96 @@ fun FamilyMeshHomeScreen() {
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                }
+            }
+
+            Card(modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
+                Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text("Owner decisions", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Text("Only the device recorded as this installation's initial owner can sign a decision. An approval is a signed statement; it does not add a member or grant access.",
+                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    pendingEnrollmentRequests.forEach { request ->
+                        val ownerAnchor = initialOwners.firstOrNull { it.familySpaceId == request.familySpaceId }
+                        val canDecide = deviceIdentity?.keyId != null &&
+                            deviceIdentity?.keyId == ownerAnchor?.ownerDeviceKeyId &&
+                            System.currentTimeMillis() < request.expiresAtEpochMillis
+                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text("Request ${request.requestId.take(12)}… · ${request.deviceKeyId.take(16)}…",
+                                style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+                            Text("Family: ${familySpaces.firstOrNull { it.id == request.familySpaceId }?.name ?: request.familySpaceId.take(12)}",
+                                style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Button(enabled = canDecide && !isProcessingDecision, onClick = {
+                                    isProcessingDecision = true
+                                    coroutineScope.launch {
+                                        try {
+                                            val signed = EnrollmentDecisionSigner(initialOwnerTrustRepository, deviceKeyManager, messageSigner)
+                                                .sign(request, EnrollmentDecisionOutcome.APPROVED, System.currentTimeMillis().coerceAtLeast(0L))
+                                            generatedDecisionText = EnrollmentDecisionTextCodec.encode(signed)
+                                            decisionStatus = "Signed approval created. Copy it and send it to the applicant."
+                                        } catch (_: Exception) {
+                                            decisionStatus = "Could not sign: this device must be the trusted initial owner and the request must be valid."
+                                        } finally { isProcessingDecision = false }
+                                    }
+                                }) { Text("Approve") }
+                                OutlinedButton(enabled = canDecide && !isProcessingDecision, onClick = {
+                                    isProcessingDecision = true
+                                    coroutineScope.launch {
+                                        try {
+                                            val signed = EnrollmentDecisionSigner(initialOwnerTrustRepository, deviceKeyManager, messageSigner)
+                                                .sign(request, EnrollmentDecisionOutcome.REJECTED, System.currentTimeMillis().coerceAtLeast(0L))
+                                            generatedDecisionText = EnrollmentDecisionTextCodec.encode(signed)
+                                            decisionStatus = "Signed rejection created. Copy it and send it to the applicant."
+                                        } catch (_: Exception) {
+                                            decisionStatus = "Could not sign: this device must be the trusted initial owner and the request must be valid."
+                                        } finally { isProcessingDecision = false }
+                                    }
+                                }) { Text("Reject") }
+                            }
+                            if (!canDecide) Text("Only the trusted initial-owner device can decide, and only before expiry.",
+                                style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                    if (generatedDecisionText.isNotBlank()) {
+                        OutlinedTextField(value = generatedDecisionText, onValueChange = {}, readOnly = true,
+                            modifier = Modifier.fillMaxWidth(), label = { Text("Signed decision code (FMOD1)") }, minLines = 3)
+                        OutlinedButton(onClick = {
+                            clipboardManager.setText(AnnotatedString(generatedDecisionText))
+                            decisionStatus = "Decision code copied."
+                        }, modifier = Modifier.fillMaxWidth()) { Text("Copy decision code") }
+                    }
+                    Text("Import an owner decision", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                    OutlinedTextField(value = importedDecisionText,
+                        onValueChange = { importedDecisionText = it.take(4000); decisionStatus = null },
+                        modifier = Modifier.fillMaxWidth(), label = { Text("Paste FMOD1 decision code") },
+                        minLines = 3, enabled = !isProcessingDecision)
+                    OutlinedButton(enabled = importedDecisionText.isNotBlank() && !isProcessingDecision,
+                        modifier = Modifier.fillMaxWidth(), onClick = {
+                            isProcessingDecision = true
+                            coroutineScope.launch {
+                                try {
+                                    val decoded = EnrollmentDecisionTextCodec.decode(importedDecisionText.trim())
+                                    val pinned = trustedOwners.singleOrNull { it.familySpaceId == decoded.familySpaceId }
+                                    decisionStatus = if (pinned == null) {
+                                        "No unique pinned owner key exists. Verify and pin the owner first."
+                                    } else when (decisionAcceptanceService.accept(decoded, pinned, System.currentTimeMillis().coerceAtLeast(0L))) {
+                                        EnrollmentDecisionAcceptanceResult.RECORDED ->
+                                            if (decoded.outcome == EnrollmentDecisionOutcome.APPROVED)
+                                                "Owner approval verified and saved. Membership has not yet been created."
+                                            else "Owner rejection verified and saved."
+                                        EnrollmentDecisionAcceptanceResult.ALREADY_RECORDED -> "This exact signed decision was already recorded."
+                                        EnrollmentDecisionAcceptanceResult.INVALID_OR_UNTRUSTED -> "Signature, pinned owner, request, or timestamp did not verify."
+                                        EnrollmentDecisionAcceptanceResult.REQUEST_NOT_PENDING -> "No matching pending request exists on this device."
+                                        EnrollmentDecisionAcceptanceResult.CONFLICT -> "A conflicting decision is already recorded."
+                                        EnrollmentDecisionAcceptanceResult.STORAGE_UNAVAILABLE -> "Could not safely save the decision."
+                                    }
+                                } catch (_: Exception) {
+                                    decisionStatus = "The decision code is malformed or could not be verified."
+                                } finally { isProcessingDecision = false }
+                            }
+                        }) { Text(if (isProcessingDecision) "Verifying…" else "Verify and save decision") }
+                    decisionStatus?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                 }
             }
 
