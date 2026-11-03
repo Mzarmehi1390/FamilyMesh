@@ -262,3 +262,33 @@ until a matching workflow result is observed.
 ### Commit
 
 - ADR 0006: ba7543def504bd7157cd1617c9fb96b5a2e730ae
+
+
+## 2026-11-03 — Signed event time versus local receipt time
+
+### Work completed
+
+- Inspected proof acceptance, nonce persistence, owner decision import, and
+  owner-side finalization services against the v1 verifiers.
+- Confirmed that `receivedAtEpochMillis` is assigned by the receiving
+  installation and atomically accompanies local nonce consumption; it is not
+  covered by the applicant signature.
+- Confirmed owner decision import separately records local
+  `recordedAtEpochMillis`.
+- Identified an important v1 lifecycle behavior: decision and acceptance
+  signed timestamps must fall within the request interval and not exceed
+  verifier time, but the verifier does not require the current receipt time
+  itself to be before expiry. Thus an event signed before expiry can be
+  delivered after expiry while its pending record remains.
+- Updated ADR 0006 to require an explicit v2 choice between event-time expiry
+  and receipt-time expiry, and to preserve local receipt metadata as distinct
+  from signed event claims.
+
+### Verification limits
+
+Documentation only. No runtime behavior changed; no local tests were run.
+CI for the documentation commit is unconfirmed.
+
+### Commit
+
+- ADR 0006 clarification: ec33dae03dd6d5e331a8af69fb67e317b88240c2
