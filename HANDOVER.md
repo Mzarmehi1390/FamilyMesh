@@ -132,3 +132,12 @@ revocation, and recovery are also resolved.
   matching before FMJA1 finalization.
 - CI #41678430461 (ADR 0009) and #41678451624 (Work Log) passed. Verify CI
   independently for the later ADR 0006 clarification commit.
+
+
+## 2026-11-03 — Enrollment clock trust-boundary handover
+
+- ADR 0010 traces `nowEpochMillis` through proof receipt, decision import, and owner finalization services to the Compose call sites. Current UI supplies `System.currentTimeMillis().coerceAtLeast(0L)`; services do not independently authenticate or acquire time.
+- Treat this as a mutable wall-clock/caller-boundary limitation, not proof that current UI accepts arbitrary timestamp text. A clock abstraction alone is not a security-grade anti-rollback source.
+- Keep signed event timestamps separate from local receipt/recording timestamps.
+- Do not change expiry/finalization behavior or add cleanup until ADR 0006's policy and threat model are accepted. Then review ADR 0008/0009 before implementing owner ledger/schema work.
+- ADR 0006 clarification CI #41680089589 and Work Log CI #41680127933 passed. ADR 0010: `0d7271217f308d7f854555bc7b5871b5628550a8`.
