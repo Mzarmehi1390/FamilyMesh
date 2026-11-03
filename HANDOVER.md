@@ -179,3 +179,6 @@ revocation, and recovery are also resolved.
 - ADR 0014 defines the required sequence: add Room DAO tests, build historical schema fixtures for versions 1–7, test migrations/constraints, then run emulator instrumentation as a separate CI check.
 - Five CI runs for ADR 0013 and its coordinated documentation updates succeeded (#41689232031, #41689300728, #41689312246, #41689319946, #41689327795).
 - ADR 0014 is documentation-only. No runtime, schema, CI, protocol, crypto, or transport changes were made. Before implementing owner-issued persistence, review ADR 0008/0012 and resolve ADR 0006 expiry policy.
+
+
+- Follow-up: ADR 0014 records a potential same-artifact import race. Sequential replay ignores local `recordedAtEpochMillis`, but the DAO's concurrent existing-row equality includes it; test same signed FMOD1 arriving concurrently with different local receipt times before deciding whether that race should be idempotent or conflict.
