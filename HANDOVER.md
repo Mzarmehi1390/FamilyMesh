@@ -114,3 +114,21 @@ revocation, and recovery are also resolved.
 - ADR 0007 is an audit/design proposal only. No runtime or schema change was
   made. Required next work: decide owner-side lifecycle states, then implement
   cross-device state tests and Room instrumentation tests.
+
+
+## 2026-11-03 — Room and expiry review handover
+
+- ADR 0009 records the current Room v7 migration chain and the fact that
+  current CI does not run Android instrumentation tests. It defines the
+  migration and transaction test acceptance criteria for a future owner
+  decision ledger; it does not change schema or runtime.
+- ADR 0006 now compares receipt-deadline and signed-event-deadline expiry
+  policies. No policy or numeric TTL/skew value has been selected.
+- Before implementing owner-ledger persistence, obtain product/security
+  answers to the offline-delivery, expiry-purpose, delivery-delay,
+  clock-rollback, and retention questions in ADR 0006.
+- Keep schema changes additive, preserve applicant-side
+  `enrollment_decisions` semantics, and require exact owner-issued FMOD1
+  matching before FMJA1 finalization.
+- CI #41678430461 (ADR 0009) and #41678451624 (Work Log) passed. Verify CI
+  independently for the later ADR 0006 clarification commit.
