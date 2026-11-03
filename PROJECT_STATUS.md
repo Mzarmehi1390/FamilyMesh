@@ -99,3 +99,12 @@ revocation semantics have been reviewed.
 - ADR 0009 CI #41678430461 and Work Log CI #41678451624 passed. The ADR 0006
   clarification is a newer commit and its CI result remains to be checked.
 - No runtime, Room schema, protocol, or v1 expiry behavior changed.
+
+
+## Enrollment clock trust-boundary audit — 2026-11-03
+
+- ADR 0010 documents source-backed clock flow: enrollment services accept caller-supplied `nowEpochMillis`, and current Compose call sites pass the mutable device wall clock.
+- The service boundary does not establish that this value is fresh, rollback-resistant, or captured at the actual receipt boundary. This is not evidence of arbitrary user text input at current UI call sites; it is an API trust-boundary limitation.
+- Signed event time remains distinct from local receipt/recording time. A plain clock wrapper improves consistency/testability but is not a tamper-resistance mechanism.
+- ADR 0006 expiry semantics remain unresolved. No runtime, protocol, or Room schema change was made.
+- CI #41680089589 (ADR 0006 clarification) and #41680127933 (Work Log) passed. ADR 0010 commit: `0d7271217f308d7f854555bc7b5871b5628550a8`.
