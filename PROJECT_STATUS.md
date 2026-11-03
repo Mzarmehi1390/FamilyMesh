@@ -116,3 +116,13 @@ revocation semantics have been reviewed.
 - Existing membership rows do not preserve the exact FMJA1 artifact or its complete-payload digest. A changed envelope retaining the same key ID/signature can therefore be reported as `ALREADY_FINALIZED`; this does not create a second membership row, but does not establish exact replay.
 - Proposed remedy is to persist a canonical artifact/digest atomically for new records and define fail-closed or explicit legacy behavior for older rows. No runtime or Room schema change was made.
 - ADR 0011 commit: `ede1f826b2a612e32173dc8050b34f7ea6766770`; CI pending.
+
+
+## Unified Room v7-to-v8 enrollment persistence design — 2026-11-03
+
+- ADR 0012 coordinates two proposed additive schema changes in one v7 → v8 migration: a separate owner-issued decision ledger and a nullable exact-FMJA1 replay digest on authenticated device rows.
+- The replay digest is SHA-256 over a domain-separated, canonical re-encoding of the complete FMJA1 envelope, including nested FMOD1 and all applicant acceptance fields. It is an idempotency identifier only; all first-time cryptographic and owner-ledger verification remains mandatory.
+- Existing v7 finalized rows must retain NULL replay digest because the complete original FMJA1 artifact cannot be reconstructed. They must not receive exact-replay success based on partial legacy fields.
+- ADR 0009 now links the unified migration and adds its exact-replay/legacy-row test requirements.
+- No runtime, database schema, protocol, or expiry-policy changes were made. ADR 0008 approval and ADR 0006 policy resolution remain separate gates.
+- ADR 0012 commit: `cd1b3316fe14c572ae06f5c8ad3f53d29cd45212`; ADR 0009 coordination commit: `c086128f9f1ee2f0f98197f34d20b1edc375e19d`. CI pending.
