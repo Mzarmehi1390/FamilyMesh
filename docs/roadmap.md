@@ -20,17 +20,21 @@
 - [x] Define repository contract for observing family spaces and members
 - [x] Implement device-local Room persistence for family spaces
 - [x] Add local member-list persistence (metadata only; not authenticated enrollment)
-- [ ] Define trusted member enrollment and membership lifecycle
-- [ ] Define invitation lifecycle
+- [x] Document proposed invitation and membership lifecycle
+- [x] Record identity, role, replay, revocation, and offline-state design questions
+- [ ] Define trusted initial-owner identity and device enrollment
+- [ ] Select and review invitation and membership cryptographic protocol
+- [ ] Implement trusted member enrollment and membership lifecycle
+- [ ] Implement invitation lifecycle only after protocol review
 - [ ] Threat-model identity and enrollment before implementing network behavior
 
 ## Milestone 2 — Secure messaging foundations
 
-Select and document reviewed cryptographic building blocks, key lifecycle, device enrollment, and message envelope formats before implementation.
+Select and document reviewed cryptographic building blocks, key lifecycle, and message envelope formats before implementation.
 
 ## Milestone 3 — Connectivity and synchronization
 
-Design peer discovery, transport abstraction, offline behavior, and synchronization. Avoid treating transport security as a replacement for end-to-end encryption.
+Design peer discovery, transport abstraction, offline behavior, revocation propagation, and synchronization. Avoid treating transport security as a replacement for end-to-end encryption.
 
 ## Milestone 4 — Product experience
 
