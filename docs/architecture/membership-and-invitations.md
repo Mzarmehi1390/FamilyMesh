@@ -107,6 +107,21 @@ policy, not a claim that the app currently enforces permissions. The policy
 must be checked against an authenticated actor and current trusted membership
 at every state-changing boundary before it can provide security.
 
+## Authorization service boundary
+
+`FamilyAuthorizationService` accepts a family-space ID, device-key ID, and
+action; it deliberately does not accept a caller-selected role. Its injected
+`TrustedFamilyMembershipResolver` must verify the device identity and resolve
+its current membership and role for that exact family. The service rejects a
+missing membership or a resolver result whose family/device identifiers do
+not match the request, then applies the proposed role policy.
+
+No production resolver exists yet, and the current local Room member records
+are not trusted membership evidence. The service is not wired to membership
+mutations, invitation operations, or UI. The next implementation must supply
+a resolver only after identity verification, membership authority, and
+staleness/version semantics are specified.
+
 ## Open design decisions
 
 - Is there a trusted initial owner, and how is that authority established?

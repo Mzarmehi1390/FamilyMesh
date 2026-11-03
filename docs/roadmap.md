@@ -29,6 +29,7 @@
 - [x] Add protocol-neutral enrollment-request lifecycle model and unit tests
 - [x] Define proposed role-permission matrix and pure policy unit tests
 - [x] Add explicit domain authorization decisions and typed policy-denial result
+- [x] Define authorization-service boundary that resolves membership by device identity (contract and tests only)
 - [ ] Select and review cryptographic identity protocol and public-key format
 - [ ] Implement and test Android-backed key storage after protocol review
 - [ ] Define trusted initial-owner ceremony and ownership transfer
