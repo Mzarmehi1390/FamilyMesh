@@ -122,6 +122,9 @@ interface EnrollmentNonceDao {
     @Query("SELECT * FROM authenticated_family_devices WHERE familySpaceId = :familySpaceId AND requestId = :requestId LIMIT 1")
     suspend fun getAuthenticatedDevice(familySpaceId: String, requestId: String): AuthenticatedFamilyDeviceEntity?
 
+    @Query("SELECT * FROM authenticated_family_devices WHERE familySpaceId = :familySpaceId ORDER BY joinedAtEpochMillis ASC, requestId ASC")
+    fun observeAuthenticatedDevices(familySpaceId: String): Flow<List<AuthenticatedFamilyDeviceEntity>>
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAuthenticatedDevice(entity: AuthenticatedFamilyDeviceEntity): Long
 

@@ -36,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import com.familymesh.core.common.domain.DeviceEnrollmentRequest
+import com.familymesh.core.common.domain.EnrollmentFinalizationRepository
 import com.familymesh.core.common.domain.FamilyRole
 import com.familymesh.core.common.domain.InitialOwnerTrustRepository
 import com.familymesh.core.common.domain.InitialOwnerPinRepository
@@ -85,9 +86,11 @@ fun FamilyMeshHomeScreen() {
     val initialOwnerPinRepository: InitialOwnerPinRepository = koinInject()
     val decisionAcceptanceService: EnrollmentDecisionAcceptanceService = koinInject()
     val enrollmentFinalizationService: EnrollmentFinalizationService = koinInject()
+    val enrollmentFinalizationRepository: EnrollmentFinalizationRepository = koinInject()
     val clipboardManager = LocalClipboardManager.current
     val profile by profileRepository.profile.collectAsState(initial = null)
     val familySpaces by familySpaceRepository.observeFamilySpaces().collectAsState(initial = emptyList())
+    val authenticatedDevices by enrollmentFinalizationRepository.observeAuthenticatedDevices(selectedFamilySpaceId).collectAsState(initial = emptyList())
     val pendingEnrollmentRequests by proofAcceptanceService.observePendingRequests().collectAsState(initial = emptyList())
     val initialOwners by initialOwnerTrustRepository.observeInitialOwners().collectAsState(initial = emptyList())
     val trustedOwners by initialOwnerPinRepository.observeTrustedOwners().collectAsState(initial = emptyList())
@@ -790,6 +793,41 @@ fun FamilyMeshHomeScreen() {
                             )
                         }
                     }
+                }
+            }
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+            ) {
+                Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("Authenticated devices", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    val selectedSpace = familySpaces.firstOrNull { it.id == selectedFamilySpaceId }
+                    Text(
+                        selectedSpace?.name?.let { "Verified membership records for $it on this device." }
+                            ?: "Select or create a family space to view verified membership records.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    if (selectedSpace != null && authenticatedDevices.isEmpty()) {
+                        Text("No authenticated devices have been finalized for this family space yet.")
+                    }
+                    authenticatedDevices.forEach { member ->
+                        Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                            Text(member.role.name.replace('_', ' '), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                            Text("Device key: ${member.deviceKeyId}", style = MaterialTheme.typography.bodySmall)
+                            Text(
+                                "Joined: ${java.text.DateFormat.getDateTimeInstance().format(java.util.Date(member.joinedAtEpochMillis))}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    Text(
+                        "These entries are backed by verified applicant acceptance records. They are local to this installation and are not synchronized to other devices.",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
 

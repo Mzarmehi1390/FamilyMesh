@@ -9,6 +9,23 @@ import com.familymesh.core.common.domain.PendingEnrollmentRequest
 class RoomEnrollmentFinalizationRepository(
     private val dao: EnrollmentNonceDao,
 ) : EnrollmentFinalizationRepository {
+    override fun observeAuthenticatedDevices(familySpaceId: String) =
+        dao.observeAuthenticatedDevices(familySpaceId).let { flow ->
+            kotlinx.coroutines.flow.map(flow) { entities ->
+                entities.map { entity ->
+                    AuthenticatedFamilyDevice(
+                        familySpaceId = entity.familySpaceId,
+                        requestId = entity.requestId,
+                        deviceKeyId = entity.deviceKeyId,
+                        publicKeyBase64 = entity.publicKeyBase64,
+                        role = FamilyRole.valueOf(entity.role),
+                        joinedAtEpochMillis = entity.joinedAtEpochMillis,
+                        acceptanceSignatureBase64 = entity.acceptanceSignatureBase64,
+                    )
+                }
+            }
+        }
+
     override suspend fun findPendingRequest(familySpaceId: String, requestId: String): PendingEnrollmentRequest? =
         dao.getPendingRequest(familySpaceId, requestId)?.let {
             PendingEnrollmentRequest(
