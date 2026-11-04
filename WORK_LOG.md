@@ -563,3 +563,28 @@ Resolve any compile/emulator failures from the first instrumentation run. Then a
 - Extended the Room instrumentation suite with a transaction rollback case: a duplicate pending-request insert must roll back the preceding nonce insert, allowing the same nonce digest to be retried for a different request.
 - Added a file-backed close/reopen test verifying pending enrollment and nonce replay state survive database recreation.
 - Follow-up test commits: `0b620981aee5fc75388f5725c209c31c6ac75d68` and cleanup `b100e6e4d8ac550bdc1659ae15b136749f17a832`. The corresponding CI run is pending.
+
+
+## 2026-11-04 — API 34 instrumentation failure triage and status correction
+
+### CI evidence
+
+- Latest source commit: `e945b8774d8d43d8426e8f2c2f4f541800d1d2cb`.
+- Run #41697147520: `verify` passed, including JVM unit tests, debug APK assembly, and APK artifact upload.
+- `storage-instrumentation` failed before the Gradle command ran. API 34 / Google APIs / x86_64 / Pixel 2 / SwiftShader did not reach `sys.boot_completed=1`; the action timed out after its 600-second boot window.
+- The runner log repeatedly reports ADB exit code 1 while polling the emulator. No connected Android test report exists, so this run gives no evidence about the six Room tests themselves.
+- Earlier API 34 run #41696869594 failed at the same boot boundary. Run #41697076341 was cancelled as a newer push started; this does not establish a failure of the concurrency configuration.
+
+### Test inventory correction
+
+The instrumentation source now contains six DAO tests. The sixth test, `sqliteConstraints_enforceDeviceUniquenessAndFamilyCascade`, exercises the unique authenticated-device key constraint and family-delete cascade for pending and authenticated-device rows. It remains unexecuted due to emulator infrastructure failure.
+
+### Documentation
+
+- Updated `PROJECT_STATUS.md` to distinguish successful JVM/build verification from unverified emulator instrumentation.
+- Updated ADR 0014 with the API 34 failure evidence and the six-test inventory.
+- No production runtime, Room schema, protocol, crypto, or transport behavior changed.
+
+### Next action
+
+Resolve emulator startup independently of test assertions, then run `:core:storage:connectedDebugAndroidTest` and inspect the actual SQLite test results. Do not mark instrumentation as passed until a completed run executes all six tests.
