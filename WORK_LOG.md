@@ -634,3 +634,25 @@ No runtime, Room entity, schema version, protocol, cryptography, expiry-policy, 
 - This independently closes the immediate emulator retry question: run #175's startup timeout was transient, while run #176 executed the complete suite successfully.
 - Migration correctness is still **not** verified: the historical v1–v7 export workflow remains manual and no historical JSON fixtures have been inspected or committed.
 - No production runtime, Room entity/schema version, protocol, cryptography, expiry policy, or transport behavior changed.
+
+
+## 2026-11-04 — Historical Room schema artifacts downloaded and audited
+
+### Work completed
+
+- Downloaded all seven Room schema artifacts from workflow run #41864521401 (artifact IDs 13341926797, 13341822088, 13341247536, 13341317491, 13341438385, 13340463912, and 13341692379).
+- Parsed each JSON document and verified its declared version (1–7), identity hash, and entity count. Inspected all entity columns, SQLite affinities, nullability, primary keys, indices, and foreign keys.
+- Confirmed entity progression: family spaces/members; nonce table; pending enrollment table; initial owner trust; trusted initial owner; applicant decision; authenticated device.
+- Cross-checked exported metadata against current migration SQL and entity definitions. The v5 trusted_initial_owners table intentionally has no foreign key, consistent with the historical entity.
+- Added `docs/architecture/room-historical-schema-audit.md` documenting artifact provenance, hashes, schema structure, source consistency, and validation limits.
+
+### Verification and limitations
+
+- All seven ZIPs downloaded and opened successfully; all seven JSON files parsed successfully and declared the expected version.
+- This validates authentic exported schema snapshots and source-level shape consistency only. No SQLite migration test, MigrationTestHelper run, or row-preservation assertion has yet been executed.
+- Room remains version 7. No runtime, database schema, protocol, crypto, expiry, or transport behavior changed.
+- No local Gradle/Android tests were run in this session.
+
+### Next exact action
+
+Refresh run #41864521401 job conclusions. Check the seven authentic JSON files into `core/storage/schemas/com.familymesh.core.storage.family.FamilyMeshDatabase/`, add MigrationTestHelper coverage for all supported start versions 1–7 with representative data and post-migration constraints, and run the tests on API 34.

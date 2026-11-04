@@ -3,7 +3,7 @@
 Last verified: 2026-11-04
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
 Branch: `main`
-Latest verified source commit: `f2b2988b0a4ffd83784cd3f87b2f2c0fd2a0e082` (verify and API 34 storage instrumentation passed in run #176)
+Latest repository commit: `7112f0ae2bfbb36a37e186b3a9eb4775d3e81213` (historical schema audit documentation; latest successful full CI baseline remains run #176)
 Protocol review drafts: ADR 0003 and ADR 0006 (proposals only; not production-approved)
 
 ## Overall state
@@ -201,3 +201,12 @@ revocation semantics have been reviewed.
 - All six DAO cases executed, including nonce rollback, database close/reopen durability, authenticated-device uniqueness, and family cascade.
 - The earlier emulator boot timeout in run #175 was transient; run #176's complete instrumentation job passed. Historical Room schema fixtures and migration validation for v1–v7 remain outstanding.
 - No runtime, Room entity/schema version, protocol, cryptography, expiry policy, or transport behavior changed.
+
+
+## Historical Room schema artifact audit — 2026-11-04
+
+- Downloaded and parsed all seven historical Room schema JSON artifacts from workflow run #41864521401. Versions 1–7 each contain one matching JSON file; identity hashes and entity sets are recorded in `docs/architecture/room-historical-schema-audit.md`.
+- The entity progression is 2→3→4→5→6→7→8 entities, matching the documented migration additions. Columns, affinities, nullability, primary keys, indexes, and foreign keys were inspected. In particular, v5 `trusted_initial_owners` has no FK, matching its historical entity definition.
+- The exported schema metadata is consistent with the source migration chain. This does not yet prove SQLite migration execution or row preservation.
+- No migration test fixtures have yet been checked into `core/storage/schemas`; no MigrationTestHelper suite has been run. Room remains v7.
+- Next: refresh terminal status of all seven export jobs, check in authentic fixtures, add migration tests from versions 1–7, and run them on API 34. Do not implement v8 until the existing ADR approval gates are satisfied.

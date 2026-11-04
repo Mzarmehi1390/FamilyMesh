@@ -1,15 +1,15 @@
 # FamilyMesh Handover
 
-Last synchronized: 2026-11-03
+Last synchronized: 2026-11-04
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
 Default branch: `main`
 
 ## Last verified repository state
 
 - Branch: `main`
-- Latest documentation commit: `be4a85cd7d2b357e3fb356c2834d94491c59db95`
-- Latest verified source commit: `21dd7ca4db718ee31416e45319d88ffce9c950c3`
-- Latest CI run checked: [Android CI #41672460808](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41672460808)
+- Latest documentation commit: `7112f0ae2bfbb36a37e186b3a9eb4775d3e81213`
+- Latest verified source/CI baseline: `f2b2988b0a4ffd83784cd3f87b2f2c0fd2a0e082` (Android CI #176); current HEAD is `7112f0ae2bfbb36a37e186b3a9eb4775d3e81213` after documentation-only updates
+- Latest full successful CI: [Android CI #41828148184](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41828148184); run #177 verify passed but instrumentation retry failed before Gradle execution
 - CI result: completed successfully; unit tests, debug APK assembly, and artifact upload all passed.
 - Branch protection: disabled; no open issues or pull requests were present at the prior synchronization.
 
@@ -194,3 +194,12 @@ revocation, and recovery are also resolved.
 
 
 - The instrumentation suite was expanded after the baseline: it now checks rollback of nonce insertion when pending insertion fails and verifies pending/nonce state after closing and reopening a file-backed database. Verify the latest emulator run before treating these cases as validated.
+
+
+## 2026-11-04 — Historical Room schema artifacts inspected
+
+- Downloaded and parsed all seven v1–v7 schema JSON artifacts from workflow run #41864521401. Full inventory, identity hashes, entity progression, indices, FKs, and limitations are in `docs/architecture/room-historical-schema-audit.md`.
+- Exported schema shapes align with the source migration chain. This is not yet a MigrationTestHelper or SQLite upgrade pass; no row-preservation result is claimed.
+- Current Room version remains 7. No v8 schema/runtime change was made.
+- Latest repository HEAD: `7112f0ae2bfbb36a37e186b3a9eb4775d3e81213`.
+- Next exact action: confirm all seven workflow job conclusions, add the authentic schema fixtures under the Room schema directory, implement MigrationTestHelper coverage for starting versions 1–7, then execute on API 34 and inspect JUnit XML.
