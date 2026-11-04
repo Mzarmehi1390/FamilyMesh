@@ -83,7 +83,7 @@ The initial Room/SQLite baseline is now present in the repository:
 - `:core:storage` has Android instrumentation dependencies and an AndroidJUnitRunner.
 - `EnrollmentNonceDaoInstrumentedTest` covers nonce replay rejection, applicant decision persistence/replay/conflict, owner finalization/replay/conflict, nonce rollback when pending insertion fails, and file-backed close/reopen durability.
 - `.github/workflows/android-ci.yml` has a separate `storage-instrumentation` job that invokes `gradle :core:storage:connectedDebugAndroidTest` and attempts to upload reports even after failure.
-- This is five DAO tests, not comprehensive persistence validation. Foreign-key cascade, historical migration preservation, and deterministic concurrent races remain uncovered.
+- This is six DAO tests, not comprehensive persistence validation. The sixth test covers authenticated-device uniqueness and family-delete cascade. Historical migration preservation and deterministic concurrent races remain uncovered.
 
 ### CI result and emulator diagnosis
 
@@ -111,3 +111,25 @@ This establishes source provenance for the versioned entity evolution, but it do
 2. Establish reproducible, verifiable historical SQLite schemas for versions 1–7 before asserting migration preservation.
 3. Test each supported migration path, representative row preservation, indexes, and foreign keys against those real fixtures.
 4. Add foreign-key cascade tests and deterministic concurrency tests for same-artifact applicant imports with distinct local receipt times and conflicting owner outcomes, without changing runtime semantics until the relevant ADR decisions are approved.
+
+
+### 2026-11-04 follow-up — API 34 attempt and six-test inventory
+
+The latest main-branch run, #41697147520 for commit `e945b8774d8d43d8426e8f2c2f4f541800d1d2cb`, completed with:
+
+- `verify`: success (unit tests, debug APK assembly, APK artifact upload);
+- `storage-instrumentation`: failure before Gradle/test execution.
+
+The API 34 / Google APIs / x86_64 / Pixel 2 emulator using SwiftShader did not report `sys.boot_completed=1` within the configured 600-second timeout. The runner log shows repeated ADB exit-code-1 polling after emulator launch, followed by `Timeout waiting for emulator to boot`. No instrumentation report was generated. The earlier API 34 run #41696869594 failed at the same boot boundary. These are environment startup failures, not test assertion failures, and provide no pass/fail evidence for Room DAO behavior.
+
+The instrumentation source now contains six tests. In addition to the five baseline cases, `sqliteConstraints_enforceDeviceUniquenessAndFamilyCascade` asserts that duplicate authenticated-device keys are rejected and deleting a family cascades to pending enrollment and authenticated-device rows. This sixth test has not been executed successfully; the current `verify` job does not compile Android instrumentation sources, so its compile/runtime status remains unverified.
+
+Run #41697076341 for commit `98c1409b` was cancelled as the subsequent main push began. This is consistent with the next push superseding the prior run and does not prove an issue in the conditional concurrency setting.
+
+### Revised acceptance state
+
+- JVM unit tests and debug APK assembly: verified on #41697147520.
+- Android instrumentation source and all six SQLite cases: present, execution unverified.
+- Emulator boot: blocked on API 34 in two consecutive attempts.
+- Historical migration fixtures for v1–v7: still unavailable; no guessed schema fixtures added.
+- Runtime, Room schema, protocol, cryptography, and transport: unchanged.
