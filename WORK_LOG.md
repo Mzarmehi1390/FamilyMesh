@@ -588,3 +588,13 @@ The instrumentation source now contains six DAO tests. The sixth test, `sqliteCo
 ### Next action
 
 Resolve emulator startup independently of test assertions, then run `:core:storage:connectedDebugAndroidTest` and inspect the actual SQLite test results. Do not mark instrumentation as passed until a completed run executes all six tests.
+
+
+## 2026-11-04 — Room instrumentation passes and schema export recovered
+
+- Run #41813611838 / #172 at commit `668542632261dac50d98915e76765a5125a4c76f` passed both jobs. The emulator report confirms all six DAO instrumentation tests executed: 6/6, 0 skipped, 0 failed.
+- The prior run failed because the instrumentation APK did not include `androidx.test.runner.AndroidJUnitRunner`. Added the explicit AndroidX runner dependency to the version catalog and storage module.
+- Run #41818762325 / #173 at commit `da5e86a94937fcbbc9d0a221b8a2d0c091a50358` successfully completed unit tests, APK assembly, explicit Room KSP schema generation, and schema artifact upload. Instrumentation was still running at the time of this log update.
+- Downloaded and inspected artifact #13316525198. It contains Room v7 schema JSON with identity hash `3d3bfeb59dfda625d9f6664d1c39765b`, eight entities, and the authenticated-device unique index. The artifact path is `com.familymesh.core.storage.family.FamilyMeshDatabase/7.json`.
+- The schema snapshot is current v7 metadata, not a historical migration fixture. No migration from versions 1–6 is claimed as validated.
+- Next: finish checking run #173 instrumentation; preserve this v7 schema as a reviewed baseline if appropriate; derive real historical v1–v6 fixtures from reproducible historical builds before adding migration assertions.

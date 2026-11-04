@@ -133,3 +133,35 @@ Run #41697076341 for commit `98c1409b` was cancelled as the subsequent main push
 - Emulator boot: blocked on API 34 in two consecutive attempts.
 - Historical migration fixtures for v1–v7: still unavailable; no guessed schema fixtures added.
 - Runtime, Room schema, protocol, cryptography, and transport: unchanged.
+
+
+### 2026-11-04 follow-up — successful instrumentation and v7 schema snapshot
+
+Run #41813611838 (#172), commit `668542632261dac50d98915e76765a5125a4c76f`, completed successfully:
+
+- `verify`: success (JVM unit tests, debug APK assembly, artifact upload).
+- `storage-instrumentation`: success on API 34 emulator.
+- Instrumentation log: 6 tests started, 6/6 completed, 0 skipped, 0 failed; Gradle reported `BUILD SUCCESSFUL`.
+- The immediate preceding instrumentation failure was traced to the test APK lacking `androidx.test.runner.AndroidJUnitRunner`. The version catalog and storage module now explicitly include `androidx.test:runner:1.7.0`.
+
+The schema artifact upload initially exposed a separate gap: the regular verify tasks did not leave a schema JSON at the configured path, and the upload step only warned. The workflow now explicitly runs `gradle :core:storage:kspDebugKotlin --rerun-tasks` before upload and treats a missing schema file as an error.
+
+Run #41818762325 (#173), commit `da5e86a94937fcbbc9d0a221b8a2d0c091a50358`, completed its verify job successfully, including explicit KSP generation and schema artifact upload. Artifact #13316525198 was downloaded and inspected. It contains:
+
+- `com.familymesh.core.storage.family.FamilyMeshDatabase/7.json`;
+- Room schema version 7;
+- identity hash `3d3bfeb59dfda625d9f6664d1c39765b`;
+- eight entities, including `authenticated_family_devices`;
+- unique composite index `index_authenticated_family_devices_familySpaceId_deviceKeyId` on `familySpaceId, deviceKeyId`;
+- the exported primary keys, indices, and foreign-key declarations for the current v7 entities.
+
+This is the first actual exported Room schema snapshot. It is a current v7 schema baseline only; it is not a historical v1–v6 fixture and does not establish migration correctness. Run #173's instrumentation job remained in progress at the time of this update.
+
+### Revised acceptance state
+
+- Six existing Room DAO instrumentation tests: executed successfully on API 34 in run #172.
+- JVM unit tests and debug APK assembly: successful in runs #172 and #173 verify.
+- Current Room v7 schema JSON: generated, uploaded, downloaded, and structurally inspected from run #173.
+- Historical schema fixtures and migration validation for v1–v6: still outstanding.
+- Deterministic concurrency coverage for same-artifact applicant imports and opposite owner outcomes: still outstanding.
+- No runtime/protocol/cryptography/transport behavior or Room schema version change was made.

@@ -172,3 +172,14 @@ revocation semantics have been reviewed.
 - Run #41696869594 on the preceding API 34 configuration failed at the same emulator boot boundary. Run #41697076341 for commit `98c1409b` was cancelled when the next main push arrived; this is consistent with a newer run superseding it and is not evidence of a CI test defect.
 - Six Room DAO instrumentation tests are now present, including SQLite device-key uniqueness and family foreign-key cascade coverage. None has yet been executed successfully on an emulator.
 - No runtime, Room schema, protocol, cryptography, or transport behavior changed. The latest successful verification is limited to the `verify` job; instrumentation remains unverified.
+
+
+## Room instrumentation and schema export — 2026-11-04
+
+- CI run #41813611838 (run #172), commit `668542632261dac50d98915e76765a5125a4c76f`: both `verify` and `storage-instrumentation` succeeded.
+- The emulator executed all six `:core:storage` DAO instrumentation tests: 6/6 completed, zero skipped, zero failed. This is the first successful runtime execution of the six-test suite.
+- The previous instrumentation failure was a missing `androidx.test.runner.AndroidJUnitRunner` class. Added the explicit `androidx.test:runner:1.7.0` catalog entry and `:core:storage` androidTest dependency. Commits: `c461e9b24ec5023351bb921547f47a3d76503d87`, `668542632261dac50d98915e76765a5125a4c76f`.
+- Room schema export is enabled and KSP generation now runs explicitly with `--rerun-tasks`. Run #41818762325 (run #173), commit `da5e86a94937fcbbc9d0a221b8a2d0c091a50358`, completed the verify job successfully and uploaded `room-schema-snapshot` artifact #13316525198. The instrumentation job was still in progress at this update.
+- Inspected the downloaded artifact: it contains `com.familymesh.core.storage.family.FamilyMeshDatabase/7.json`, Room schema version 7, identity hash `3d3bfeb59dfda625d9f6664d1c39765b`. The snapshot lists eight entities, including `authenticated_family_devices`, with its unique composite index on `familySpaceId, deviceKeyId`; family-owned tables declare cascade foreign keys where present.
+- This verifies the current v7 exported schema only. It does not create or validate historical schema fixtures for versions 1–6, and it does not prove migration correctness.
+- No runtime behavior, Room entities/schema version, protocol, cryptography, expiry policy, or transport semantics were changed. Historical migration fixtures and the approved-design gates remain outstanding.
