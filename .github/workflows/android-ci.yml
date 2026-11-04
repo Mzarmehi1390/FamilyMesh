@@ -33,12 +33,14 @@ jobs:
         run: gradle testDebugUnitTest
       - name: Assemble debug APK
         run: gradle assembleDebug
+      - name: Generate Room schema snapshot
+        run: gradle :core:storage:kspDebugKotlin --rerun-tasks
       - name: Upload Room schema snapshot
         uses: actions/upload-artifact@v4
         with:
           name: room-schema-snapshot
           path: core/storage/schemas/**/*.json
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 30
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
