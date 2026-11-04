@@ -623,3 +623,14 @@ Resolve emulator startup independently of test assertions, then run `:core:stora
 4. Keep owner-ledger and exact FMJA1 replay schema/runtime changes blocked on their existing ADR approvals.
 
 No runtime, Room entity, schema version, protocol, cryptography, expiry-policy, or transport behavior changed.
+
+
+## 2026-11-04 — run #176 full CI and Room instrumentation verified
+
+- Refreshed run [#41828148184](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41828148184) on commit `f2b2988b0a4ffd83784cd3f87b2f2c0fd2a0e082`: both `verify` and `storage-instrumentation` completed successfully.
+- Downloaded instrumentation artifact #13325065058 and parsed `TEST-emulator-5554 - 14-_core_storage-.xml`.
+- JUnit result: suite `EnrollmentNonceDaoInstrumentedTest`, API 34 emulator, `tests=6`, `failures=0`, `errors=0`, `skipped=0`, suite time 129.86 seconds.
+- Confirmed the six executed cases: SQLite uniqueness/family cascade; atomic nonce replay rejection; idempotent owner finalization/conflicting replay; nonce rollback on pending-insert failure; file-backed database reopen durability; and atomic applicant decision persistence.
+- This independently closes the immediate emulator retry question: run #175's startup timeout was transient, while run #176 executed the complete suite successfully.
+- Migration correctness is still **not** verified: the historical v1–v7 export workflow remains manual and no historical JSON fixtures have been inspected or committed.
+- No production runtime, Room entity/schema version, protocol, cryptography, expiry policy, or transport behavior changed.

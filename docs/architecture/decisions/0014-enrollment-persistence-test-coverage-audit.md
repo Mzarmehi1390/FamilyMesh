@@ -184,3 +184,18 @@ This independently confirms that all six current Room DAO tests execute successf
 Run [#41819471027](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41819471027) (#175), at commit `b0879b22cf97295109a35c5388c43feb0105a346`, passed `verify`, including Room v7 schema generation and artifact upload. Its instrumentation job failed before Gradle/test execution because the emulator did not boot within the configured 600-second timeout. The failed job was re-run independently; that retry is still in progress. Treat this as an environment startup failure, not a test failure, and do not report the retry as green until completed.
 
 The historical Room schema export workflow for v1–v7 is committed but has not yet been dispatched. Actual historical fixtures and `MigrationTestHelper` validation remain the next migration gate. No runtime/schema/protocol/crypto/transport changes were made.
+
+
+### 2026-11-04 follow-up — run #176 instrumentation report inspected
+
+Run [#41828148184](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41828148184), commit `f2b2988b0a4ffd83784cd3f87b2f2c0fd2a0e082`, completed both CI jobs successfully. The instrumentation artifact #13325065058 was downloaded and its JUnit XML parsed directly:
+
+- Suite: `EnrollmentNonceDaoInstrumentedTest`
+- Device: API 34 emulator
+- Tests: 6
+- Failures: 0
+- Errors: 0
+- Skipped: 0
+- Suite execution time: 129.86 seconds
+
+All six DAO cases ran, including SQLite uniqueness/cascade, atomic nonce consumption, conflicting replay rejection, transaction rollback, database reopen durability, and applicant decision persistence. This confirms the prior emulator startup timeout was transient. It does not validate historical migrations: authentic v1–v7 schema fixtures and MigrationTestHelper coverage remain outstanding. No runtime, Room schema, protocol, cryptography, expiry, or transport behavior changed.

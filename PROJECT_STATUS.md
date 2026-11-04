@@ -3,7 +3,7 @@
 Last verified: 2026-11-04
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
 Branch: `main`
-Latest source commit: `b0879b22cf97295109a35c5388c43feb0105a346` (verify passed; latest instrumentation retry is in progress)
+Latest verified source commit: `f2b2988b0a4ffd83784cd3f87b2f2c0fd2a0e082` (verify and API 34 storage instrumentation passed in run #176)
 Protocol review drafts: ADR 0003 and ADR 0006 (proposals only; not production-approved)
 
 ## Overall state
@@ -36,7 +36,7 @@ production authorization are not implemented.
 | BLE / Wi-Fi Direct / internet P2P / relay | NOT_STARTED | No transport implementation |
 | Cross-device synchronization | NOT_STARTED | Manual text transfer only |
 | Gradle Wrapper | NOT_STARTED | CI installs Gradle 8.13 |
-| Android instrumentation / device validation | PARTIALLY_VERIFIED | Six Room DAO tests passed on API 34 in runs #172 and #173; a later retry is in progress after one emulator boot timeout |
+| Android instrumentation / device validation | PARTIALLY_VERIFIED | Six Room DAO tests passed on API 34 in runs #172, #173, and #176; historical migrations and device-specific validation remain outstanding |
 
 ## Latest verification
 
@@ -192,3 +192,12 @@ revocation semantics have been reviewed.
 - Run [#41819471027](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41819471027) (#175), commit `b0879b22cf97295109a35c5388c43feb0105a346`, passed `verify` and generated/uploaded schema v7. Its instrumentation attempt timed out while waiting for the emulator to boot; Gradle did not execute. The failed job was re-run independently; the retry is currently in progress.
 - The current v7 schema artifact remains a verified snapshot, not a historical migration fixture. The manual historical export workflow for versions 1–7 is committed but has not yet been dispatched.
 - No runtime, database schema version, protocol, cryptography, expiry policy, or transport behavior changed.
+
+
+## Room CI confirmation — run #176 — 2026-11-04
+
+- Run [#41828148184](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41828148184), commit `f2b2988b0a4ffd83784cd3f87b2f2c0fd2a0e082`, completed both `verify` and `storage-instrumentation` successfully.
+- Downloaded instrumentation artifact #13325065058 and inspected its JUnit XML directly: suite `EnrollmentNonceDaoInstrumentedTest`, API 34 emulator, 6 tests, 0 failures, 0 errors, 0 skipped; suite time 129.86 seconds.
+- All six DAO cases executed, including nonce rollback, database close/reopen durability, authenticated-device uniqueness, and family cascade.
+- The earlier emulator boot timeout in run #175 was transient; run #176's complete instrumentation job passed. Historical Room schema fixtures and migration validation for v1–v7 remain outstanding.
+- No runtime, Room entity/schema version, protocol, cryptography, expiry policy, or transport behavior changed.
