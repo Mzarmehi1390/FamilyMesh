@@ -42,14 +42,14 @@ class FamilyMeshMigrationInstrumentedTest {
             try {
                 assertEquals(1, count(migrated, "family_spaces"))
                 assertEquals(1, count(migrated, "family_members"))
-                assertEquals(1, scalarLong(migrated, "SELECT createdAtEpochMillis FROM family_spaces WHERE id = 'family-$startVersion'"))
-                assertEquals(1, count(migrated, "consumed_enrollment_nonces"))
-                assertEquals(1, count(migrated, "pending_enrollment_requests"))
-                assertEquals(1, count(migrated, "initial_owner_trust"))
-                assertEquals(1, count(migrated, "trusted_initial_owners"))
-                assertEquals(1, count(migrated, "enrollment_decisions"))
-                assertEquals(1, count(migrated, "authenticated_family_devices"))
-                assertFinalConstraints(migrated)
+                assertEquals(1_000L, scalarLong(migrated, "SELECT createdAtEpochMillis FROM family_spaces WHERE id = 'family-$startVersion'"))
+                assertEquals(if (startVersion >= 2) 1 else 0, count(migrated, "consumed_enrollment_nonces"))
+                assertEquals(if (startVersion >= 3) 1 else 0, count(migrated, "pending_enrollment_requests"))
+                assertEquals(if (startVersion >= 4) 1 else 0, count(migrated, "initial_owner_trust"))
+                assertEquals(if (startVersion >= 5) 1 else 0, count(migrated, "trusted_initial_owners"))
+                assertEquals(if (startVersion >= 6) 1 else 0, count(migrated, "enrollment_decisions"))
+                assertEquals(if (startVersion >= 7) 1 else 0, count(migrated, "authenticated_family_devices"))
+                assertFinalConstraints(migrated, startVersion)
             } finally {
                 migrated.close()
                 context.deleteDatabase(databaseName)
@@ -104,7 +104,7 @@ class FamilyMeshMigrationInstrumentedTest {
         }
     }
 
-    private fun assertFinalConstraints(database: SupportSQLiteDatabase) {
+    private fun assertFinalConstraints(database: SupportSQLiteDatabase, startVersion: Int) {
         val expectedIndices = listOf(
             "index_family_members_familySpaceId",
             "index_pending_enrollment_requests_receivedAtEpochMillis",
@@ -130,10 +130,16 @@ class FamilyMeshMigrationInstrumentedTest {
         }
         assertTrue("Authenticated device family/key index must remain unique", uniqueDeviceIndex)
 
+        if (startVersion < 7) {
+            database.execSQL(
+                "INSERT INTO authenticated_family_devices VALUES (?, ?, ?, ?, ?, ?, ?)",
+                arrayOf("family-$startVersion", "migration-test-device", "authenticated-device-$startVersion", "cHVibGlj", "MEMBER", 1_950L, "c2ln"),
+            )
+        }
         try {
             database.execSQL(
                 "INSERT INTO authenticated_family_devices VALUES (?, ?, ?, ?, ?, ?, ?)",
-                arrayOf("family-7", "duplicate-device", "authenticated-device-7", "cHVibGlj", "MEMBER", 2_000L, "c2ln"),
+                arrayOf("family-$startVersion", "duplicate-device", "authenticated-device-$startVersion", "cHVibGlj", "MEMBER", 2_000L, "c2ln"),
             )
             throw AssertionError("Expected unique family/device constraint to reject duplicate device.")
         } catch (_: SQLiteConstraintException) {
@@ -149,7 +155,7 @@ class FamilyMeshMigrationInstrumentedTest {
             "authenticated_family_devices",
         ).forEach { table -> assertEquals(0, count(database, table)) }
         // Historical v5 intentionally has no FK, so this row survives family deletion.
-        assertEquals(7, count(database, "trusted_initial_owners"))
+        assertEquals(if (startVersion >= 5) 1 else 0, count(database, "trusted_initial_owners"))
     }
 
     private fun count(database: SupportSQLiteDatabase, table: String): Int =
