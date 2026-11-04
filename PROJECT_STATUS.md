@@ -3,7 +3,7 @@
 Last verified: 2026-11-03
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
 Branch: `main`
-Latest verified source commit: `21dd7ca4db718ee31416e45319d88ffce9c950c3`
+Latest verified source commit: `e945b8774d8d43d8426e8f2c2f4f541800d1d2cb` (verify job only; instrumentation not verified)
 Protocol review drafts: ADR 0003 and ADR 0006 (proposals only; not production-approved)
 
 ## Overall state
@@ -22,7 +22,7 @@ production authorization are not implemented.
 |---|---|---|
 | Native Android + Compose foundation | IMPLEMENTED_AND_TESTED | CI builds debug APK |
 | Modular Gradle architecture | IMPLEMENTED_AND_TESTED | Five modules present |
-| Room / DataStore local storage | IMPLEMENTED_AND_TESTED | Room schema v7; instrumentation still needed |
+| Room / DataStore local storage | IMPLEMENTED_WITH_UNVERIFIED_INSTRUMENTATION | Room schema v7; DAO instrumentation suite added, but emulator boot failure prevents SQLite execution evidence |
 | Android Keystore device signing | IMPLEMENTED_UNVERIFIED | P-256-only verification enforced; unit tests; device/API instrumentation pending |
 | Signed enrollment proof | IMPLEMENTED_AND_TESTED | Bounded local codec and verifier tests |
 | Local nonce replay protection | IMPLEMENTED_AND_TESTED | One database only; not distributed |
@@ -36,7 +36,7 @@ production authorization are not implemented.
 | BLE / Wi-Fi Direct / internet P2P / relay | NOT_STARTED | No transport implementation |
 | Cross-device synchronization | NOT_STARTED | Manual text transfer only |
 | Gradle Wrapper | NOT_STARTED | CI installs Gradle 8.13 |
-| Android instrumentation / device validation | NOT_STARTED | Not demonstrated by current CI |
+| Android instrumentation / device validation | BLOCKED_BY_CI_EMULATOR_BOOT | Instrumentation job exists; API 34 emulator timed out before Gradle/tests; no SQLite test result |
 
 ## Latest verification
 
@@ -162,3 +162,13 @@ revocation semantics have been reviewed.
 
 
 - The initial Room suite has since been expanded with transaction rollback verification (failed pending insert must roll back nonce consumption) and file-backed database close/reopen durability. These tests are awaiting the latest emulator CI result.
+
+
+## Room instrumentation CI follow-up — 2026-11-04
+
+- Latest main commit at review: `e945b8774d8d43d8426e8f2c2f4f541800d1d2cb`.
+- CI run #41697147520: `verify` passed (unit tests, debug APK assembly, artifact upload); `storage-instrumentation` failed before invoking Gradle because API 34 emulator never reported `sys.boot_completed` and the runner ended with `Timeout waiting for emulator to boot`.
+- The API 34 attempt used Google APIs / x86_64 / Pixel 2 / SwiftShader, with a 600-second boot timeout. Logs show repeated ADB exit-code-1 polling after the emulator launch. No instrumentation report was produced; this is infrastructure failure, not a test assertion failure.
+- Run #41696869594 on the preceding API 34 configuration failed at the same emulator boot boundary. Run #41697076341 for commit `98c1409b` was cancelled when the next main push arrived; this is consistent with a newer run superseding it and is not evidence of a CI test defect.
+- Six Room DAO instrumentation tests are now present, including SQLite device-key uniqueness and family foreign-key cascade coverage. None has yet been executed successfully on an emulator.
+- No runtime, Room schema, protocol, cryptography, or transport behavior changed. The latest successful verification is limited to the `verify` job; instrumentation remains unverified.
