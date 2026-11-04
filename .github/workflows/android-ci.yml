@@ -33,6 +33,13 @@ jobs:
         run: gradle testDebugUnitTest
       - name: Assemble debug APK
         run: gradle assembleDebug
+      - name: Upload Room schema snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: room-schema-snapshot
+          path: core/storage/schemas/**/*.json
+          if-no-files-found: warn
+          retention-days: 30
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
