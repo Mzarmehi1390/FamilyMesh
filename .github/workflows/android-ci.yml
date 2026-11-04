@@ -42,7 +42,9 @@ jobs:
           retention-days: 7
 
   storage-instrumentation:
-    runs-on: ubuntu-latest
+    # Keep emulator execution on the known Ubuntu 22.04 image while isolating
+    # the repeated Android Emulator/ADB startup failure seen on Ubuntu 24.04.
+    runs-on: ubuntu-22.04
     timeout-minutes: 35
     steps:
       - name: Checkout
