@@ -261,7 +261,7 @@ interface FamilySpaceDao {
 @Database(
     entities = [FamilySpaceEntity::class, FamilyMemberEntity::class, ConsumedEnrollmentNonceEntity::class, PendingEnrollmentRequestEntity::class, InitialOwnerTrustEntity::class, TrustedInitialOwnerEntity::class, EnrollmentDecisionEntity::class, AuthenticatedFamilyDeviceEntity::class],
     version = 7,
-    exportSchema = false
+    exportSchema = true
 )
 abstract class FamilyMeshDatabase : RoomDatabase() {
     abstract fun familySpaceDao(): FamilySpaceDao
