@@ -28,4 +28,5 @@ dependencies {
     api(libs.androidx.datastore.preferences)
     androidTestImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext)
+    androidTestImplementation(libs.androidx.test.runner)
 }
