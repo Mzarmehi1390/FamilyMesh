@@ -598,3 +598,28 @@ Resolve emulator startup independently of test assertions, then run `:core:stora
 - Downloaded and inspected artifact #13316525198. It contains Room v7 schema JSON with identity hash `3d3bfeb59dfda625d9f6664d1c39765b`, eight entities, and the authenticated-device unique index. The artifact path is `com.familymesh.core.storage.family.FamilyMeshDatabase/7.json`.
 - The schema snapshot is current v7 metadata, not a historical migration fixture. No migration from versions 1–6 is claimed as validated.
 - Next: finish checking run #173 instrumentation; preserve this v7 schema as a reviewed baseline if appropriate; derive real historical v1–v6 fixtures from reproducible historical builds before adding migration assertions.
+
+
+## 2026-11-04 — API 34 Room suite green; transient emulator boot failure retried
+
+### Verified work
+
+- Run #41818762325 (#173), source commit `da5e86a94937fcbbc9d0a221b8a2d0c091a50358`, completed both `verify` and `storage-instrumentation` successfully.
+- Downloaded instrumentation artifact #13317910182 and inspected its JUnit XML: `tests=6`, `failures=0`, `errors=0`, `skipped=0`; all six DAO tests executed on API 34. XML test-suite time: 72.646 seconds.
+- The run also uploaded the current Room v7 schema snapshot and debug APK.
+- The historical export workflow `.github/workflows/room-historical-schemas.yml` is present on main, with one pinned historical source commit per Room version 1–7. It remains a manual `workflow_dispatch` workflow and has not yet been run.
+
+### CI failure triage and action
+
+- Run #41819471027 (#175), commit `b0879b22cf97295109a35c5388c43feb0105a346`, passed the complete `verify` job, including unit tests, APK assembly, KSP schema generation, and schema artifact upload.
+- Its instrumentation job failed before Gradle started: the emulator did not reach `sys.boot_completed` within the configured 600-second startup window. No tests ran and no JUnit report was produced; this is an emulator startup failure, not a DAO assertion failure.
+- Re-ran only the failed instrumentation job through GitHub Actions. The retry was in progress at the time of this update. Do not mark run #175 green until the retry completes successfully.
+
+### Remaining work
+
+1. Execute the historical schema export workflow for Room v1–v7 and inspect the actual JSON outputs before checking fixtures into the repository.
+2. Add `MigrationTestHelper` coverage for every supported migration path using those generated historical schemas.
+3. Add deterministic SQLite concurrency coverage for the already documented applicant same-artifact/local-receipt-time race; do not alter behavior until its semantics are approved.
+4. Keep owner-ledger and exact FMJA1 replay schema/runtime changes blocked on their existing ADR approvals.
+
+No runtime, Room entity, schema version, protocol, cryptography, expiry-policy, or transport behavior changed.

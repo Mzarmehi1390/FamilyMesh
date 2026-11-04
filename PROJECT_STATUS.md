@@ -1,9 +1,9 @@
 # FamilyMesh Project Status
 
-Last verified: 2026-11-03
+Last verified: 2026-11-04
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
 Branch: `main`
-Latest verified source commit: `e945b8774d8d43d8426e8f2c2f4f541800d1d2cb` (verify job only; instrumentation not verified)
+Latest source commit: `b0879b22cf97295109a35c5388c43feb0105a346` (verify passed; latest instrumentation retry is in progress)
 Protocol review drafts: ADR 0003 and ADR 0006 (proposals only; not production-approved)
 
 ## Overall state
@@ -22,7 +22,7 @@ production authorization are not implemented.
 |---|---|---|
 | Native Android + Compose foundation | IMPLEMENTED_AND_TESTED | CI builds debug APK |
 | Modular Gradle architecture | IMPLEMENTED_AND_TESTED | Five modules present |
-| Room / DataStore local storage | IMPLEMENTED_WITH_UNVERIFIED_INSTRUMENTATION | Room schema v7; DAO instrumentation suite added, but emulator boot failure prevents SQLite execution evidence |
+| Room / DataStore local storage | IMPLEMENTED_AND_INSTRUMENTED | Room schema v7; six DAO tests passed on API 34 in CI run #173; historical migrations remain unverified |
 | Android Keystore device signing | IMPLEMENTED_UNVERIFIED | P-256-only verification enforced; unit tests; device/API instrumentation pending |
 | Signed enrollment proof | IMPLEMENTED_AND_TESTED | Bounded local codec and verifier tests |
 | Local nonce replay protection | IMPLEMENTED_AND_TESTED | One database only; not distributed |
@@ -36,7 +36,7 @@ production authorization are not implemented.
 | BLE / Wi-Fi Direct / internet P2P / relay | NOT_STARTED | No transport implementation |
 | Cross-device synchronization | NOT_STARTED | Manual text transfer only |
 | Gradle Wrapper | NOT_STARTED | CI installs Gradle 8.13 |
-| Android instrumentation / device validation | BLOCKED_BY_CI_EMULATOR_BOOT | Instrumentation job exists; API 34 emulator timed out before Gradle/tests; no SQLite test result |
+| Android instrumentation / device validation | PARTIALLY_VERIFIED | Six Room DAO tests passed on API 34 in runs #172 and #173; a later retry is in progress after one emulator boot timeout |
 
 ## Latest verification
 
@@ -183,3 +183,12 @@ revocation semantics have been reviewed.
 - Inspected the downloaded artifact: it contains `com.familymesh.core.storage.family.FamilyMeshDatabase/7.json`, Room schema version 7, identity hash `3d3bfeb59dfda625d9f6664d1c39765b`. The snapshot lists eight entities, including `authenticated_family_devices`, with its unique composite index on `familySpaceId, deviceKeyId`; family-owned tables declare cascade foreign keys where present.
 - This verifies the current v7 exported schema only. It does not create or validate historical schema fixtures for versions 1–6, and it does not prove migration correctness.
 - No runtime behavior, Room entities/schema version, protocol, cryptography, expiry policy, or transport semantics were changed. Historical migration fixtures and the approved-design gates remain outstanding.
+
+
+## Room CI and migration-fixture progress — 2026-11-04
+
+- Run [#41818762325](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41818762325) (#173), commit `da5e86a94937fcbbc9d0a221b8a2d0c091a50358`, completed **both** `verify` and `storage-instrumentation` successfully. The downloaded instrumentation XML reports 6 tests, 0 failures, 0 errors, 0 skipped.
+- Run #173 instrumentation artifact #13317910182 confirms all six DAO cases ran on API 34; total test time was 72.646 seconds.
+- Run [#41819471027](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41819471027) (#175), commit `b0879b22cf97295109a35c5388c43feb0105a346`, passed `verify` and generated/uploaded schema v7. Its instrumentation attempt timed out while waiting for the emulator to boot; Gradle did not execute. The failed job was re-run independently; the retry is currently in progress.
+- The current v7 schema artifact remains a verified snapshot, not a historical migration fixture. The manual historical export workflow for versions 1–7 is committed but has not yet been dispatched.
+- No runtime, database schema version, protocol, cryptography, expiry policy, or transport behavior changed.
