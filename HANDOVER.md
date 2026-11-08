@@ -203,3 +203,12 @@ revocation, and recovery are also resolved.
 - Current Room version remains 7. No v8 schema/runtime change was made.
 - Latest repository HEAD: `7112f0ae2bfbb36a37e186b3a9eb4775d3e81213`.
 - Next exact action: confirm all seven workflow job conclusions, add the authentic schema fixtures under the Room schema directory, implement MigrationTestHelper coverage for starting versions 1–7, then execute on API 34 and inspect JUnit XML.
+
+
+## 2026-11-08 — Historical Room migration fixtures handover
+
+- Main HEAD reviewed: `968b580283b2ce17d0deda83beab4675ec55b845`.
+- Android CI run [#41879166661](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41879166661): `verify` passed; `storage-instrumentation` executed seven tests, with six passing and the migration test failing before migration assertions because the v1 schema JSON was not packaged in androidTest assets.
+- All seven historical export jobs from [run #41864521401](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41864521401) succeeded. The v1–v7 JSON fixtures were parsed, version/entity counts checked, and v7 was confirmed byte-identical to the current generated schema.
+- Branch `fix/room-migration-schema-fixtures-20261108` now includes the seven fixtures at the configured Room schema asset path. No production schema/runtime behavior was changed.
+- Next exact action: let the branch CI run, inspect the API 34 JUnit XML, and only then mark migration validation complete. If it passes, continue with the separately recorded DAO same-artifact concurrency/idempotency test. Keep v7→v8 owner-ledger changes blocked on ADR 0006/0008/0012 review.
