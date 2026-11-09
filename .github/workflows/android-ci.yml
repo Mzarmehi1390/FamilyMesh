@@ -63,8 +63,6 @@ jobs:
           java-version: "17"
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: "8.13"
       - name: Run Room storage tests on emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
