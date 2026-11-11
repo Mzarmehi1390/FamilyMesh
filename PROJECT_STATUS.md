@@ -210,3 +210,12 @@ revocation semantics have been reviewed.
 - The exported schema metadata is consistent with the source migration chain. This does not yet prove SQLite migration execution or row preservation.
 - No migration test fixtures have yet been checked into `core/storage/schemas`; no MigrationTestHelper suite has been run. Room remains v7.
 - Next: refresh terminal status of all seven export jobs, check in authentic fixtures, add migration tests from versions 1–7, and run them on API 34. Do not implement v8 until the existing ADR approval gates are satisfied.
+
+
+## Historical Room migration fixture integration — 2026-11-08
+
+- Refreshed Android CI run [#41879166661](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41879166661) on main commit `968b580283b2ce17d0deda83beab4675ec55b845`: the `verify` job passed unit tests, debug APK assembly, and current Room v7 schema export.
+- The `storage-instrumentation` job started the API 34 emulator and executed 7 tests. Six completed successfully; the migration test failed before its first migration assertion because `MigrationTestHelper` could not load `com.familymesh.core.storage.family.FamilyMeshDatabase/1.json` from androidTest assets. This is a missing-fixture packaging failure, not a reported migration SQL or row-preservation assertion failure.
+- Confirmed all seven historical schema-export matrix jobs in run [#41864521401](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41864521401) completed successfully. Downloaded v1–v7 JSON files parse and declare their matching versions; entity counts progress from 2 to 8. The v7 fixture SHA-256 matches the current main schema snapshot exactly.
+- Added all seven historical fixtures to branch `fix/room-migration-schema-fixtures-20261108` under `core/storage/schemas/com.familymesh.core.storage.family.FamilyMeshDatabase/`, which is already configured as the androidTest assets source.
+- No runtime, Room entity, schema version, protocol, cryptography, expiry, or transport behavior changed. Migration correctness remains unverified until the fixture-backed API 34 run passes and its JUnit XML is inspected.

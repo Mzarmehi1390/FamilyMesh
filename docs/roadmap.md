@@ -91,7 +91,8 @@ Required gates:
 - [ ] Define trusted owner ceremony, ownership transfer, revocation, and recovery
 - [ ] Threat-model the complete enrollment flow, including local database tampering, clock skew, compromised devices, and offline peers
 - [ ] Add Android API 31+ Keystore instrumentation coverage
-- [ ] Add Room migration and transactional persistence tests on Android
+- [x] Add `MigrationTestHelper` coverage for Room start versions 1–7, representative row preservation, and final SQLite constraints
+- [ ] Pass the fixture-backed Room migration and transactional persistence suite on an API 34 emulator
 
 A draft COSE v2 profile and migration considerations are documented in
 ADR 0003. Its proposals are not production decisions until interoperability

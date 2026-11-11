@@ -80,15 +80,24 @@ a schema-shape/source cross-check, not execution of the migrations.
 - Room remains schema version 7. No v8 migration, owner-ledger persistence,
   expiry behavior, protocol, crypto, or transport behavior was changed.
 
+## Current validation state
+
+- The seven authentic schema JSON files are included in branch
+  `fix/room-migration-schema-fixtures-20261108` under
+  `core/storage/schemas/com.familymesh.core.storage.family.FamilyMeshDatabase/`.
+- Each fixture parses and declares its matching version (1–7); entity counts
+  progress from 2 through 8. The v7 fixture is byte-identical to the v7
+  snapshot generated from the current main commit.
+- CI run [#41879166661](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41879166661)
+  passed the unit-test, APK-assembly, and current-schema-export job. Its
+  instrumentation job exposed the missing-fixture packaging issue described
+  above. The fixture-backed migration result is still pending.
+
 ## Next engineering action
 
-1. Refresh workflow #41864521401 and record the terminal conclusion for
-   every version job.
-2. Check in the authentic v1–v7 schema JSON fixtures under
-   `core/storage/schemas/com.familymesh.core.storage.family.FamilyMeshDatabase/`.
-3. Add Room `MigrationTestHelper` instrumentation tests for every supported
-   start version (1–7), including representative data preservation and
-   final constraint checks.
-4. Run the suite on the API 34 emulator and inspect the JUnit XML.
-5. Keep the v7→v8 proposal gated on ADR 0006/0008/0012 review; this audit
-   does not approve a production schema change.
+1. Run the branch's API 34 `storage-instrumentation` job and inspect the JUnit
+   XML for all seven migration start versions and the DAO tests.
+2. If it passes, record the verified migration result and continue with the
+   separately documented DAO concurrency/idempotency gap.
+3. Keep v7→v8 owner-ledger and replay-identity work gated on ADR
+   0006/0008/0012 review; this fixture work does not approve a schema change.
