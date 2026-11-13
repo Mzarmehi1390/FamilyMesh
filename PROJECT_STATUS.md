@@ -219,3 +219,13 @@ revocation semantics have been reviewed.
 - Confirmed all seven historical schema-export matrix jobs in run [#41864521401](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41864521401) completed successfully. Downloaded v1–v7 JSON files parse and declare their matching versions; entity counts progress from 2 to 8. The v7 fixture SHA-256 matches the current main schema snapshot exactly.
 - Added all seven historical fixtures to branch `fix/room-migration-schema-fixtures-20261108` under `core/storage/schemas/com.familymesh.core.storage.family.FamilyMeshDatabase/`, which is already configured as the androidTest assets source.
 - No runtime, Room entity, schema version, protocol, cryptography, expiry, or transport behavior changed. Migration correctness remains unverified until the fixture-backed API 34 run passes and its JUnit XML is inspected.
+
+
+## Historical Room migrations and reproducible Gradle build — 2026-11-13
+
+- Combined PR #2 branch head `2897397fa2e9f672f891c2f2f61f26ada901a372` passed Android CI run [#43231837501](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/43231837501): both `verify` and `storage-instrumentation` succeeded.
+- Downloaded artifact #13952322275 and inspected the JUnit XML: 7 test cases, 0 failures, 0 errors, 0 skipped on API 34.
+- The migration test iterated all supported start versions 1–7, seeded representative records, migrated each database to v7, and verified preserved rows, expected tables, indexes, unique device-key enforcement, and family foreign-key cascades. The v5 trusted-owner row intentionally remains outside the historical FK cascade.
+- The official Gradle 8.13 wrapper, unit tests, Debug APK assembly, Room schema generation, and artifact uploads passed in the same CI run.
+- The current Room schema remains v7. No v8 migration or production runtime/protocol/crypto/transport behavior was changed.
+- Next: run the deterministic DAO concurrency tests added for same signed artifacts with different local receipt times and concurrent opposite outcomes. Keep the intended same-artifact receipt-time semantics open until explicitly reviewed under ADR 0014; keep owner-ledger/v8 work gated on ADR 0006/0008/0012.

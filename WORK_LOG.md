@@ -683,3 +683,26 @@ Refresh run #41864521401 job conclusions. Check the seven authentic JSON files i
 ### Next exact action
 
 Wait for the branch's API 34 CI result, inspect its JUnit XML, and update this log only with the actual test counts. If migration coverage passes, move on to the outstanding deterministic DAO concurrency/idempotency case without changing behavior before its semantics are reviewed.
+
+
+## 2026-11-13 — Historical Room migration validation passed; DAO concurrency characterization added
+
+### Verified CI result
+
+- Refreshed [Android CI run #43231837501](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/43231837501) for PR #2 head `2897397fa2e9f672f891c2f2f61f26ada901a372`.
+- Both `verify` and `storage-instrumentation` completed successfully.
+- Downloaded artifact #13952322275 and parsed `TEST-emulator-5554 - 14-_core_storage-.xml`: 7 test cases, 0 failures, 0 errors, 0 skipped.
+- The six DAO cases and the migration test all passed. The migration test iterates starting versions 1–7, seeds representative rows, migrates to v7, verifies row/table preservation, checks all expected indices and the unique family/device index, and exercises FK cascade behavior. The historical v5 `trusted_initial_owners` row is intentionally retained because its v5 schema has no FK.
+- The same run passed JVM unit tests, Debug APK assembly, KSP Room v7 schema generation, and artifact uploads.
+- Gradle 8.13 wrapper and distribution checksums are pinned; the wrapper-based CI path is now verified.
+- No local Gradle/Android build was run in this automation environment.
+
+### Work added after that green run
+
+- Added two deterministic Room DAO concurrency instrumentation cases: same signed decision with different local receipt times, and concurrent opposite decision artifacts.
+- The same-artifact test is explicitly a characterization of the current `RECORDED` + `CONFLICT` behavior. It does not approve that behavior as product policy and makes no production code change.
+- Updated ADR 0014, the historical-schema audit, roadmap, project status, and handover to reflect the migration pass and the next validation gate.
+
+### Next exact action
+
+Run the updated API 34 instrumentation suite and inspect its JUnit XML. Keep applicant-side receipt-time idempotency semantics open until separately reviewed; keep the owner-issued ledger and exact FMJA1 replay schema changes gated on ADR 0006/0008/0012 approval.

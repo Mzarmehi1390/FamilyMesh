@@ -212,3 +212,14 @@ revocation, and recovery are also resolved.
 - All seven historical export jobs from [run #41864521401](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41864521401) succeeded. The v1–v7 JSON fixtures were parsed, version/entity counts checked, and v7 was confirmed byte-identical to the current generated schema.
 - Branch `fix/room-migration-schema-fixtures-20261108` now includes the seven fixtures at the configured Room schema asset path. No production schema/runtime behavior was changed.
 - Next exact action: let the branch CI run, inspect the API 34 JUnit XML, and only then mark migration validation complete. If it passes, continue with the separately recorded DAO same-artifact concurrency/idempotency test. Keep v7→v8 owner-ledger changes blocked on ADR 0006/0008/0012 review.
+
+
+## 2026-11-13 — Room migration validation completed; DAO race coverage next
+
+- PR #2 combined branch head: `2897397fa2e9f672f891c2f2f61f26ada901a372`.
+- CI [run #43231837501](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/43231837501) completed both jobs successfully.
+- Downloaded and inspected JUnit artifact #13952322275: 7 tests, 0 failures, 0 errors, 0 skipped on API 34.
+- The migration test passed for all supported start versions 1–7, with representative row preservation, expected tables, indexes, unique device-key enforcement, and family FK cascades. Room remains v7.
+- Gradle 8.13 wrapper, unit tests, Debug APK assembly, and schema export passed.
+- The seven historical schema fixtures and wrapper are integrated on PR #2; no changes were made to main.
+- Next: execute deterministic DAO concurrency tests for same signed FMOD1 with distinct local receipt times and for opposite artifacts. The current same-artifact DAO equality behavior remains a characterization, not an approved idempotency policy. Keep v7→v8 owner-ledger/replay changes blocked on ADR 0006/0008/0012 review.
