@@ -199,3 +199,15 @@ Run [#41828148184](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41828
 - Suite execution time: 129.86 seconds
 
 All six DAO cases ran, including SQLite uniqueness/cascade, atomic nonce consumption, conflicting replay rejection, transaction rollback, database reopen durability, and applicant decision persistence. This confirms the prior emulator startup timeout was transient. It does not validate historical migrations: authentic v1–v7 schema fixtures and MigrationTestHelper coverage remain outstanding. No runtime, Room schema, protocol, cryptography, expiry, or transport behavior changed.
+
+
+### 2026-11-13 follow-up — historical migration validation completed on PR #2
+
+- Combined branch head: `2897397fa2e9f672f891c2f2f61f26ada901a372`.
+- Android CI run [#43231837501](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/43231837501) completed both `verify` and `storage-instrumentation` successfully.
+- Downloaded instrumentation artifact #13952322275 and inspected its JUnit XML directly: 7 tests, 0 failures, 0 errors, and 0 skipped on the API 34 emulator.
+- The six DAO cases passed. The migration case `everySupportedStartVersion_migratesToV7AndPreservesRowsAndConstraints` iterated every supported starting schema (v1–v7), seeded representative rows, migrated to v7, checked row preservation and version-appropriate table contents, verified expected indexes and the unique device index, and exercised foreign-key cascades (including the intentional v5 trusted-owner exception).
+- This closes the historical Room v1–v7 migration-validation gate for the current v7 migration chain on the tested API 34 image. It does not approve or validate a v7→v8 migration.
+- The Gradle 8.13 wrapper, JVM unit tests, Debug APK assembly, and current schema export also passed in the same run.
+- The DAO concurrency characterization cases for same-artifact/different-receipt-time imports and opposite outcomes are now added in the same review branch; their execution is pending the follow-up CI run.
+- No production runtime, Room entity/schema version, protocol, cryptography, expiry policy, or transport behavior changed.

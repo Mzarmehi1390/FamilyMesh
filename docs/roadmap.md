@@ -12,7 +12,7 @@
 - [x] Unit-test baseline
 - [x] GitHub Actions workflow
 - [x] Verify unit tests and debug APK on the clean GitHub Actions Ubuntu/JDK 17/Gradle 8.13 environment (latest verified run: 2026-11-03)
-- [ ] Add and validate the Gradle Wrapper
+- [x] Add and validate the official Gradle 8.13 Wrapper (JAR and distribution checksums pinned; PR #2 CI run #43231837501 passed)
 
 ## Milestone 1 — Domain and identity
 
@@ -91,7 +91,9 @@ Required gates:
 - [ ] Define trusted owner ceremony, ownership transfer, revocation, and recovery
 - [ ] Threat-model the complete enrollment flow, including local database tampering, clock skew, compromised devices, and offline peers
 - [ ] Add Android API 31+ Keystore instrumentation coverage
-- [ ] Add Room migration and transactional persistence tests on Android
+- [x] Add `MigrationTestHelper` coverage for Room start versions 1–7, representative row preservation, and final SQLite constraints
+- [x] Pass the fixture-backed Room migration suite on API 34 (run #43231837501: 7 tests, 0 failures/errors/skips; v1–v7 migration and preservation assertions passed)
+- [ ] Execute deterministic concurrent DAO coverage for same-artifact imports with different receipt times and concurrent opposite outcomes
 
 A draft COSE v2 profile and migration considerations are documented in
 ADR 0003. Its proposals are not production decisions until interoperability

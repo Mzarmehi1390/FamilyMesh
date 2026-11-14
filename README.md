@@ -32,16 +32,25 @@ recovery protocol yet. See the [project status](PROJECT_STATUS.md),
 ## Build
 
 Open the repository in a current Android Studio installation with Android SDK
-36 installed. A Gradle Wrapper is not included yet. Until it is added, install
-Gradle 8.13 and run:
+36 installed. The checked-in Gradle Wrapper pins Gradle 8.13 and verifies the
+downloaded distribution with its published SHA-256 checksum.
+
+On macOS/Linux:
 
 ```bash
-gradle testDebugUnitTest
-gradle assembleDebug
+./gradlew testDebugUnitTest
+./gradlew assembleDebug
 ```
 
-GitHub Actions runs both commands on Ubuntu with JDK 17 and Gradle 8.13.
-Successful runs publish the `familymesh-debug-apk` artifact for seven days.
+On Windows PowerShell:
+
+```powershell
+.\gradlew.bat testDebugUnitTest
+.\gradlew.bat assembleDebug
+```
+
+GitHub Actions uses the same checked-in wrapper with JDK 17. Successful runs
+publish the `familymesh-debug-apk` artifact for seven days.
 
 ## Security notes
 
