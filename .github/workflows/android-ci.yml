@@ -63,7 +63,7 @@ jobs:
           java-version: "17"
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
-      - name: Run Room storage tests on emulator
+      - name: Run Room and Keystore tests on API 34 emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
@@ -73,14 +73,51 @@ jobs:
           emulator-options: -no-window -gpu swiftshader -no-snapshot -noaudio -no-boot-anim -no-metrics
           disable-animations: true
           emulator-boot-timeout: 600
-          script: ./gradlew :core:storage:connectedDebugAndroidTest
-      - name: Upload instrumentation reports
+          script: ./gradlew :core:storage:connectedDebugAndroidTest :core:identity:connectedDebugAndroidTest
+      - name: Upload API 34 instrumentation reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: storage-instrumentation-reports
+          name: android-api34-instrumentation-reports
           path: |
             core/storage/build/reports/androidTests/connected/**
             core/storage/build/outputs/androidTest-results/connected/**
+            core/identity/build/reports/androidTests/connected/**
+            core/identity/build/outputs/androidTest-results/connected/**
+          if-no-files-found: warn
+          retention-days: 7
+
+  identity-api31-instrumentation:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Run Keystore tests on minimum supported API 31
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 31
+          target: google_apis
+          arch: x86_64
+          profile: pixel_2
+          emulator-options: -no-window -gpu swiftshader -no-snapshot -noaudio -no-boot-anim -no-metrics
+          disable-animations: true
+          emulator-boot-timeout: 600
+          script: ./gradlew :core:identity:connectedDebugAndroidTest
+      - name: Upload API 31 identity instrumentation reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: identity-api31-instrumentation-reports
+          path: |
+            core/identity/build/reports/androidTests/connected/**
+            core/identity/build/outputs/androidTest-results/connected/**
           if-no-files-found: warn
           retention-days: 7
