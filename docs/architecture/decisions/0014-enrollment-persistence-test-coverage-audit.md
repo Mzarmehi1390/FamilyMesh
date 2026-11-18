@@ -211,3 +211,14 @@ All six DAO cases ran, including SQLite uniqueness/cascade, atomic nonce consump
 - The Gradle 8.13 wrapper, JVM unit tests, Debug APK assembly, and current schema export also passed in the same run.
 - The DAO concurrency characterization cases for same-artifact/different-receipt-time imports and opposite outcomes are now added in the same review branch; their execution is pending the follow-up CI run.
 - No production runtime, Room entity/schema version, protocol, cryptography, expiry policy, or transport behavior changed.
+
+
+## 2026-11-17 follow-up — complete PR #2 instrumentation run
+
+Android CI run [#43602180283](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/43602180283), attempt 4, completed successfully for candidate head `dc16231b10276443b5169876c4af2ff1232c824e`. The `verify`, API 34 `storage-instrumentation`, and API 31 `identity-api31-instrumentation` jobs all passed. This is the first fully green run for the combined candidate after the earlier API 34 emulator package-manager startup failure.
+
+The API 34 job passed the historical Room v1–v7 migration test, DAO concurrency characterization cases, and Android Keystore instrumentation suite. The API 31 job passed the Keystore identity suite on the minimum supported platform. The verify job passed JVM unit tests, Debug APK assembly, Room schema generation, and artifact uploads.
+
+The migration suite validates the existing v1–v7 chain only; Room remains v7. The DAO concurrency tests record current behavior and do not settle whether same-artifact imports with different local receipt timestamps should be idempotent or conflicting, nor do they approve owner decision issuance semantics. No runtime, schema, protocol, cryptographic, expiry, authorization, or transport behavior changed.
+
+The API 34 and API 31 test jobs establish behavior on those CI emulator images only. They do not prove hardware-backed Keystore protection, remote attestation, physical-device compatibility, or security against a compromised operating system.

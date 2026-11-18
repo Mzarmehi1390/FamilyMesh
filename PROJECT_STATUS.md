@@ -1,6 +1,6 @@
 # FamilyMesh Project Status
 
-Last verified: 2026-11-04
+Last verified: 2026-11-18
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
 Branch: `main`
 Latest repository commit: `7112f0ae2bfbb36a37e186b3a9eb4775d3e81213` (historical schema audit documentation; latest successful full CI baseline remains run #176)
@@ -229,3 +229,19 @@ revocation semantics have been reviewed.
 - The official Gradle 8.13 wrapper, unit tests, Debug APK assembly, Room schema generation, and artifact uploads passed in the same CI run.
 - The current Room schema remains v7. No v8 migration or production runtime/protocol/crypto/transport behavior was changed.
 - Next: run the deterministic DAO concurrency tests added for same signed artifacts with different local receipt times and concurrent opposite outcomes. Keep the intended same-artifact receipt-time semantics open until explicitly reviewed under ADR 0014; keep owner-ledger/v8 work gated on ADR 0006/0008/0012.
+
+
+## 2026-11-18 — PR #2 integration candidate validation refresh
+
+- The default branch remains unchanged at `968b580283b2ce17d0deda83beab4675ec55b845`; this work is still isolated on `build/gradle-wrapper-8.13-20261109` and has not been merged.
+- PR #2 candidate head: `dc16231b10276443b5169876c4af2ff1232c824e`.
+- Android CI run [#43602180283](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/43602180283), attempt 4, completed successfully on 2026-11-17. All three jobs passed: `verify`, API 34 `storage-instrumentation`, and API 31 `identity-api31-instrumentation`.
+- The verify job passed JVM unit tests, Debug APK assembly, Room schema generation, and artifact uploads. API 34 instrumentation passed the Room v1–v7 migration suite, DAO concurrency characterizations, and Keystore tests; API 31 Keystore instrumentation also passed.
+- Room remains schema v7. The historical migration result validates supported v1–v7 paths only; it is not evidence for a future v7→v8 migration.
+- The same-artifact/different-receipt-time and opposite-decision DAO tests are characterization tests. They do not approve idempotency, conflict, expiry, or owner-decision product semantics.
+- PR #1 remains superseded for integration by PR #2 and must not be merged independently.
+- No production runtime, Room entity/schema version, protocol, cryptographic behavior, expiry policy, or network transport changed in this validation stage.
+
+### Next work and safety gates
+
+Continue the identity/trusted-enrollment review without enabling messaging transport or production authorization. The unresolved gates remain: independent COSE/CBOR vectors for all four artifacts; deterministic encoding and ECDSA low-S policy; v1/v2 key-ID and serialization migration; expiry and replay-retention semantics; trusted owner ceremony, ownership transfer, revocation, recovery; and a threat model covering clock rollback, local database tampering, backup/restore, and offline peers. Do not implement the owner decision ledger or a v7→v8 migration until ADR 0006/0008/0012 semantics are reviewed and approved.
