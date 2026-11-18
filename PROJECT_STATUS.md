@@ -2,8 +2,9 @@
 
 Last verified: 2026-11-18
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
-Branch: `main`
-Latest repository commit: `7112f0ae2bfbb36a37e186b3a9eb4775d3e81213` (historical schema audit documentation; latest successful full CI baseline remains run #176)
+Default branch: `main` at `968b580283b2ce17d0deda83beab4675ec55b845` (unchanged; no candidate changes merged)
+Current integration candidate: PR #2, `build/gradle-wrapper-8.13-20261109`, head `2f6cddd9176430365f25913a00ddf7dceab7e4ae`
+Latest fully successful candidate CI: run #43602180283, attempt 4 (all three jobs passed)
 Protocol review drafts: ADR 0003 and ADR 0006 (proposals only; not production-approved)
 
 ## Overall state
@@ -22,8 +23,8 @@ production authorization are not implemented.
 |---|---|---|
 | Native Android + Compose foundation | IMPLEMENTED_AND_TESTED | CI builds debug APK |
 | Modular Gradle architecture | IMPLEMENTED_AND_TESTED | Five modules present |
-| Room / DataStore local storage | IMPLEMENTED_AND_INSTRUMENTED | Room schema v7; six DAO tests passed on API 34 in CI run #173; historical migrations remain unverified |
-| Android Keystore device signing | IMPLEMENTED_UNVERIFIED | P-256-only verification enforced; unit tests; device/API instrumentation pending |
+| Room / DataStore local storage | IMPLEMENTED_AND_INSTRUMENTED | Room schema v7; DAO tests and fixture-backed migrations from v1–v7 pass on API 34 in PR #2 candidate; no v7→v8 validation |
+| Android Keystore device signing | IMPLEMENTED_AND_EMULATOR_TESTED | API 31 and API 34 instrumentation pass on PR #2 candidate; physical-device/hardware-backed assurance remains unverified |
 | Signed enrollment proof | IMPLEMENTED_AND_TESTED | Bounded local codec and verifier tests |
 | Local nonce replay protection | IMPLEMENTED_AND_TESTED | One database only; not distributed |
 | Initial-owner trust bootstrap/pinning | IMPLEMENTED_AND_TESTED | Manual out-of-band fingerprint comparison |
@@ -35,22 +36,16 @@ production authorization are not implemented.
 | E2EE messaging | NOT_STARTED | No message crypto implementation |
 | BLE / Wi-Fi Direct / internet P2P / relay | NOT_STARTED | No transport implementation |
 | Cross-device synchronization | NOT_STARTED | Manual text transfer only |
-| Gradle Wrapper | NOT_STARTED | CI installs Gradle 8.13 |
-| Android instrumentation / device validation | PARTIALLY_VERIFIED | Six Room DAO tests passed on API 34 in runs #172, #173, and #176; historical migrations and device-specific validation remain outstanding |
+| Gradle Wrapper | IMPLEMENTED_AND_CI_VERIFIED_ON_PR | Official Gradle 8.13 POSIX/Windows wrapper with pinned JAR/distribution checksums on PR #2 candidate |
+| Android instrumentation / device validation | EMULATOR_COVERAGE_PASSED_ON_PR | Room v1–v7 migration, DAO, and Keystore instrumentation passed on API 34; Keystore suite passed on API 31; physical devices and future schema v8 remain unverified |
 
 ## Latest verification
 
-CI run [#41672460808](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41672460808)
-completed successfully for the documentation baseline:
-- `testDebugUnitTest`
-- `assembleDebug`
-- debug APK artifact upload
-
-This is CI evidence only; it is not a production security review or device
-instrumentation result. Documentation commits after the last verified baseline are not covered by
-that successful run. The latest lifecycle-audit commit is 86cc551; Android CI
-run #41677314967 was queued/in progress at the last check, so its result is
-not yet confirmed.
+- Candidate PR #2 head `dc16231` passed [run #43602180283](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/43602180283), attempt 4: `verify`, API 34 `storage-instrumentation`, and API 31 `identity-api31-instrumentation` all succeeded.
+- The passing verify job ran JVM unit tests, Debug APK assembly, Room schema generation, and artifact uploads. Both emulator jobs completed their configured instrumentation suites.
+- The documentation synchronization commit `2f6cddd` is the current PR #2 head. Its newer [run #44315768852](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/44315768852) had a successful verify job; API 31 and API 34 instrumentation were still in progress at the last check.
+- No local Gradle/Android build was run in this automation environment. CI emulator results do not establish physical-device compatibility, hardware-backed Keystore protection, or production security approval.
+- No candidate changes have been merged to `main`.
 
 ## Immediate priority
 

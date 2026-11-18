@@ -6,12 +6,12 @@ Default branch: `main`
 
 ## Last verified repository state
 
-- Branch: `main`
-- Latest documentation commit: `7112f0ae2bfbb36a37e186b3a9eb4775d3e81213`
-- Latest verified source/CI baseline: `f2b2988b0a4ffd83784cd3f87b2f2c0fd2a0e082` (Android CI #176); current HEAD is `7112f0ae2bfbb36a37e186b3a9eb4775d3e81213` after documentation-only updates
-- Latest full successful CI: [Android CI #41828148184](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41828148184); run #177 verify passed but instrumentation retry failed before Gradle execution
-- CI result: completed successfully; unit tests, debug APK assembly, and artifact upload all passed.
-- Branch protection: disabled; no open issues or pull requests were present at the prior synchronization.
+- Default branch `main` remains at `968b580283b2ce17d0deda83beab4675ec55b845`; no candidate changes have been merged.
+- Active integration candidate: PR #2, branch `build/gradle-wrapper-8.13-20261109`, latest documentation-synchronized head `2f6cddd9176430365f25913a00ddf7dceab7e4ae`.
+- Latest fully successful candidate CI: [Android CI #43602180283](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/43602180283), attempt 4; `verify`, API 34 storage/identity instrumentation, and API 31 identity instrumentation all passed.
+- Documentation synchronization commit `2f6cddd` triggered run [#44315768852](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/44315768852); its verify job passed, while API 31 and API 34 instrumentation were still running at the last check.
+- PR #2 remains Draft pending the latest documentation-head CI completion and owner review. PR #1 is superseded for integration and must not be merged independently.
+- Branch protection is disabled. No source or documentation candidate has been merged to `main`.
 
 ## Product and architecture invariants
 
@@ -52,10 +52,14 @@ Default branch: `main`
 
 ## Latest code changes and verification
 
-- Commits: `918b03b` (canonical Base64URL), `36e2d27` (P-256 enforcement), `21dd7ca` (parser cleanup).
-- CI #41671671596 and #41671944679 passed their respective security-hardening changes.
-- CI #41671995919 passed unit tests, APK assembly, and artifact upload for the latest source commit.
-- CI #41672460808 completed successfully for the earlier documentation baseline. Later docs commits through ADR 0005 have no status entries exposed by the available status/PR-run queries; CI is unconfirmed.
+The main-branch implementation baseline is unchanged. The separate PR #2 candidate adds validation infrastructure only:
+
+- Official Gradle 8.13 POSIX/Windows Wrapper with pinned distribution and JAR checksums.
+- Authentic Room schema fixtures for versions 1–7 and `MigrationTestHelper` coverage of every supported start version.
+- Android Keystore instrumentation on API 31 and API 34, including stable identity, non-exportability, signing/verification, and fail-closed missing/corrupt key metadata cases.
+- DAO concurrency characterization for same-artifact/different-receipt-time imports and opposite decision artifacts.
+
+Run #43602180283 attempt 4 passed all three CI jobs. The follow-up documentation-only head `2f6cddd` has a newer CI run in progress; do not treat it as complete until both emulator jobs finish. Emulator results do not prove hardware-backed keys or physical-device compatibility.
 
 ## Current work package
 
@@ -84,7 +88,7 @@ should be implemented until independent vectors and platform tests validate it.
    tests on physical/emulated devices.
 7. Room migrations and transaction behavior need Android instrumentation
    coverage.
-8. Gradle Wrapper is absent. CI currently installs Gradle 8.13 and JDK 17.
+8. The PR #2 candidate adds the official Gradle 8.13 Wrapper with pinned JAR/distribution checksums; main remains unchanged until review.
 9. Original Master Engineering Prompt was not present among the accessible
    repository/project files during this synchronization. Do not invent its
    contents; use the repository roadmap and established project invariants.
