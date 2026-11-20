@@ -1,17 +1,18 @@
 # FamilyMesh Handover
 
-Last synchronized: 2026-11-04
+Last synchronized: 2026-11-20
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
 Default branch: `main`
 
 ## Last verified repository state
 
 - Branch: `main`
-- Latest documentation commit: `7112f0ae2bfbb36a37e186b3a9eb4775d3e81213`
-- Latest verified source/CI baseline: `f2b2988b0a4ffd83784cd3f87b2f2c0fd2a0e082` (Android CI #176); current HEAD is `7112f0ae2bfbb36a37e186b3a9eb4775d3e81213` after documentation-only updates
-- Latest full successful CI: [Android CI #41828148184](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41828148184); run #177 verify passed but instrumentation retry failed before Gradle execution
-- CI result: completed successfully; unit tests, debug APK assembly, and artifact upload all passed.
-- Branch protection: disabled; no open issues or pull requests were present at the prior synchronization.
+- Default branch HEAD: `968b580283b2ce17d0deda83beab4675ec55b845`; main has not received the validation-candidate changes.
+- Current integration candidate: [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2), head `49fd3c2100aa0d4210a46ab84e205747b837a019`.
+- Latest candidate CI: [run #44317110977](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/44317110977); all three jobs completed successfully: JVM/unit + APK/schema verify, API 34 storage instrumentation, and API 31 identity instrumentation.
+- PR #1 remains superseded by PR #2 and must not be merged independently. PR #2 remains open/draft for owner review.
+- New validation branch: `test/cose-v2-primitive-kat-verifier-20261120`; local vector verification passed, with its PR CI to be checked before treating the branch as validated.
+- Branch protection is disabled; keep all changes on review branches and do not merge automatically.
 
 ## Product and architecture invariants
 
@@ -203,3 +204,12 @@ revocation, and recovery are also resolved.
 - Current Room version remains 7. No v8 schema/runtime change was made.
 - Latest repository HEAD: `7112f0ae2bfbb36a37e186b3a9eb4775d3e81213`.
 - Next exact action: confirm all seven workflow job conclusions, add the authentic schema fixtures under the Room schema directory, implement MigrationTestHelper coverage for starting versions 1–7, then execute on API 34 and inspect JUnit XML.
+
+
+## 2026-11-20 — Independent primitive COSE vector verifier
+
+- Added a test-only Python standard-library verifier at `tools/verify_cose_v2_kat.py`. It independently reconstructs KAT 0001's CBOR values and checks the documented bytes, key ID, Sig_structure digest, complete tagged COSE_Sign1, P-256 scalar bounds, and low-S fixture property.
+- The script converts the 64-byte `R || S` value to DER and verifies it with the OpenSSL CLI; altered external AAD and payload are required to fail verification.
+- Local run: all eight byte-reconstruction checks, signature verification, and two tamper checks passed (Python 3.13.5 / OpenSSL 3.5.5). CI invocation was added before Gradle validation; new branch CI remains pending.
+- This validates only the primitive fixture. It is not a COSE parser or full independent implementation of all four artifacts and does not approve ADR 0003, low-S, expiry, owner-ledger, or v7→v8 decisions.
+- Next exact action: review and close the product/security decisions in ADR 0006/0008/0012; independently specify all four artifact schemas and publish positive/negative vectors before considering runtime COSE migration. Keep E2EE, transport, relay, and production authorization blocked until their separate designs are approved.

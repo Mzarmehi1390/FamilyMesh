@@ -1,9 +1,11 @@
 # FamilyMesh Project Status
 
-Last verified: 2026-11-04
+Last verified: 2026-11-20
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
-Branch: `main`
-Latest repository commit: `7112f0ae2bfbb36a37e186b3a9eb4775d3e81213` (historical schema audit documentation; latest successful full CI baseline remains run #176)
+Default branch: `main` at `968b580283b2ce17d0deda83beab4675ec55b845` (unchanged; validation work remains on review branches)
+Current integration candidate: [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2), branch `build/gradle-wrapper-8.13-20261109`, head `49fd3c2100aa0d4210a46ab84e205747b837a019`
+Latest candidate CI: [run #44317110977](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/44317110977) completed successfully across `verify`, API 34 storage instrumentation, and API 31 identity instrumentation
+Current validation branch: `test/cose-v2-primitive-kat-verifier-20261120` (local primitive-vector verifier passed; branch CI pending)
 Protocol review drafts: ADR 0003 and ADR 0006 (proposals only; not production-approved)
 
 ## Overall state
@@ -210,3 +212,12 @@ revocation semantics have been reviewed.
 - The exported schema metadata is consistent with the source migration chain. This does not yet prove SQLite migration execution or row preservation.
 - No migration test fixtures have yet been checked into `core/storage/schemas`; no MigrationTestHelper suite has been run. Room remains v7.
 - Next: refresh terminal status of all seven export jobs, check in authentic fixtures, add migration tests from versions 1–7, and run them on API 34. Do not implement v8 until the existing ADR approval gates are satisfied.
+
+
+## Independent primitive COSE vector verification — 2026-11-20
+
+- Added `tools/verify_cose_v2_kat.py`, a test-only verifier that reconstructs KAT 0001 with Python's standard library and verifies the ESP256 signature through the OpenSSL CLI.
+- It checks the public COSE_Key, key ID, payload, external AAD, protected header, Sig_structure, digest, complete tagged COSE_Sign1, P-256 scalar range/low-S fixture property, and rejection after AAD/payload tampering.
+- Local execution passed with Python 3.13.5 and OpenSSL 3.5.5. The Android CI workflow now invokes the script before Gradle tasks; the new branch CI result is pending.
+- This closes only independent reproduction of the primitive fixture. It does not close ADR 0003's two-independent-COSE-implementation gate, define complete artifact schemas, approve low-S or the draft protocol, or authorize runtime migration.
+- No production runtime, Room schema, key format, enrollment behavior, or transport changed.
