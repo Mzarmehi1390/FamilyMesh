@@ -84,6 +84,7 @@ Required gates:
 - [x] Enforce P-256-only public-key parsing at all enrollment signature-verification boundaries
 - [ ] Select canonical interoperable COSE_Key / COSE_Sign1 wire representation
 - [x] Add first reproducible primitive COSE v2 known-answer vector (one artifact context; not full interoperability approval)
+- [x] Reconstruct primitive KAT 0001 in a separate Python-standard-library/OpenSSL CI verifier (fixture-level check only; the two-independent-COSE-implementation gate remains open)
 - [ ] Define strict ECDSA-to-COSE signature conversion and low-S policy
 - [ ] Finalize versioned public-key serialization and key-ID derivation (current v1 remains SHA-256 over X.509 SPKI with domain separation)
 - [ ] Resolve the gap between the proposed COSE ESP256 profile and current JCA ECDSA / X.509 / custom length-prefixed payload implementation

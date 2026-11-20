@@ -656,3 +656,24 @@ No runtime, Room entity, schema version, protocol, cryptography, expiry-policy, 
 ### Next exact action
 
 Refresh run #41864521401 job conclusions. Check the seven authentic JSON files into `core/storage/schemas/com.familymesh.core.storage.family.FamilyMeshDatabase/`, add MigrationTestHelper coverage for all supported start versions 1–7 with representative data and post-migration constraints, and run the tests on API 34.
+
+
+## 2026-11-20 — Independent COSE v2 primitive KAT verifier
+
+### Work completed
+
+- Added `tools/verify_cose_v2_kat.py`, using only Python's standard library plus the runner's OpenSSL CLI; no Python package or production dependency was added.
+- Reconstructed the public COSE_Key, v2 key ID, minimal payload, external AAD, protected header, Sig_structure, SHA-256 digest, and tagged COSE_Sign1 from the documented fixture.
+- Converted the fixed-width ESP256 `R || S` signature to DER and verified it with OpenSSL. Added negative checks proving altered external AAD and payload do not verify.
+- Wired the verifier into Android CI before Gradle tasks and updated the roadmap, KAT record, project status, and handover with its exact scope and limitations.
+
+### Verification
+
+- Local: Python 3.13.5, OpenSSL 3.5.5 — 8 byte-for-byte reconstruction checks passed; P-256/SHA-256 signature verification passed; AAD and payload tamper checks were rejected.
+- `python3 -m py_compile tools/verify_cose_v2_kat.py` passed.
+- New GitHub PR CI is pending at the time of this log update.
+- No Android/Gradle build was run locally. No production runtime, Room schema, protocol behavior, key format, or transport changed.
+
+### Boundary
+
+This is an independent reproduction of one primitive test fixture, not a complete COSE implementation or malformed-CBOR parser test. ADR 0003's full cross-implementation gate and all protocol/product approval gates remain open.
