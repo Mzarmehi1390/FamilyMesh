@@ -656,3 +656,18 @@ No runtime, Room entity, schema version, protocol, cryptography, expiry-policy, 
 ### Next exact action
 
 Refresh run #41864521401 job conclusions. Check the seven authentic JSON files into `core/storage/schemas/com.familymesh.core.storage.family.FamilyMeshDatabase/`, add MigrationTestHelper coverage for all supported start versions 1–7 with representative data and post-migration constraints, and run the tests on API 34.
+
+
+## 2026-11-21 — Stabilize Compose repository Flow collection
+
+### Work completed
+
+- Memoized the family-space, pending-enrollment, initial-owner, trusted-owner, and selected-family authenticated-device observation Flows in `FamilyMeshHomeScreen`.
+- Repository/service identity is used as the cache key; the authenticated-device Flow also keys on the selected family ID, so changing families still switches the observed dataset.
+- This avoids constructing fresh mapped Room Flow wrappers on unrelated recompositions and therefore avoids unnecessary collector cancellation/restart cycles caused by Flow identity changes.
+
+### Validation and scope
+
+- GitHub Actions validation is pending for this branch; no local Android SDK/Gradle execution or device profiling was available in this run.
+- No numeric performance gain is claimed. The change targets avoidable subscription churn; device-level profiling is still required to quantify impact.
+- No domain, database schema, protocol, cryptographic, authorization, or transport behavior changed.
