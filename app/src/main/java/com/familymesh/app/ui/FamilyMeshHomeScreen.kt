@@ -89,10 +89,26 @@ fun FamilyMeshHomeScreen() {
     val enrollmentFinalizationRepository: EnrollmentFinalizationRepository = koinInject()
     val clipboardManager = LocalClipboardManager.current
     val profile by profileRepository.profile.collectAsState(initial = null)
-    val familySpaces by familySpaceRepository.observeFamilySpaces().collectAsState(initial = emptyList())
-    val pendingEnrollmentRequests by proofAcceptanceService.observePendingRequests().collectAsState(initial = emptyList())
-    val initialOwners by initialOwnerTrustRepository.observeInitialOwners().collectAsState(initial = emptyList())
-    val trustedOwners by initialOwnerPinRepository.observeTrustedOwners().collectAsState(initial = emptyList())
+
+    // Keep repository Flow instances stable across unrelated UI recompositions.
+    // Recreating mapped Room Flows here would cancel and restart their collectors.
+    val familySpacesFlow = remember(familySpaceRepository) {
+        familySpaceRepository.observeFamilySpaces()
+    }
+    val pendingEnrollmentRequestsFlow = remember(proofAcceptanceService) {
+        proofAcceptanceService.observePendingRequests()
+    }
+    val initialOwnersFlow = remember(initialOwnerTrustRepository) {
+        initialOwnerTrustRepository.observeInitialOwners()
+    }
+    val trustedOwnersFlow = remember(initialOwnerPinRepository) {
+        initialOwnerPinRepository.observeTrustedOwners()
+    }
+
+    val familySpaces by familySpacesFlow.collectAsState(initial = emptyList())
+    val pendingEnrollmentRequests by pendingEnrollmentRequestsFlow.collectAsState(initial = emptyList())
+    val initialOwners by initialOwnersFlow.collectAsState(initial = emptyList())
+    val trustedOwners by trustedOwnersFlow.collectAsState(initial = emptyList())
     var displayName by remember(profile?.displayName) { mutableStateOf(profile?.displayName.orEmpty()) }
     var familyName by remember { mutableStateOf("") }
     var deviceIdentity by remember { mutableStateOf<DevicePublicIdentity?>(null) }
@@ -100,7 +116,10 @@ fun FamilyMeshHomeScreen() {
     var keySecurityLevel by remember { mutableStateOf<DeviceKeySecurityLevel?>(null) }
     var isCreatingIdentity by remember { mutableStateOf(false) }
     var selectedFamilySpaceId by remember { mutableStateOf("") }
-    val authenticatedDevices by enrollmentFinalizationRepository.observeAuthenticatedDevices(selectedFamilySpaceId).collectAsState(initial = emptyList())
+    val authenticatedDevicesFlow = remember(enrollmentFinalizationRepository, selectedFamilySpaceId) {
+        enrollmentFinalizationRepository.observeAuthenticatedDevices(selectedFamilySpaceId)
+    }
+    val authenticatedDevices by authenticatedDevicesFlow.collectAsState(initial = emptyList())
     var generatedProofText by remember { mutableStateOf("") }
     var importedProofText by remember { mutableStateOf("") }
     var proofStatus by remember { mutableStateOf<String?>(null) }
