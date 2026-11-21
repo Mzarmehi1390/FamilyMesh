@@ -1,10 +1,10 @@
 # FamilyMesh Project Status
 
-Last verified: 2026-11-18
+Last audited: 2026-11-21
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
 Default branch: `main` at `968b580283b2ce17d0deda83beab4675ec55b845` (unchanged; no candidate changes merged)
-Current integration candidate: PR #2, `build/gradle-wrapper-8.13-20261109`, head `2f6cddd9176430365f25913a00ddf7dceab7e4ae`
-Latest fully successful candidate CI: run #43602180283, attempt 4 (all three jobs passed)
+Current integration candidate: PR #2, `build/gradle-wrapper-8.13-20261109`; this update adds stable Compose Flow collection and an independent primitive COSE KAT verifier. CI for the new head is pending.
+Latest fully successful candidate CI before this update: [run #44317110977](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/44317110977) on the previous PR #2 head `49fd3c2100aa0d4210a46ab84e205747b837a019` (all three jobs passed); current update is pending CI.
 Protocol review drafts: ADR 0003 and ADR 0006 (proposals only; not production-approved)
 
 ## Overall state
@@ -41,10 +41,10 @@ production authorization are not implemented.
 
 ## Latest verification
 
-- Candidate PR #2 head `dc16231` passed [run #43602180283](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/43602180283), attempt 4: `verify`, API 34 `storage-instrumentation`, and API 31 `identity-api31-instrumentation` all succeeded.
-- The passing verify job ran JVM unit tests, Debug APK assembly, Room schema generation, and artifact uploads. Both emulator jobs completed their configured instrumentation suites.
-- The documentation synchronization commit `2f6cddd` is the current PR #2 head. Its newer [run #44315768852](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/44315768852) had a successful verify job; API 31 and API 34 instrumentation were still in progress at the last check.
-- No local Gradle/Android build was run in this automation environment. CI emulator results do not establish physical-device compatibility, hardware-backed Keystore protection, or production security approval.
+- The previous PR #2 head `49fd3c2100aa0d4210a46ab84e205747b837a019` passed `verify`, API 34 storage instrumentation, and API 31 identity instrumentation in [run #44317110977](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/44317110977).
+- The current PR #2 update adds stable Compose observation Flows and the independent primitive COSE KAT verifier. Its new CI result is pending.
+- Standalone PR #3 and PR #4 verify jobs passed. Their API 34 instrumentation jobs failed before tests ran because the hosted runner disabled hardware acceleration; the emulator exited with unsupported `-accel off` and ADB could not find the device. No instrumentation assertion result is available from those runs.
+- No local Gradle/Android build was run in this automation environment. Emulator CI does not establish physical-device compatibility, hardware-backed Keystore protection, or production security approval.
 - No candidate changes have been merged to `main`.
 
 ## Immediate priority
@@ -240,3 +240,10 @@ revocation semantics have been reviewed.
 ### Next work and safety gates
 
 Continue the identity/trusted-enrollment review without enabling messaging transport or production authorization. The unresolved gates remain: independent COSE/CBOR vectors for all four artifacts; deterministic encoding and ECDSA low-S policy; v1/v2 key-ID and serialization migration; expiry and replay-retention semantics; trusted owner ceremony, ownership transfer, revocation, recovery; and a threat model covering clock rollback, local database tampering, backup/restore, and offline peers. Do not implement the owner decision ledger or a v7→v8 migration until ADR 0006/0008/0012 semantics are reviewed and approved.
+
+
+## 2026-11-21 integration update
+
+- PR #2 now also includes memoized Room-backed Compose observation Flows. The authenticated-device Flow is keyed by both its repository and selected family-space ID.
+- PR #2 now runs the test-only Python/OpenSSL verifier for COSE primitive KAT 0001 in the existing wrapper-based `verify` job.
+- The verifier is fixture-level validation only; it does not approve the draft COSE profile, implement a production parser, or close the full interoperability gate.

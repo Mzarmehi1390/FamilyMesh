@@ -722,3 +722,24 @@ Run the updated API 34 instrumentation suite and inspect its JUnit XML. Keep app
 ### Next work and safety gates
 
 Continue the identity/trusted-enrollment review without enabling messaging transport or production authorization. The unresolved gates remain: independent COSE/CBOR vectors for all four artifacts; deterministic encoding and ECDSA low-S policy; v1/v2 key-ID and serialization migration; expiry and replay-retention semantics; trusted owner ceremony, ownership transfer, revocation, recovery; and a threat model covering clock rollback, local database tampering, backup/restore, and offline peers. Do not implement the owner decision ledger or a v7→v8 migration until ADR 0006/0008/0012 semantics are reviewed and approved.
+
+
+## 2026-11-21 — Consolidate Compose Flow stability and COSE primitive verification
+
+### Work completed
+
+- Ported the reviewed Flow memoization change from PR #4 into the existing PR #2 integration branch. The family-space, pending-enrollment, initial-owner, and trusted-owner Flows are remembered by repository/service identity; the authenticated-device Flow is also keyed by the selected family ID.
+- Added the test-only `tools/verify_cose_v2_kat.py` verifier from PR #3 and integrated it into the existing wrapper-based Android CI `verify` job.
+- The verifier reconstructs the documented primitive COSE_Key, key ID, payload, external AAD, protected header, Sig_structure, digest, and tagged COSE_Sign1; it checks P-256 scalar bounds, OpenSSL signature verification, and rejection after AAD/payload tampering.
+- Updated the roadmap, primitive vector record, project status, and handover to preserve the exact validation boundary.
+
+### Validation evidence and limits
+
+- Previous PR #2 head `49fd3c2100aa0d4210a46ab84e205747b837a019` passed `verify`, API 34 storage instrumentation, and API 31 identity instrumentation in [run #44317110977](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/44317110977).
+- PR #3 run [#44743902233](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/44743902233) and PR #4 run [#44866983970](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/44866983970) both passed their `verify` jobs. Their API 34 instrumentation jobs failed before tests ran: the hosted runner disabled hardware acceleration, the emulator reported that `-accel off` was unsupported, and ADB could not find the emulator device. These runs provide no instrumentation result.
+- The verifier passed the PR #3 `verify` job and its recorded local Python/OpenSSL checks; the newly integrated PR #2 head still needs its own CI run.
+- No local Gradle/Android build was run in this automation environment. No production protocol, cryptographic runtime, Room schema, authorization, or transport behavior changed.
+
+### Next action
+
+Wait for CI on the updated PR #2 head and inspect all three jobs. Keep the COSE profile, owner-decision ledger, expiry semantics, v7-to-v8 migration, authorization, E2EE, and network transport behind their existing review gates.

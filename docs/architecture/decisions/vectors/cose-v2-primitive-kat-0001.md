@@ -150,3 +150,25 @@ required: four complete artifact payload schemas and vectors, malformed CBOR
 corpus, independent second implementation, Android Keystore instrumentation,
 Room transaction/migration tests, and explicit approval of replay, time,
 owner-authority, revocation, and recovery policies.
+
+
+## Independent CI reproduction — 2026-11-20
+
+The repository now includes `tools/verify_cose_v2_kat.py`. It independently
+reconstructs the public COSE_Key, v2 key identifier, minimal payload,
+external AAD, protected header, Sig_structure, digest, and tagged COSE_Sign1
+using Python's standard library. It converts the fixed-width ESP256
+`R || S` fixture to strict positive ASN.1 DER integers and asks the OpenSSL
+CLI to verify the P-256/SHA-256 signature. It also confirms that changing
+the external AAD or payload invalidates the signature.
+
+The Android CI workflow runs this verifier before Gradle validation. The
+script was executed locally with Python 3.13.5 and OpenSSL 3.5.5; all eight
+byte-for-byte reconstruction checks, signature verification, and two
+tamper-rejection checks passed.
+
+This is a reproducible second implementation of this **primitive fixture
+only**. It is not a complete COSE parser, does not validate malformed-CBOR
+handling, does not define any of the four production payload schemas, and
+does not satisfy ADR 0003's requirement for two independent CBOR/COSE
+implementations. It does not approve the draft wire profile or low-S policy.

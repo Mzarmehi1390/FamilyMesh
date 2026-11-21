@@ -1,14 +1,14 @@
 # FamilyMesh Handover
 
-Last synchronized: 2026-11-18
+Last synchronized: 2026-11-21
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
 Default branch: `main`
 
 ## Last verified repository state
 
 - Default branch `main` remains at `968b580283b2ce17d0deda83beab4675ec55b845`; no candidate changes have been merged.
-- Active integration candidate: PR #2, branch `build/gradle-wrapper-8.13-20261109`, latest documentation-synchronized head `2f6cddd9176430365f25913a00ddf7dceab7e4ae`.
-- Latest fully successful candidate CI: [Android CI #43602180283](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/43602180283), attempt 4; `verify`, API 34 storage/identity instrumentation, and API 31 identity instrumentation all passed.
+- Active integration candidate: PR #2, branch `build/gradle-wrapper-8.13-20261109`; this synchronization extends it with stable Compose Flow collection and the independent COSE primitive KAT verifier. New-head CI is pending.
+- Latest fully successful candidate CI before this extension: [Android CI #44317110977](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/44317110977) on the previous PR #2 head `49fd3c2100aa0d4210a46ab84e205747b837a019`; all three jobs passed. The new head must be revalidated.
 - Documentation synchronization commit `2f6cddd` triggered run [#44315768852](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/44315768852); its verify job passed, while API 31 and API 34 instrumentation were still running at the last check.
 - PR #2 remains Draft pending the latest documentation-head CI completion and owner review. PR #1 is superseded for integration and must not be merged independently.
 - Branch protection is disabled. No source or documentation candidate has been merged to `main`.
@@ -243,3 +243,11 @@ revocation, and recovery are also resolved.
 ### Next work and safety gates
 
 Continue the identity/trusted-enrollment review without enabling messaging transport or production authorization. The unresolved gates remain: independent COSE/CBOR vectors for all four artifacts; deterministic encoding and ECDSA low-S policy; v1/v2 key-ID and serialization migration; expiry and replay-retention semantics; trusted owner ceremony, ownership transfer, revocation, recovery; and a threat model covering clock rollback, local database tampering, backup/restore, and offline peers. Do not implement the owner decision ledger or a v7→v8 migration until ADR 0006/0008/0012 semantics are reviewed and approved.
+
+
+## 2026-11-21 — Compose observation stability and primitive KAT integration
+
+- Ported PR #4's memoized observation Flows into the existing PR #2 validation candidate. Repository-backed Flow instances are remembered by repository/service identity; authenticated devices are additionally keyed by selected family-space ID.
+- Ported PR #3's fixture-only Python/OpenSSL verifier and wired it into PR #2's existing wrapper-based CI. The verifier reproduces KAT 0001 bytes and checks the signature plus AAD/payload tampering; it is not a production COSE parser or protocol approval.
+- PR #3 and PR #4 standalone verify jobs passed, while their API 34 instrumentation jobs did not reach Gradle tests because the hosted runner disabled hardware acceleration and the emulator/ADB device failed to start. Treat those runs as infrastructure failures, not test assertion failures.
+- The previous PR #2 head passed all three jobs in run #44317110977. Await CI for the newly extended PR #2 head before marking this integration complete.
