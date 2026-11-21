@@ -74,21 +74,34 @@ a schema-shape/source cross-check, not execution of the migrations.
 - Artifact presence and JSON validity do not by themselves prove that the
   workflow matrix jobs have all reached a successful terminal state; the
   GitHub run/job status should still be refreshed and recorded.
-- No `MigrationTestHelper` test has yet opened these historical schemas.
-- No row-preservation, SQLite migration, index/FK post-migration, or
-  database-upgrade test is claimed as passed.
-- Room remains schema version 7. No v8 migration, owner-ledger persistence,
-  expiry behavior, protocol, crypto, or transport behavior was changed.
+- The fixture-backed `MigrationTestHelper` suite has now opened every supported historical schema (v1–v7) and migrated each database to v7 on the API 34 emulator in CI run [#43231837501](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/43231837501).
+- The JUnit report records 7 total test cases, 0 failures, 0 errors, and 0 skipped. The migration test seeded representative rows, verified preservation and version-appropriate tables, checked required indexes and uniqueness, and exercised foreign-key cascades.
+- This validates the existing v1–v7 → v7 migration chain on the tested API 34 image. It does not validate a future v7→v8 migration.
+- Room remains schema version 7. No owner-ledger persistence, expiry behavior, protocol, crypto, or transport behavior was changed.
+
+## Current validation state — refreshed 2026-11-13
+
+- The seven authentic schema JSON files (v1–v7) are included in the combined
+  review branch for [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2)
+  under `core/storage/schemas/com.familymesh.core.storage.family.FamilyMeshDatabase/`.
+- Each fixture parses and declares its matching version (1–7); entity counts
+  progress from 2 through 8. The v7 fixture matches the generated v7 snapshot.
+- Android CI run [#43231837501](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/43231837501)
+  completed both `verify` and `storage-instrumentation` successfully on the
+  combined PR #2 head. The downloaded JUnit artifact #13952322275 reports
+  7 tests, 0 failures, 0 errors, and 0 skipped.
+- `everySupportedStartVersion_migratesToV7AndPreservesRowsAndConstraints`
+  passed for each start version 1–7, including representative row preservation,
+  expected tables, indexes, unique device-key enforcement, and FK cascades.
+- Room remains at v7. This evidence does not authorize or validate v8.
 
 ## Next engineering action
 
-1. Refresh workflow #41864521401 and record the terminal conclusion for
-   every version job.
-2. Check in the authentic v1–v7 schema JSON fixtures under
-   `core/storage/schemas/com.familymesh.core.storage.family.FamilyMeshDatabase/`.
-3. Add Room `MigrationTestHelper` instrumentation tests for every supported
-   start version (1–7), including representative data preservation and
-   final constraint checks.
-4. Run the suite on the API 34 emulator and inspect the JUnit XML.
-5. Keep the v7→v8 proposal gated on ADR 0006/0008/0012 review; this audit
-   does not approve a production schema change.
+1. Execute and inspect the newly added deterministic DAO concurrency cases:
+   same signed artifact with different local receipt times, and concurrent
+   opposite decision artifacts.
+2. Decide applicant-side same-artifact receipt-time idempotency separately;
+   the current characterization test records the existing `RECORDED` plus
+   `CONFLICT` outcome without approving it as product policy.
+3. Keep v7→v8 owner-ledger and replay-identity work gated on ADR
+   0006/0008/0012 review; this fixture work does not approve a schema change.

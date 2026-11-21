@@ -1,17 +1,17 @@
 # FamilyMesh Handover
 
-Last synchronized: 2026-11-04
+Last synchronized: 2026-11-21
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
 Default branch: `main`
 
 ## Last verified repository state
 
-- Branch: `main`
-- Latest documentation commit: `7112f0ae2bfbb36a37e186b3a9eb4775d3e81213`
-- Latest verified source/CI baseline: `f2b2988b0a4ffd83784cd3f87b2f2c0fd2a0e082` (Android CI #176); current HEAD is `7112f0ae2bfbb36a37e186b3a9eb4775d3e81213` after documentation-only updates
-- Latest full successful CI: [Android CI #41828148184](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41828148184); run #177 verify passed but instrumentation retry failed before Gradle execution
-- CI result: completed successfully; unit tests, debug APK assembly, and artifact upload all passed.
-- Branch protection: disabled; no open issues or pull requests were present at the prior synchronization.
+- Default branch `main` remains at `968b580283b2ce17d0deda83beab4675ec55b845`; no candidate changes have been merged.
+- Active integration candidate: PR #2, branch `build/gradle-wrapper-8.13-20261109`; this synchronization extends it with stable Compose Flow collection and the independent COSE primitive KAT verifier. New-head CI is pending.
+- Latest fully successful candidate CI before this extension: [Android CI #44317110977](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/44317110977) on the previous PR #2 head `49fd3c2100aa0d4210a46ab84e205747b837a019`; all three jobs passed. The new head must be revalidated.
+- Documentation synchronization commit `2f6cddd` triggered run [#44315768852](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/44315768852); its verify job passed, while API 31 and API 34 instrumentation were still running at the last check.
+- PR #2 remains Draft pending the latest documentation-head CI completion and owner review. PR #1 is superseded for integration and must not be merged independently.
+- Branch protection is disabled. No source or documentation candidate has been merged to `main`.
 
 ## Product and architecture invariants
 
@@ -52,10 +52,14 @@ Default branch: `main`
 
 ## Latest code changes and verification
 
-- Commits: `918b03b` (canonical Base64URL), `36e2d27` (P-256 enforcement), `21dd7ca` (parser cleanup).
-- CI #41671671596 and #41671944679 passed their respective security-hardening changes.
-- CI #41671995919 passed unit tests, APK assembly, and artifact upload for the latest source commit.
-- CI #41672460808 completed successfully for the earlier documentation baseline. Later docs commits through ADR 0005 have no status entries exposed by the available status/PR-run queries; CI is unconfirmed.
+The main-branch implementation baseline is unchanged. The separate PR #2 candidate adds validation infrastructure only:
+
+- Official Gradle 8.13 POSIX/Windows Wrapper with pinned distribution and JAR checksums.
+- Authentic Room schema fixtures for versions 1–7 and `MigrationTestHelper` coverage of every supported start version.
+- Android Keystore instrumentation on API 31 and API 34, including stable identity, non-exportability, signing/verification, and fail-closed missing/corrupt key metadata cases.
+- DAO concurrency characterization for same-artifact/different-receipt-time imports and opposite decision artifacts.
+
+Run #43602180283 attempt 4 passed all three CI jobs. The follow-up documentation-only head `2f6cddd` has a newer CI run in progress; do not treat it as complete until both emulator jobs finish. Emulator results do not prove hardware-backed keys or physical-device compatibility.
 
 ## Current work package
 
@@ -84,7 +88,7 @@ should be implemented until independent vectors and platform tests validate it.
    tests on physical/emulated devices.
 7. Room migrations and transaction behavior need Android instrumentation
    coverage.
-8. Gradle Wrapper is absent. CI currently installs Gradle 8.13 and JDK 17.
+8. The PR #2 candidate adds the official Gradle 8.13 Wrapper with pinned JAR/distribution checksums; main remains unchanged until review.
 9. Original Master Engineering Prompt was not present among the accessible
    repository/project files during this synchronization. Do not invent its
    contents; use the repository roadmap and established project invariants.
@@ -203,3 +207,47 @@ revocation, and recovery are also resolved.
 - Current Room version remains 7. No v8 schema/runtime change was made.
 - Latest repository HEAD: `7112f0ae2bfbb36a37e186b3a9eb4775d3e81213`.
 - Next exact action: confirm all seven workflow job conclusions, add the authentic schema fixtures under the Room schema directory, implement MigrationTestHelper coverage for starting versions 1–7, then execute on API 34 and inspect JUnit XML.
+
+
+## 2026-11-08 — Historical Room migration fixtures handover
+
+- Main HEAD reviewed: `968b580283b2ce17d0deda83beab4675ec55b845`.
+- Android CI run [#41879166661](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41879166661): `verify` passed; `storage-instrumentation` executed seven tests, with six passing and the migration test failing before migration assertions because the v1 schema JSON was not packaged in androidTest assets.
+- All seven historical export jobs from [run #41864521401](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41864521401) succeeded. The v1–v7 JSON fixtures were parsed, version/entity counts checked, and v7 was confirmed byte-identical to the current generated schema.
+- Branch `fix/room-migration-schema-fixtures-20261108` now includes the seven fixtures at the configured Room schema asset path. No production schema/runtime behavior was changed.
+- Next exact action: let the branch CI run, inspect the API 34 JUnit XML, and only then mark migration validation complete. If it passes, continue with the separately recorded DAO same-artifact concurrency/idempotency test. Keep v7→v8 owner-ledger changes blocked on ADR 0006/0008/0012 review.
+
+
+## 2026-11-13 — Room migration validation completed; DAO race coverage next
+
+- PR #2 combined branch head: `2897397fa2e9f672f891c2f2f61f26ada901a372`.
+- CI [run #43231837501](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/43231837501) completed both jobs successfully.
+- Downloaded and inspected JUnit artifact #13952322275: 7 tests, 0 failures, 0 errors, 0 skipped on API 34.
+- The migration test passed for all supported start versions 1–7, with representative row preservation, expected tables, indexes, unique device-key enforcement, and family FK cascades. Room remains v7.
+- Gradle 8.13 wrapper, unit tests, Debug APK assembly, and schema export passed.
+- The seven historical schema fixtures and wrapper are integrated on PR #2; no changes were made to main.
+- Next: execute deterministic DAO concurrency tests for same signed FMOD1 with distinct local receipt times and for opposite artifacts. The current same-artifact DAO equality behavior remains a characterization, not an approved idempotency policy. Keep v7→v8 owner-ledger/replay changes blocked on ADR 0006/0008/0012 review.
+
+
+## 2026-11-18 — PR #2 integration candidate validation refresh
+
+- The default branch remains unchanged at `968b580283b2ce17d0deda83beab4675ec55b845`; this work is still isolated on `build/gradle-wrapper-8.13-20261109` and has not been merged.
+- PR #2 candidate head: `dc16231b10276443b5169876c4af2ff1232c824e`.
+- Android CI run [#43602180283](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/43602180283), attempt 4, completed successfully on 2026-11-17. All three jobs passed: `verify`, API 34 `storage-instrumentation`, and API 31 `identity-api31-instrumentation`.
+- The verify job passed JVM unit tests, Debug APK assembly, Room schema generation, and artifact uploads. API 34 instrumentation passed the Room v1–v7 migration suite, DAO concurrency characterizations, and Keystore tests; API 31 Keystore instrumentation also passed.
+- Room remains schema v7. The historical migration result validates supported v1–v7 paths only; it is not evidence for a future v7→v8 migration.
+- The same-artifact/different-receipt-time and opposite-decision DAO tests are characterization tests. They do not approve idempotency, conflict, expiry, or owner-decision product semantics.
+- PR #1 remains superseded for integration by PR #2 and must not be merged independently.
+- No production runtime, Room entity/schema version, protocol, cryptographic behavior, expiry policy, or network transport changed in this validation stage.
+
+### Next work and safety gates
+
+Continue the identity/trusted-enrollment review without enabling messaging transport or production authorization. The unresolved gates remain: independent COSE/CBOR vectors for all four artifacts; deterministic encoding and ECDSA low-S policy; v1/v2 key-ID and serialization migration; expiry and replay-retention semantics; trusted owner ceremony, ownership transfer, revocation, recovery; and a threat model covering clock rollback, local database tampering, backup/restore, and offline peers. Do not implement the owner decision ledger or a v7→v8 migration until ADR 0006/0008/0012 semantics are reviewed and approved.
+
+
+## 2026-11-21 — Compose observation stability and primitive KAT integration
+
+- Ported PR #4's memoized observation Flows into the existing PR #2 validation candidate. Repository-backed Flow instances are remembered by repository/service identity; authenticated devices are additionally keyed by selected family-space ID.
+- Ported PR #3's fixture-only Python/OpenSSL verifier and wired it into PR #2's existing wrapper-based CI. The verifier reproduces KAT 0001 bytes and checks the signature plus AAD/payload tampering; it is not a production COSE parser or protocol approval.
+- PR #3 and PR #4 standalone verify jobs passed, while their API 34 instrumentation jobs did not reach Gradle tests because the hosted runner disabled hardware acceleration and the emulator/ADB device failed to start. Treat those runs as infrastructure failures, not test assertion failures.
+- The previous PR #2 head passed all three jobs in run #44317110977. Await CI for the newly extended PR #2 head before marking this integration complete.

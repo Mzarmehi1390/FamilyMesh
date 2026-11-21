@@ -105,6 +105,15 @@ class FamilyMeshMigrationInstrumentedTest {
     }
 
     private fun assertFinalConstraints(database: SupportSQLiteDatabase, startVersion: Int) {
+        // MigrationTestHelper exposes a raw SQLite connection. Enable FK enforcement
+        // explicitly so the cascade checks exercise the same constraint behavior as Room.
+        database.execSQL("PRAGMA foreign_keys = ON")
+        assertEquals(
+            "Foreign-key enforcement must be enabled during migration validation",
+            1L,
+            scalarLong(database, "PRAGMA foreign_keys"),
+        )
+
         val expectedIndices = listOf(
             "index_family_members_familySpaceId",
             "index_pending_enrollment_requests_receivedAtEpochMillis",
@@ -153,7 +162,13 @@ class FamilyMeshMigrationInstrumentedTest {
             "initial_owner_trust",
             "enrollment_decisions",
             "authenticated_family_devices",
-        ).forEach { table -> assertEquals(0, count(database, table)) }
+        ).forEach { table ->
+            assertEquals(
+                "Deleting family-$startVersion must cascade to $table",
+                0,
+                count(database, table),
+            )
+        }
         // Historical v5 intentionally has no FK, so this row survives family deletion.
         assertEquals(if (startVersion >= 5) 1 else 0, count(database, "trusted_initial_owners"))
     }
