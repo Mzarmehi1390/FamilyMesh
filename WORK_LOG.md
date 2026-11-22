@@ -743,3 +743,19 @@ Continue the identity/trusted-enrollment review without enabling messaging trans
 ### Next action
 
 Wait for CI on the updated PR #2 head and inspect all three jobs. Keep the COSE profile, owner-decision ledger, expiry semantics, v7-to-v8 migration, authorization, E2EE, and network transport behind their existing review gates.
+
+
+## 2026-11-22 — Make home-screen Flow collection lifecycle-aware
+
+### Work completed
+
+- Replaced all six `collectAsState` subscriptions in `FamilyMeshHomeScreen` (profile, family spaces, pending enrollment, initial-owner trust, trusted owners, and authenticated devices) with `collectAsStateWithLifecycle`.
+- Reused the existing `androidx.lifecycle:lifecycle-runtime-compose` dependency; no new library or version was added.
+- Kept the Flow memoization keys unchanged, including the selected family-space ID for authenticated devices. The selected family still switches to its own observation Flow.
+
+### Rationale and validation boundary
+
+- Collection now follows the host Lifecycle and stops below the configured active state, avoiding unnecessary UI-layer subscriptions while the screen is stopped.
+- This is a lifecycle/resource-usage improvement, not a measured CPU or battery benchmark. No numeric gain is claimed.
+- No repository, Room, domain, protocol, cryptographic, authorization, or transport behavior changed.
+- The PR #2 verify job must compile and run unit tests on this head; emulator instrumentation is tracked separately because the latest hosted runner attempt timed out before the emulator became available.
