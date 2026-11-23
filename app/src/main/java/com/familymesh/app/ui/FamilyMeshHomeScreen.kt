@@ -503,8 +503,6 @@ fun FamilyMeshHomeScreen() {
                                                 .sign(request, EnrollmentDecisionOutcome.APPROVED, System.currentTimeMillis().coerceAtLeast(0L))
                                             generatedDecisionText = EnrollmentDecisionTextCodec.encode(signed)
                                             decisionStatus = "Signed approval created. Copy it and send it to the applicant."
-                                        } catch (cancelled: CancellationException) {
-                                            throw cancelled
                                         } catch (cancelled: CancellationException) { throw cancelled } catch (_: Exception) {
                                             decisionStatus = "Could not sign: this device must be the trusted initial owner and the request must be valid."
                                         } finally { isProcessingDecision = false }
@@ -558,8 +556,6 @@ fun FamilyMeshHomeScreen() {
                                         EnrollmentDecisionAcceptanceResult.CONFLICT -> "A conflicting decision is already recorded."
                                         EnrollmentDecisionAcceptanceResult.STORAGE_UNAVAILABLE -> "Could not safely save the decision."
                                     }
-                                } catch (cancelled: CancellationException) {
-                                    throw cancelled
                                 } catch (cancelled: CancellationException) { throw cancelled } catch (_: Exception) {
                                     decisionStatus = "The decision code is malformed or could not be verified."
                                 } finally { isProcessingDecision = false }
@@ -607,8 +603,6 @@ fun FamilyMeshHomeScreen() {
                                     )
                                     generatedAcceptanceText = EnrollmentAcceptanceTextCodec.encode(signed)
                                     acceptanceStatus = "Applicant acceptance signed. Transfer the FMJA1 code to the initial-owner device."
-                                } catch (cancelled: CancellationException) {
-                                    throw cancelled
                                 } catch (cancelled: CancellationException) { throw cancelled } catch (_: Exception) {
                                     acceptanceStatus = "Could not sign acceptance. Check that this is an approved decision addressed to this device."
                                 } finally {
@@ -674,8 +668,6 @@ fun FamilyMeshHomeScreen() {
                                         EnrollmentFinalizationOutcome.StorageUnavailable ->
                                             "Could not safely finalize enrollment. Try again later."
                                     }
-                                } catch (cancelled: CancellationException) {
-                                    throw cancelled
                                 } catch (cancelled: CancellationException) { throw cancelled } catch (_: Exception) {
                                     acceptanceStatus = "The FMJA1 code is malformed or could not be processed."
                                 } finally {
