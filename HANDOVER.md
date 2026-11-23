@@ -7,11 +7,11 @@ Default branch: `main`
 ## Last verified repository state
 
 - Default branch `main` remains at `968b580283b2ce17d0deda83beab4675ec55b845`; no candidate changes have been merged.
-- Active integration candidate: PR #2, branch `build/gradle-wrapper-8.13-20261109`; the candidate now also includes cancellation-safe handling for suspend operations in the Home screen and JVM coverage for the helper. CI for the new head is pending.
-- PR #2 run [#44989187384](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/44989187384): `verify` passed (KAT, JVM tests, Debug APK, Room schema, and artifacts). API 34 and API 31 instrumentation failed before tests because ADB could not find `emulator-5554` and the emulator boot timed out; no instrumentation assertion result is available. The earlier full pass [#44317110977](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/44317110977) remains evidence for its earlier head only.
-- Documentation synchronization commit `2f6cddd` triggered run [#44315768852](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/44315768852); its verify job passed, while API 31 and API 34 instrumentation were still running at the last check.
-- PR #2 remains Draft pending validation of the latest head and owner review. PR #1 is superseded for integration and must not be merged independently.
-- Branch protection is disabled. No source or documentation candidate has been merged to `main`.
+- Active integration candidate: [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2), branch `build/gradle-wrapper-8.13-20261109`. Its combined scope includes the Gradle Wrapper, historical Room migration fixtures/tests, Keystore instrumentation, the primitive COSE fixture verifier, stable Compose observation Flows, and cancellation-safe Home screen operations.
+- Latest pre-fix candidate CI: [run #45166958142](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45166958142). The `verify` job and API 34 storage/Keystore instrumentation passed. API 31's emulator reported boot completion after approximately 611 seconds, just beyond its 600-second action timeout; cleanup then returned ADB exit 224. The Gradle instrumentation command did not start and no API 31 JUnit result was produced. This is a hosted-emulator startup timeout, not a test assertion failure.
+- This update raises only the API 31 emulator boot window to 900 seconds. CI for the resulting commit is pending; no new API 31 test pass is claimed.
+- PR #2 remains Draft pending validation and owner review. PR #1 is superseded. PRs #3 and #4 are standalone candidates whose changes are already included in PR #2; do not merge them independently.
+- Branch protection is disabled. No candidate source or documentation changes have been merged to `main`.
 
 ## Product and architecture invariants
 
@@ -59,7 +59,7 @@ The main-branch implementation baseline is unchanged. The separate PR #2 candida
 - Android Keystore instrumentation on API 31 and API 34, including stable identity, non-exportability, signing/verification, and fail-closed missing/corrupt key metadata cases.
 - DAO concurrency characterization for same-artifact/different-receipt-time imports and opposite decision artifacts.
 
-Run #43602180283 attempt 4 passed all three CI jobs. The follow-up documentation-only head `2f6cddd` has a newer CI run in progress; do not treat it as complete until both emulator jobs finish. Emulator results do not prove hardware-backed keys or physical-device compatibility.
+Run #43602180283 attempt 4 passed all three CI jobs on an earlier candidate head. On the newer head, run #45166958142 passed `verify` and API 34 storage/Keystore instrumentation. API 31 did not reach Gradle tests because TCG emulator boot completed at approximately 611 seconds, just after the configured 600-second timeout. The API 31 timeout is now 900 seconds; the new CI result is pending. Emulator results do not prove hardware-backed keys or physical-device compatibility.
 
 ## Current work package
 
@@ -84,10 +84,8 @@ should be implemented until independent vectors and platform tests validate it.
    `DenyAllFamilyMembershipResolver` remains the default.
 5. No device revocation, recovery, cross-device synchronization, network
    transport, BLE, Wi-Fi Direct, internet P2P, relay, or E2EE messaging.
-6. Keystore behavior has not been verified by Android API 31+ instrumentation
-   tests on physical/emulated devices.
-7. Room migrations and transaction behavior need Android instrumentation
-   coverage.
+6. Keystore instrumentation passed on API 31 and API 34 on an earlier candidate head; the latest API 31 attempt was blocked before Gradle by emulator startup timeout. Physical-device and hardware-backed assurance remain unverified.
+7. Room v1–v7 migration and DAO instrumentation passed on API 34 in the PR #2 candidate; future v7→v8 behavior remains unverified.
 8. The PR #2 candidate adds the official Gradle 8.13 Wrapper with pinned JAR/distribution checksums; main remains unchanged until review.
 9. Original Master Engineering Prompt was not present among the accessible
    repository/project files during this synchronization. Do not invent its
@@ -95,12 +93,7 @@ should be implemented until independent vectors and platform tests validate it.
 
 ## Next exact engineering action
 
-Review ADR 0003's COSE v2 profile and produce cross-language known-answer
-vectors for the key representation, protected headers, external AAD,
-Sig_structure, and ECDSA DER/R||S conversion. Then add parser and malformed
-input tests before any migration implementation. Keep networking and
-authorization integration blocked until replay scope, trust lifecycle,
-revocation, and recovery are also resolved.
+First verify that the increased API 31 emulator boot window allows the Keystore instrumentation command to execute. Then continue ADR 0003's COSE v2 review with cross-language known-answer vectors for key representation, protected headers, external AAD, Sig_structure, and ECDSA DER/R||S conversion. Keep networking and authorization integration blocked until replay scope, trust lifecycle, revocation, recovery, and independent interoperability review are resolved.
 
 
 ## Latest lifecycle audit (documentation proposal)

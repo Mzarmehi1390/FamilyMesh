@@ -116,7 +116,9 @@ jobs:
           profile: pixel_2
           emulator-options: -no-window -gpu swiftshader -no-snapshot -noaudio -no-boot-anim -no-metrics
           disable-animations: true
-          emulator-boot-timeout: 600
+          # API 31 TCG boot took about 611s in run #45166958142; 600s expired just before boot completed.
+          # Allow additional startup headroom on hosted runners before instrumentation begins.
+          emulator-boot-timeout: 900
           script: ./gradlew :core:identity:connectedDebugAndroidTest
       - name: Upload API 31 identity instrumentation reports
         if: always()

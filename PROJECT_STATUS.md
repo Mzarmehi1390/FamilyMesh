@@ -3,8 +3,9 @@
 Last audited: 2026-11-23
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
 Default branch: `main` at `968b580283b2ce17d0deda83beab4675ec55b845` (unchanged; no candidate changes merged)
-Current integration candidate: PR #2, `build/gradle-wrapper-8.13-20261109`; the candidate also includes cancellation-safe Home screen suspend handling and JVM tests for cancellation propagation. CI for the new head is pending.
-Latest PR #2 CI before this update: [run #44989187384](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/44989187384); `verify` passed, while API 34 and API 31 instrumentation failed before tests because the hosted emulator device was unavailable. The new cancellation-safety head is pending its own CI.
+Current integration candidate: [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2), branch `build/gradle-wrapper-8.13-20261109`.
+Latest pre-fix CI: [run #45166958142](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45166958142): `verify` and API 34 storage/Keystore instrumentation passed. API 31 emulator boot completed after approximately 611 seconds, just beyond the 600-second timeout; ADB cleanup returned exit 224 and Gradle instrumentation did not start. This is infrastructure timeout evidence, not a test assertion failure.
+The API 31 emulator boot timeout is increased to 900 seconds in the current candidate update; its new CI result is pending.
 Protocol review drafts: ADR 0003 and ADR 0006 (proposals only; not production-approved)
 
 ## Overall state
@@ -24,7 +25,7 @@ production authorization are not implemented.
 | Native Android + Compose foundation | IMPLEMENTED_AND_TESTED | CI builds debug APK |
 | Modular Gradle architecture | IMPLEMENTED_AND_TESTED | Five modules present |
 | Room / DataStore local storage | IMPLEMENTED_AND_INSTRUMENTED | Room schema v7; DAO tests and fixture-backed migrations from v1–v7 pass on API 34 in PR #2 candidate; no v7→v8 validation |
-| Android Keystore device signing | IMPLEMENTED_AND_EMULATOR_TESTED | API 31 and API 34 instrumentation pass on PR #2 candidate; physical-device/hardware-backed assurance remains unverified |
+| Android Keystore device signing | IMPLEMENTED_WITH_PARTIAL_EMULATOR_EVIDENCE | API 31 and API 34 passed on an earlier PR #2 head; latest API 31 attempt stopped at emulator boot timeout before tests; physical-device/hardware-backed assurance remains unverified |
 | Signed enrollment proof | IMPLEMENTED_AND_TESTED | Bounded local codec and verifier tests |
 | Local nonce replay protection | IMPLEMENTED_AND_TESTED | One database only; not distributed |
 | Initial-owner trust bootstrap/pinning | IMPLEMENTED_AND_TESTED | Manual out-of-band fingerprint comparison |
@@ -37,22 +38,19 @@ production authorization are not implemented.
 | BLE / Wi-Fi Direct / internet P2P / relay | NOT_STARTED | No transport implementation |
 | Cross-device synchronization | NOT_STARTED | Manual text transfer only |
 | Gradle Wrapper | IMPLEMENTED_AND_CI_VERIFIED_ON_PR | Official Gradle 8.13 POSIX/Windows wrapper with pinned JAR/distribution checksums on PR #2 candidate |
-| Android instrumentation / device validation | EMULATOR_COVERAGE_PASSED_ON_PR | Room v1–v7 migration, DAO, and Keystore instrumentation passed on API 34; Keystore suite passed on API 31; physical devices and future schema v8 remain unverified |
+| Android instrumentation / device validation | PARTIAL_EMULATOR_COVERAGE_ON_PR | Room v1–v7 migration, DAO, and Keystore instrumentation passed on API 34; API 31 Keystore passed on an earlier head but latest attempt timed out before Gradle; future schema v8 and physical devices remain unverified |
 
 ## Latest verification
 
-- The previous PR #2 head `49fd3c2100aa0d4210a46ab84e205747b837a019` passed `verify`, API 34 storage instrumentation, and API 31 identity instrumentation in [run #44317110977](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/44317110977).
-- The current PR #2 candidate adds stable Compose observation Flows, the independent primitive COSE KAT verifier, lifecycle-aware Flow collection, and cancellation-safe suspend handling in the Home screen. The latest cancellation-safety commit requires CI verification.
-- PR #2 run #44989187384 passed its verify job. Both emulator instrumentation jobs failed before Gradle tests started because ADB could not find `emulator-5554` and the emulator boot timed out. This provides no test assertion result for that run.
+- Run #45166958142 on the prior PR #2 head passed the COSE primitive fixture verifier, JVM unit tests, Debug APK assembly, Room schema generation, artifact uploads, and API 34 Room/Keystore instrumentation.
+- The API 31 emulator booted at approximately 611 seconds, just after the 600-second timeout. ADB cleanup failed with exit 224; the Gradle Keystore test task never started and no API 31 JUnit report was produced.
+- The current update increases only the API 31 emulator boot window to 900 seconds. A new CI run must verify that the test task executes; its result is pending.
 - No local Gradle/Android build was run in this automation environment. Emulator CI does not establish physical-device compatibility, hardware-backed Keystore protection, or production security approval.
 - No candidate changes have been merged to `main`.
 
 ## Immediate priority
 
-Complete the Identity & Trusted Enrollment protocol review. Keep authorization
-integration and network transport blocked until canonical encoding, key IDs,
-signature representation, replay scope, trust ceremony, and recovery/
-revocation semantics have been reviewed.
+Verify the API 31 Keystore instrumentation after the boot-timeout adjustment. Continue the Identity & Trusted Enrollment protocol review in parallel at the design/test level; keep production authorization and network transport blocked until canonical encoding, key IDs, signature representation, replay scope, trust ceremony, revocation, and recovery semantics are reviewed.
 
 ## Protocol audit progress
 

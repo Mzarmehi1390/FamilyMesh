@@ -829,3 +829,24 @@ Verify the new PR #2 head with CI, including the three new cancellation-helper u
 
 - No local Android build is available in this session. The updated PR CI must compile and test this cleanup.
 - This is a behavior-preserving cleanup; no performance gain is claimed. No domain, Room schema, protocol, cryptographic, authorization, or transport behavior changed.
+
+
+## 2026-11-23 — Increase API 31 emulator boot window
+
+### Evidence
+
+- Inspected PR #2 head `8c15b5df1bb714136a90d8ab8204ef858bcb01fa` and Android CI run [#45166958142](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45166958142).
+- The `verify` job passed the primitive COSE fixture verifier, JVM unit tests, Debug APK assembly, Room schema generation, and artifact uploads. API 34 Room/Keystore instrumentation also passed.
+- In the API 31 job, the emulator's `sys.boot_completed` value became `1` at approximately 611 seconds. The configured 600-second boot timeout had already elapsed; the action then terminated the emulator and ADB returned exit 224 / broken pipe.
+- The Gradle `:core:identity:connectedDebugAndroidTest` command did not start and no API 31 JUnit report was produced. This is an emulator startup timeout, not a failing instrumentation assertion.
+
+### Change
+
+- Increased only the API 31 emulator `emulator-boot-timeout` from 600 to 900 seconds. API 34 retains its 600-second timeout because its job passed in the same run.
+- Kept the existing API level, image, test command, and 35-minute job timeout unchanged.
+- No Kotlin runtime, identity, database, protocol, cryptography, authorization, or transport behavior changed.
+
+### Validation boundary
+
+- A new PR #2 CI run is required to verify the API 31 test command now executes. No API 31 pass is claimed yet.
+- No local Android SDK/Gradle build or physical-device test was available in this automation environment.
