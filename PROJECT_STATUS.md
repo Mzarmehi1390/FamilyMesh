@@ -247,3 +247,24 @@ Continue the identity/trusted-enrollment review without enabling messaging trans
 - PR #2 now also includes memoized Room-backed Compose observation Flows. The authenticated-device Flow is keyed by both its repository and selected family-space ID.
 - PR #2 now runs the test-only Python/OpenSSL verifier for COSE primitive KAT 0001 in the existing wrapper-based `verify` job.
 - The verifier is fixture-level validation only; it does not approve the draft COSE profile, implement a production parser, or close the full interoperability gate.
+
+
+## 2026-11-23 — Hosted Linux emulator startup root-cause fix
+
+### Investigation
+
+- Inspected PR #2 head `d7ebfd44ae9d5bf81b5ed02e164764947759fb6a` and Android CI run [#45114550680](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45114550680).
+- The `verify` job passed the COSE primitive fixture verifier, JVM unit tests, Debug APK assembly, Room schema generation, and both artifact uploads.
+- Both API 31 and API 34 instrumentation jobs failed before Gradle instrumentation started. Raw job logs explicitly reported: `Software CPU emulation (-accel off) is not supported. A hardware CPU accelerator is required (or set ANDROID_I_WANT_MY_TCG=yes to force TCG software emulation).` The runner also reported that hardware acceleration was unavailable.
+- This is an emulator-host capability/configuration failure, not a test assertion failure. No instrumentation result is claimed for run #45114550680.
+
+### Change
+
+- Set job-level `ANDROID_I_WANT_MY_TCG: "yes"` in both hosted-Linux emulator jobs so QEMU TCG software CPU emulation is explicitly permitted when KVM/hardware acceleration is unavailable.
+- Kept the API levels, emulator image, test commands, timeout, and test coverage unchanged.
+- Workflow fix commit: `78f68e1dff252d9e9865d6a25606252e7a9c19e7`.
+
+### Validation boundary
+
+- The workflow edit is committed to PR #2's existing integration branch. A new CI run must confirm whether TCG can boot these images and whether instrumentation tests execute. Until that run completes, emulator validation remains pending.
+- No Kotlin runtime, database schema, protocol, cryptography, authorization, or transport behavior changed. No performance gain is claimed.
