@@ -272,3 +272,23 @@ Continue the identity/trusted-enrollment review without enabling messaging trans
 
 - The workflow edit is committed to PR #2's existing integration branch. A new CI run must confirm whether TCG can boot these images and whether instrumentation tests execute. Until that run completes, emulator validation remains pending.
 - No Kotlin runtime, database schema, protocol, cryptography, authorization, or transport behavior changed. No performance gain is claimed.
+
+
+## 2026-11-23 — Remove duplicate cancellation handlers in Home screen
+
+### Audit finding
+
+- Re-read the complete 921-line `FamilyMeshHomeScreen.kt` on the active integration branch after the prior cancellation-safety change.
+- Found four consecutive duplicate `catch (cancelled: CancellationException) { throw cancelled }` clauses in owner approval, decision import, applicant acceptance signing, and owner finalization actions.
+- These duplicate clauses added no behavior and obscured the cancellation/error boundary.
+
+### Change
+
+- Removed exactly four redundant cancellation handlers while retaining one cancellation rethrow before each ordinary `Exception` handler.
+- Confirmed by source-level audit that no duplicate adjacent cancellation-handler pairs remain and that no `runCatching` calls remain in this screen.
+- Commit: `595b189e5707f26666d14fa6886e9f0b010be2ed`.
+
+### Validation boundary
+
+- No local Android build is available in this session. The updated PR CI must compile and test this cleanup.
+- This is a behavior-preserving cleanup; no performance gain is claimed. No domain, Room schema, protocol, cryptographic, authorization, or transport behavior changed.
