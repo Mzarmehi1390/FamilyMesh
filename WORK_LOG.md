@@ -759,3 +759,32 @@ Wait for CI on the updated PR #2 head and inspect all three jobs. Keep the COSE 
 - This is a lifecycle/resource-usage improvement, not a measured CPU or battery benchmark. No numeric gain is claimed.
 - No repository, Room, domain, protocol, cryptographic, authorization, or transport behavior changed.
 - The PR #2 verify job must compile and run unit tests on this head; emulator instrumentation is tracked separately because the latest hosted runner attempt timed out before the emulator became available.
+
+
+## 2026-11-23 — Preserve coroutine cancellation in Home screen actions
+
+### Findings
+
+- Audited the current PR #2 integration candidate rather than the stale `main` branch.
+- `FamilyMeshHomeScreen` contains suspend operations in lifecycle effects and user actions. Several broad `catch (Exception)` handlers and four `runCatching` calls could convert `CancellationException` into an ordinary UI/storage failure.
+- The affected suspend operations include local profile updates, family-space creation, device-key security-level reads, owner bootstrap, identity creation, enrollment proof creation/import, decision issuance/import, acceptance/finalization, and owner-key pinning.
+
+### Changes
+
+- Added a small `runSuspendCatching` helper that returns ordinary exceptions as `Result.failure` but always rethrows coroutine cancellation.
+- Replaced all four `runCatching` wrappers around suspend work in the Home screen with the cancellation-aware helper.
+- Updated broad exception handlers in the Home screen to rethrow `CancellationException` before presenting a user-facing failure.
+- Added three JVM tests for cancellation propagation, ordinary exception capture, and success-value preservation.
+- No domain, Room schema, authorization, protocol, cryptographic, or transport behavior was changed.
+
+### Validation boundary
+
+- Source transformation checks confirmed that no `runCatching` remains in `FamilyMeshHomeScreen` and all twelve generic exception handlers now rethrow cancellation first.
+- The prior PR #2 run [#44989187384](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/44989187384) passed the `verify` job (COSE primitive KAT, JVM unit tests, Debug APK assembly, Room schema generation, and artifact uploads).
+- In that same run, API 34 and API 31 instrumentation jobs failed before Gradle tests started: ADB repeatedly reported `emulator-5554 not found`, followed by `Timeout waiting for emulator to boot`. This is an emulator infrastructure failure, not a test assertion result.
+- This automation environment did not run a local Gradle build or device profile. The new commit requires its own CI run; no result is claimed yet.
+- No numeric CPU, memory, battery, or latency improvement is claimed.
+
+### Next action
+
+Verify the new PR #2 head with CI, including the three new cancellation-helper unit tests. Retry emulator instrumentation only when the runner can provision a working ADB device. Continue protocol review separately; do not introduce the owner-issued ledger or Room v7→v8 migration before ADR 0006/0008/0012 semantics are approved.

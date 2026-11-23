@@ -1,16 +1,16 @@
 # FamilyMesh Handover
 
-Last synchronized: 2026-11-21
+Last synchronized: 2026-11-23
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
 Default branch: `main`
 
 ## Last verified repository state
 
 - Default branch `main` remains at `968b580283b2ce17d0deda83beab4675ec55b845`; no candidate changes have been merged.
-- Active integration candidate: PR #2, branch `build/gradle-wrapper-8.13-20261109`; this synchronization extends it with stable Compose Flow collection and the independent COSE primitive KAT verifier. New-head CI is pending.
-- Latest fully successful candidate CI before this extension: [Android CI #44317110977](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/44317110977) on the previous PR #2 head `49fd3c2100aa0d4210a46ab84e205747b837a019`; all three jobs passed. The new head must be revalidated.
+- Active integration candidate: PR #2, branch `build/gradle-wrapper-8.13-20261109`; the candidate now also includes cancellation-safe handling for suspend operations in the Home screen and JVM coverage for the helper. CI for the new head is pending.
+- PR #2 run [#44989187384](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/44989187384): `verify` passed (KAT, JVM tests, Debug APK, Room schema, and artifacts). API 34 and API 31 instrumentation failed before tests because ADB could not find `emulator-5554` and the emulator boot timed out; no instrumentation assertion result is available. The earlier full pass [#44317110977](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/44317110977) remains evidence for its earlier head only.
 - Documentation synchronization commit `2f6cddd` triggered run [#44315768852](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/44315768852); its verify job passed, while API 31 and API 34 instrumentation were still running at the last check.
-- PR #2 remains Draft pending the latest documentation-head CI completion and owner review. PR #1 is superseded for integration and must not be merged independently.
+- PR #2 remains Draft pending validation of the latest head and owner review. PR #1 is superseded for integration and must not be merged independently.
 - Branch protection is disabled. No source or documentation candidate has been merged to `main`.
 
 ## Product and architecture invariants

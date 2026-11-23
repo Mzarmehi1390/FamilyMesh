@@ -1,10 +1,10 @@
 # FamilyMesh Project Status
 
-Last audited: 2026-11-21
+Last audited: 2026-11-23
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
 Default branch: `main` at `968b580283b2ce17d0deda83beab4675ec55b845` (unchanged; no candidate changes merged)
-Current integration candidate: PR #2, `build/gradle-wrapper-8.13-20261109`; this update adds stable Compose Flow collection and an independent primitive COSE KAT verifier. CI for the new head is pending.
-Latest fully successful candidate CI before this update: [run #44317110977](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/44317110977) on the previous PR #2 head `49fd3c2100aa0d4210a46ab84e205747b837a019` (all three jobs passed); current update is pending CI.
+Current integration candidate: PR #2, `build/gradle-wrapper-8.13-20261109`; the candidate also includes cancellation-safe Home screen suspend handling and JVM tests for cancellation propagation. CI for the new head is pending.
+Latest PR #2 CI before this update: [run #44989187384](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/44989187384); `verify` passed, while API 34 and API 31 instrumentation failed before tests because the hosted emulator device was unavailable. The new cancellation-safety head is pending its own CI.
 Protocol review drafts: ADR 0003 and ADR 0006 (proposals only; not production-approved)
 
 ## Overall state
@@ -42,8 +42,8 @@ production authorization are not implemented.
 ## Latest verification
 
 - The previous PR #2 head `49fd3c2100aa0d4210a46ab84e205747b837a019` passed `verify`, API 34 storage instrumentation, and API 31 identity instrumentation in [run #44317110977](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/44317110977).
-- The current PR #2 update adds stable Compose observation Flows and the independent primitive COSE KAT verifier. Its new CI result is pending.
-- Standalone PR #3 and PR #4 verify jobs passed. Their API 34 instrumentation jobs failed before tests ran because the hosted runner disabled hardware acceleration; the emulator exited with unsupported `-accel off` and ADB could not find the device. No instrumentation assertion result is available from those runs.
+- The current PR #2 candidate adds stable Compose observation Flows, the independent primitive COSE KAT verifier, lifecycle-aware Flow collection, and cancellation-safe suspend handling in the Home screen. The latest cancellation-safety commit requires CI verification.
+- PR #2 run #44989187384 passed its verify job. Both emulator instrumentation jobs failed before Gradle tests started because ADB could not find `emulator-5554` and the emulator boot timed out. This provides no test assertion result for that run.
 - No local Gradle/Android build was run in this automation environment. Emulator CI does not establish physical-device compatibility, hardware-backed Keystore protection, or production security approval.
 - No candidate changes have been merged to `main`.
 
