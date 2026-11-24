@@ -314,3 +314,16 @@ Android CI run [#45331772915](https://github.com/Mzarmehi1390/FamilyMesh/actions
 - API 34 instrumentation: storage 9/9 and identity 8/8 passed; 0 failures/skips.
 
 This closes the CI execution gate for that exact head only. A separate staging branch adds P-256 point validation and a single-boot emulator-cache workflow; neither change is included in this run. A new CI run is required after integrating that candidate. No production COSE v2, E2EE, authorization resolver, P2P, BLE, Wi-Fi Direct, or relay capability is implied.
+
+
+## 2026-11-24 — Verified PR #2 head and Android instrumentation
+
+PR #2 head `79304843f42ad1ef1fc0e331c2f562a2da731302` was validated by Android CI [run #45406912355](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45406912355). All three jobs completed successfully:
+
+- `verify`: draft COSE primitive KAT verifier, JVM unit tests, Debug APK assembly, Room schema generation, and artifact uploads passed.
+- API 34 instrumentation: 9/9 storage tests and 8/8 identity tests passed; no failures or skipped tests.
+- API 31 instrumentation: 8/8 identity tests passed; no failures or skipped tests.
+
+The job logs confirm the instrumentation Gradle commands executed; transient ADB polling and emulator-console warnings did not prevent test execution. The single-boot AVD/system-image cache workflow is now validated for successful execution on this CI run, but no numeric startup or performance improvement is claimed. The P-256 SPKI import hardening and its negative JVM tests are included in this tested head.
+
+PR #2 remains Draft and unmerged; `main` remains at `968b580283b2ce17d0deda83beab4675ec55b845`. Room remains v7. CI emulator success is not evidence of hardware-backed Keystore assurance or physical-device compatibility. COSE v2 interoperability, owner-decision authority, exact acceptance replay identity, expiry/replay policy, revocation/recovery, and production authorization/transport remain gated by their ADR reviews.
