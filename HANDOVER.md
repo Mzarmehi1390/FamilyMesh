@@ -300,3 +300,8 @@ Continue the identity/trusted-enrollment review without enabling messaging trans
 ## 2026-11-24 — P-256 parser hardening staged
 
 A source audit identified that the common P-256 SPKI parser checked curve parameters but did not itself assert coordinate bounds and the curve equation. A candidate adds those checks and two malformed-point JVM tests. It is staged on `staging/security-and-ci-hardening-20261124`, based on PR #2 head `93adcffc67d75d70d8b9397b1cd9f7308b169160`, and is not yet part of PR #2. First allow run [#45331772915](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45331772915) to finish; then fast-forward the PR branch to the staged candidate and require the next CI run to pass. This change does not implement COSE v2 or alter the protocol.
+
+
+## 2026-11-24 — Emulator workflow redesign staged
+
+The current PR run proves API 31 can boot and pass 8/8 Keystore tests, but its second emulator launch failed to restore `default_boot` (Error -22) and fell back to cold boot. A candidate revision on `staging/security-and-ci-hardening-20261124` removes the separate warm-up boot, caches AVD definition plus AOSP system image, disables snapshots explicitly, and runs each API's tests in one emulator action. Both workflows also move to Node 24-native action versions. The candidate is not yet in PR #2; wait for run #45331772915 to finish before fast-forwarding it.

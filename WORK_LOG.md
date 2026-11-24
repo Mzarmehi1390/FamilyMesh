@@ -896,3 +896,28 @@ Verify the new PR #2 head with CI, including the three new cancellation-helper u
 - This change is staged on `staging/security-and-ci-hardening-20261124` from PR #2 head `93adcffc67d75d70d8b9397b1cd9f7308b169160`; it has not yet been added to PR #2 because run [#45331772915](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45331772915) is validating the preceding emulator-workflow change.
 - The JVM tests and Android build must run on the next PR #2 CI head before this parser hardening is treated as verified.
 - No benchmark or runtime performance gain is claimed; no Room, protocol, authorization, transport, or UI behavior changed.
+
+
+## 2026-11-24 — Emulator snapshot diagnosis and single-boot cache redesign
+
+### Run #45331772915 evidence
+
+- The `verify` job passed: draft COSE primitive verifier, JVM unit tests, Debug APK assembly, Room schema export, and artifact uploads.
+- API 31 instrumentation completed successfully. Its JUnit XML artifact contains 8 tests, 0 failures, 0 errors, 0 skipped; suite time 45.047 seconds. The job completed successfully.
+- API 31 emulator preparation took 419 seconds. The subsequent test action logged `Error -22 while loading VM state` and `Failed to load snapshot 'default_boot'`, then fell back to a cold boot; the emulator became ready at 05:24:09Z. This confirms the two-action snapshot strategy pays for a redundant boot and does not reliably restore the TCG snapshot.
+- API 34 emulator preparation completed in 478 seconds; its instrumentation task was still running at the time this staged workflow revision was prepared.
+- The current v7 Room schema artifact was downloaded and inspected: it contains schema JSON for versions 1–7; v7 identity hash `3d3bfeb59dfda625d9f6664d1c39765b`, eight entities, the unique `authenticated_family_devices(familySpaceId, deviceKeyId)` index, and five foreign-key declarations.
+- The staged P-256 parser and its exact four test methods were compiled/executed locally with Kotlin/JVM on JDK 21 using a minimal JUnit-compatible assertion stub: valid P-256 accepted; P-384, off-curve point, and out-of-field coordinate rejected. This is a focused local check, not the repository Gradle/JDK 17 test task.
+
+### Change
+
+- Remove the separate emulator warm-up action and unreliable Quick Boot snapshot load/save path.
+- Restore/cache the AVD definition and corresponding AOSP system-image package, then run the instrumentation command in one emulator action per job.
+- Disable snapshots explicitly (`-no-snapshot`) to avoid the observed Error -22 restore path; disable the unused back camera; retain TCG, ADB pre-start, `swiftshader_indirect`, and the 1,200-second boot bound.
+- Save the AVD/system-image cache after a successful instrumentation action, so the first successful run seeds subsequent runs without an extra emulator boot.
+- Upgrade both repository workflows to Node 24-native action releases: checkout v6, setup-java v6, upload-artifact v6, cache restore/save v5, and setup-gradle v5.
+
+### Validation boundary
+
+- The current PR #2 run [#45331772915](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45331772915) validates the previous two-action workflow, not this single-boot redesign or the staged P-256 code.
+- The staged code/workflow changes must be fast-forwarded to PR #2 only after the current run completes, then validated by a fresh PR CI run. No startup speedup or cache-hit benefit is claimed yet.

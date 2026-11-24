@@ -298,3 +298,8 @@ The candidate workflow now uses AOSP `default` images (no Google Play dependency
 ## 2026-11-24 — P-256 public-point validation staged
 
 The shared SPKI parser now has a proposed hardening change to reject EC point-at-infinity, coordinates outside the P-256 field, and points that fail the curve equation. Two JVM negative tests cover an off-curve point and a coordinate equal to the field prime. The change is staged separately while PR #2 run [#45331772915](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45331772915) validates the preceding CI workflow update. No v2 COSE parser or wire schema is introduced; this is not yet CI-verified and must be validated on the next PR head.
+
+
+## 2026-11-24 — Emulator CI findings and next candidate
+
+Run [#45331772915](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45331772915) passed `verify` and API 31 Keystore instrumentation (8/8, no failures/errors/skips). API 31 and API 34 emulator preparation completed, but the API 31 second launch logged Quick Boot snapshot restore Error -22 and fell back to cold boot. The staged candidate therefore removes the extra warm-up boot, disables snapshot restore, caches the AVD definition plus AOSP system image, and runs each API's instrumentation once per job. It also upgrades both workflows to Node 24-native action versions. API 34 instrumentation was still running when this note was prepared; its final result remains pending.
