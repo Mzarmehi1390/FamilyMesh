@@ -305,3 +305,14 @@ A source audit identified that the common P-256 SPKI parser checked curve parame
 ## 2026-11-24 — Emulator workflow redesign staged
 
 The current PR run proves API 31 can boot and pass 8/8 Keystore tests, but its second emulator launch failed to restore `default_boot` (Error -22) and fell back to cold boot. A candidate revision on `staging/security-and-ci-hardening-20261124` removes the separate warm-up boot, caches AVD definition plus AOSP system image, disables snapshots explicitly, and runs each API's tests in one emulator action. Both workflows also move to Node 24-native action versions. The candidate is not yet in PR #2; wait for run #45331772915 to finish before fast-forwarding it.
+
+
+## 2026-11-24 — PR #2 integration CI fully green
+
+- Android CI run [#45331772915](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45331772915) completed successfully on PR #2 head `93adcffc67d75d70d8b9397b1cd9f7308b169160`; all three jobs passed.
+- `verify` passed the draft COSE primitive KAT verifier, `testDebugUnitTest`, `assembleDebug`, Room schema generation, and artifact uploads.
+- API 31 Keystore instrumentation passed 8/8 tests with 0 failures and 0 skipped.
+- API 34 instrumentation passed 9/9 storage tests and 8/8 identity tests, with 0 failures and 0 skipped in both suites.
+- The prior two-action emulator setup still logged a Quick Boot restore `Error -22` on API 31 and fell back to a cold boot; this did not prevent the test suite from executing and passing. The new single-boot AVD/system-image cache redesign is intended to remove that redundant snapshot path, but remains unverified until a fresh run.
+- The two commits on `staging/security-and-ci-hardening-20261124` add explicit P-256 imported-point validation with negative JVM tests and redesign emulator caching/action versions. They are not included in PR #2 yet and are not covered by run #45331772915.
+- Next action: fast-forward the PR #2 working branch to the staged candidate and require a new full CI run. Keep PR #2 Draft and unmerged; the COSE v2, owner-decision, expiry, replay, revocation, and recovery reviews remain open.
