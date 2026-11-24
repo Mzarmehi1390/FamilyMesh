@@ -316,3 +316,16 @@ The current PR run proves API 31 can boot and pass 8/8 Keystore tests, but its s
 - The prior two-action emulator setup still logged a Quick Boot restore `Error -22` on API 31 and fell back to a cold boot; this did not prevent the test suite from executing and passing. The new single-boot AVD/system-image cache redesign is intended to remove that redundant snapshot path, but remains unverified until a fresh run.
 - The two commits on `staging/security-and-ci-hardening-20261124` add explicit P-256 imported-point validation with negative JVM tests and redesign emulator caching/action versions. They are not included in PR #2 yet and are not covered by run #45331772915.
 - Next action: fast-forward the PR #2 working branch to the staged candidate and require a new full CI run. Keep PR #2 Draft and unmerged; the COSE v2, owner-decision, expiry, replay, revocation, and recovery reviews remain open.
+
+
+## 2026-11-24 — Single-boot emulator workflow and P-256 hardening verified
+
+- Current PR #2 head: `79304843f42ad1ef1fc0e331c2f562a2da731302`; PR #2 remains open, Draft, and unmerged. Default branch `main` remains unchanged at `968b580283b2ce17d0deda83beab4675ec55b845`.
+- Android CI run [#45406912355](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45406912355) completed successfully across all three jobs on this exact head.
+- `verify`: the draft COSE primitive KAT verifier, `testDebugUnitTest`, `assembleDebug`, Room schema generation, and artifact uploads succeeded.
+- API 34: Room/storage instrumentation 9/9 and identity/Keystore instrumentation 8/8 passed; zero failures and zero skipped.
+- API 31: identity/Keystore instrumentation 8/8 passed; zero failures and zero skipped.
+- The new single-boot AVD + AOSP system-image cache workflow executed both emulator jobs successfully. Initial ADB polling emitted transient exit-code-1 messages and emulator-console warnings, but both Gradle instrumentation commands subsequently ran and passed. This run confirms test execution, not a measured boot-time or cache-efficiency improvement.
+- The common v1 P-256 SPKI import boundary now rejects point-at-infinity, out-of-field coordinates, and off-curve points; its malformed-point JVM tests are included in the passing verify job. This does not implement or approve COSE v2.
+- Artifacts include the Debug APK, Room schema snapshot, and API 31/API 34 instrumentation reports. Emulator tests do not prove hardware-backed Keystore assurance, attestation, or physical-device compatibility.
+- Next: continue the ADR-gated enrollment protocol review. Resolve the COSE v2 schema/interop, DER-to-R||S and low-S policy, key-ID migration, time/replay semantics, owner-issued decision ledger, exact FMJA1 replay identity, and trust/revocation/recovery design before changing Room v7, authorization, or any network transport. Keep PR #2 Draft and do not merge it automatically.
