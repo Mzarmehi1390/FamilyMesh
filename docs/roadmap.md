@@ -11,7 +11,7 @@
 - [x] Basic launch screen and shared theme
 - [x] Unit-test baseline
 - [x] GitHub Actions workflow
-- [x] Verify unit tests and debug APK on the clean GitHub Actions Ubuntu/JDK 17/Gradle 8.13 environment (latest full integration candidate: PR #2 run #45331772915, 2026-11-24; verify, API 31 Keystore, and API 34 Room/Keystore jobs all passed)
+- [x] Verify unit tests and debug APK on the clean GitHub Actions Ubuntu/JDK 17/Gradle 8.13 environment (latest full integration candidate: PR #2 run #45406912355, 2026-11-24; verify, API 31 identity, and API 34 storage/identity jobs all passed)
 - [x] Add and validate the official Gradle 8.13 Wrapper (JAR and distribution checksums pinned; PR #2 CI run #43602180283 passed)
 
 ## Milestone 1 — Domain and identity
@@ -91,7 +91,7 @@ Required gates:
 - [ ] Define replay protection and nonce retention across multiple devices
 - [ ] Define trusted owner ceremony, ownership transfer, revocation, and recovery
 - [ ] Threat-model the complete enrollment flow, including local database tampering, clock skew, compromised devices, and offline peers
-- [x] Add Android API 31+ Keystore instrumentation coverage (PR #2 run #43602180283: API 31 and API 34 instrumentation jobs passed; this verifies tested platform behavior, not hardware backing or attestation)
+- [x] Add Android API 31+ Keystore instrumentation coverage (PR #2 run #45406912355: API 31 identity 8/8; API 34 storage 9/9 and identity 8/8 passed; this verifies tested platform behavior, not hardware backing or attestation)
 - [x] Add `MigrationTestHelper` coverage for Room start versions 1–7, representative row preservation, and final SQLite constraints
 - [x] Pass the fixture-backed Room migration suite on API 34 (run #43231837501: 7 tests, 0 failures/errors/skips; v1–v7 migration and preservation assertions passed)
 - [x] Execute deterministic concurrent DAO coverage for same-artifact imports with different receipt times and concurrent opposite outcomes (PR #2 run #43602180283 passed; tests characterize current DAO outcomes only and do not choose product idempotency/conflict policy)
