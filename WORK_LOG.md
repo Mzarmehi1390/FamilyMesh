@@ -921,3 +921,22 @@ Verify the new PR #2 head with CI, including the three new cancellation-helper u
 
 - The current PR #2 run [#45331772915](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45331772915) validates the previous two-action workflow, not this single-boot redesign or the staged P-256 code.
 - The staged code/workflow changes must be fast-forwarded to PR #2 only after the current run completes, then validated by a fresh PR CI run. No startup speedup or cache-hit benefit is claimed yet.
+
+
+## 2026-11-24 — Verify complete API 31/API 34 integration run
+
+### Run evidence
+
+- PR #2 candidate head: `93adcffc67d75d70d8b9397b1cd9f7308b169160`.
+- Android CI run [#45331772915](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45331772915) concluded `success`; all three jobs completed successfully.
+- `verify` passed the Python/OpenSSL primitive KAT check, JVM unit tests, Debug APK assembly, Room schema export, and both artifacts.
+- API 31 identity instrumentation: 8 tests, 0 failures, 0 errors, 0 skipped.
+- API 34 storage instrumentation: 9 tests, 0 failures, 0 errors, 0 skipped; API 34 identity instrumentation: 8 tests, 0 failures, 0 errors, 0 skipped.
+- The API 31 job's earlier emulator snapshot restore logged Error -22 and fell back to cold boot; the Gradle instrumentation command nevertheless ran and passed. This is a workflow-efficiency/reliability issue, not a test failure.
+
+### Candidate follow-up
+
+- `staging/security-and-ci-hardening-20261124` is exactly two commits ahead of the tested PR #2 head. It adds common-boundary P-256 point validation (reject infinity, out-of-field coordinates, and off-curve points) with two JVM negative tests, and replaces the redundant emulator warm-up/snapshot path with a single-boot AVD + system-image cache.
+- The staged parser tests received a focused Kotlin/JVM check under JDK 21 with a minimal JUnit-compatible stub, but this is not the repository Gradle/JDK 17 verification.
+- The new workflow and parser changes have not yet been exercised by GitHub Actions. They must be fast-forwarded to PR #2 only as a review candidate and validated by a fresh complete CI run.
+- No Room schema, protocol wire format, authorization, messaging, or transport behavior changed in these two staged commits.
