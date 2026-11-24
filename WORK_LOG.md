@@ -876,3 +876,23 @@ Verify the new PR #2 head with CI, including the three new cancellation-helper u
 - Workflow and status-document changes are committed together to the existing PR #2 branch.
 - The next PR CI run is the required validation of the new AOSP image, ADB pre-start, and snapshot-cache path. Until that run finishes, no new API 31/API 34 instrumentation pass is claimed.
 - No local Android SDK/emulator build or physical-device profile was available in this run; no performance or battery improvement is claimed.
+
+
+## 2026-11-24 — Validate imported P-256 public points
+
+### Source audit
+
+- The shared `P256PublicKeyParser` restricted imported SubjectPublicKeyInfo keys to P-256 domain parameters, but did not explicitly check that affine coordinates were in the field or that the point satisfied the curve equation.
+- All current signed enrollment artifact verifiers reuse this parser, so consistent point validation belongs at this common trust boundary.
+
+### Change
+
+- Reject the point at infinity, negative/out-of-field coordinates, and points that do not satisfy the P-256 curve equation before returning an imported public key.
+- Add JVM tests for an off-curve point and a coordinate equal to the field prime; retain the existing positive P-256 and negative P-384 tests.
+- This hardens the current v1 SPKI import/verification path only. It does not implement a v2 COSE key parser, freeze any v2 schema, or satisfy the independent COSE interoperability gate.
+
+### Validation boundary
+
+- This change is staged on `staging/security-and-ci-hardening-20261124` from PR #2 head `93adcffc67d75d70d8b9397b1cd9f7308b169160`; it has not yet been added to PR #2 because run [#45331772915](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45331772915) is validating the preceding emulator-workflow change.
+- The JVM tests and Android build must run on the next PR #2 CI head before this parser hardening is treated as verified.
+- No benchmark or runtime performance gain is claimed; no Room, protocol, authorization, transport, or UI behavior changed.

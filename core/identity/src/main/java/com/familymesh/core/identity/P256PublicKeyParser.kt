@@ -25,7 +25,7 @@ internal object P256PublicKeyParser {
                 init(ECGenParameterSpec("secp256r1"))
                 getParameterSpec(ECParameterSpec::class.java)
             }
-            if (key.params.isP256EquivalentTo(expected)) key else null
+            if (key.params.isP256EquivalentTo(expected) && key.hasValidP256Point()) key else null
         } catch (_: Exception) {
             null
         }
@@ -41,4 +41,29 @@ internal object P256PublicKeyParser {
             order == expected.order &&
             cofactor == expected.cofactor
     }
+}
+
+
+/**
+ * JCA providers differ in how eagerly they validate imported EC points.
+ * Enforce the P-256 field bounds and curve equation at this shared trust
+ * boundary so every enrollment-artifact verifier gets the same guarantee.
+ */
+private fun ECPublicKey.hasValidP256Point(): Boolean {
+    val field = params.curve.field as? ECFieldFp ?: return false
+    val prime = field.p
+    val point = w
+    if (point == ECPoint.POINT_INFINITY) return false
+
+    val x = point.affineX ?: return false
+    val y = point.affineY ?: return false
+    if (x.signum() < 0 || x >= prime || y.signum() < 0 || y >= prime) return false
+
+    val curve = params.curve
+    val left = y.multiply(y).mod(prime)
+    val right = x.multiply(x).multiply(x)
+        .add(curve.a.multiply(x))
+        .add(curve.b)
+        .mod(prime)
+    return left == right
 }

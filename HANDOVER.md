@@ -295,3 +295,8 @@ Continue the identity/trusted-enrollment review without enabling messaging trans
 - The workflow now prepares/caches AOSP API 31 and API 34 emulator snapshots, explicitly starts ADB before launch, uses `swiftshader_indirect`, and allows 1,200 seconds for cold boot. Wait for the next PR CI result before treating these jobs as verified.
 - No source runtime, Room schema, cryptographic profile, authorization, or transport change was made in this cycle. Room remains v7 and the draft COSE primitive verifier remains fixture-only.
 - Next priorities: verify the new emulator workflow; then resume the ADR-gated protocol review (four-artifact parity, independent deterministic-CBOR/COSE evidence, time/replay semantics, owner-decision authority, revocation and recovery). Do not start production messaging, P2P, BLE, Wi-Fi Direct, relay, or schema v8 before those decisions are approved.
+
+
+## 2026-11-24 — P-256 parser hardening staged
+
+A source audit identified that the common P-256 SPKI parser checked curve parameters but did not itself assert coordinate bounds and the curve equation. A candidate adds those checks and two malformed-point JVM tests. It is staged on `staging/security-and-ci-hardening-20261124`, based on PR #2 head `93adcffc67d75d70d8b9397b1cd9f7308b169160`, and is not yet part of PR #2. First allow run [#45331772915](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45331772915) to finish; then fast-forward the PR branch to the staged candidate and require the next CI run to pass. This change does not implement COSE v2 or alter the protocol.
