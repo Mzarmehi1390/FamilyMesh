@@ -11,7 +11,7 @@
 - [x] Basic launch screen and shared theme
 - [x] Unit-test baseline
 - [x] GitHub Actions workflow
-- [x] Verify unit tests and debug APK on the clean GitHub Actions Ubuntu/JDK 17/Gradle 8.13 environment (latest verified integration candidate: PR #2 run #43602180283, 2026-11-17)
+- [x] Verify unit tests and debug APK on the clean GitHub Actions Ubuntu/JDK 17/Gradle 8.13 environment (latest full integration candidate: PR #2 run #45331772915, 2026-11-24; verify, API 31 Keystore, and API 34 Room/Keystore jobs all passed)
 - [x] Add and validate the official Gradle 8.13 Wrapper (JAR and distribution checksums pinned; PR #2 CI run #43602180283 passed)
 
 ## Milestone 1 — Domain and identity
