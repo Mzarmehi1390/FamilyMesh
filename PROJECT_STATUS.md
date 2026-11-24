@@ -1,6 +1,6 @@
 # FamilyMesh Project Status
 
-Last audited: 2026-11-23
+Last audited: 2026-11-24
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
 Default branch: `main` at `968b580283b2ce17d0deda83beab4675ec55b845` (unchanged; no candidate changes merged)
 Current integration candidate: [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2), branch `build/gradle-wrapper-8.13-20261109`.
@@ -286,3 +286,10 @@ Continue the identity/trusted-enrollment review without enabling messaging trans
 
 - No local Android build is available in this session. The updated PR CI must compile and test this cleanup.
 - This is a behavior-preserving cleanup; no performance gain is claimed. No domain, Room schema, protocol, cryptographic, authorization, or transport behavior changed.
+
+
+## 2026-11-24 — Latest emulator CI result and mitigation
+
+PR #2 remains the only integration candidate; `main` is unchanged at `968b580283b2ce17d0deda83beab4675ec55b845`. On candidate head `90de4eaaa6b7505dd3c06e0c43c8d755c9437803`, Android CI run [#45191763315](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45191763315) passed the complete `verify` job (COSE primitive KAT, JVM unit tests, Debug APK, Room schema export, and artifacts). Both instrumentation jobs failed before Gradle tests: API 34 timed out before emulator boot completion; API 31 booted but ADB failed on the post-boot unlock command with a broken pipe. These are infrastructure/startup failures, not failed test assertions, and no new instrumentation pass is claimed.
+
+The candidate workflow now uses AOSP `default` images (no Google Play dependency in these suites), `swiftshader_indirect`, explicit ADB-server startup, per-API AVD snapshot caching, a 1,200-second boot window, and a 45-minute job timeout. The next CI run must validate this mitigation before the emulator gate can be closed. Room remains v7; protocol/security gates and all messaging transports remain unchanged.

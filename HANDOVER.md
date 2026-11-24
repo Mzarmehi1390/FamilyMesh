@@ -1,6 +1,6 @@
 # FamilyMesh Handover
 
-Last synchronized: 2026-11-23
+Last synchronized: 2026-11-24
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
 Default branch: `main`
 
@@ -285,3 +285,13 @@ Continue the identity/trusted-enrollment review without enabling messaging trans
 
 - No local Android build is available in this session. The updated PR CI must compile and test this cleanup.
 - This is a behavior-preserving cleanup; no performance gain is claimed. No domain, Room schema, protocol, cryptographic, authorization, or transport behavior changed.
+
+
+## 2026-11-24 — Current integration and CI handover
+
+- Current integration branch: `build/gradle-wrapper-8.13-20261109`; baseline head before the latest workflow update: `90de4eaaa6b7505dd3c06e0c43c8d755c9437803`.
+- PR #2 is open, Draft, and not merged. PR #1 remains superseded; PRs #3 and #4 contain changes already integrated into PR #2 and must not be merged independently.
+- Latest completed CI before this update: [run #45191763315](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45191763315). The `verify` job passed. API 34 did not complete emulator boot; API 31 booted but failed at the action's ADB unlock step. Neither instrumentation Gradle command ran.
+- The workflow now prepares/caches AOSP API 31 and API 34 emulator snapshots, explicitly starts ADB before launch, uses `swiftshader_indirect`, and allows 1,200 seconds for cold boot. Wait for the next PR CI result before treating these jobs as verified.
+- No source runtime, Room schema, cryptographic profile, authorization, or transport change was made in this cycle. Room remains v7 and the draft COSE primitive verifier remains fixture-only.
+- Next priorities: verify the new emulator workflow; then resume the ADR-gated protocol review (four-artifact parity, independent deterministic-CBOR/COSE evidence, time/replay semantics, owner-decision authority, revocation and recovery). Do not start production messaging, P2P, BLE, Wi-Fi Direct, relay, or schema v8 before those decisions are approved.

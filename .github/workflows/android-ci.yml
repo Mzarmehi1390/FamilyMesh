@@ -51,12 +51,13 @@ jobs:
           retention-days: 7
 
   storage-instrumentation:
-    # Hosted Linux runners currently expose no hardware virtualization. Enable
-    # QEMU TCG explicitly so the emulator can boot instead of exiting at -accel off.
+    # Hosted Linux runners have no nested hardware virtualization. Keep TCG enabled,
+    # use the smaller AOSP image (these tests do not need Google Play services), and
+    # cache a clean Quick Boot snapshot so later runs avoid repeated cold boots.
     env:
       ANDROID_I_WANT_MY_TCG: "yes"
     runs-on: ubuntu-22.04
-    timeout-minutes: 35
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -67,16 +68,40 @@ jobs:
           java-version: "17"
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
+      - name: Restore API 34 emulator cache
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: familymesh-avd-api34-${{ runner.os }}-${{ runner.arch }}-default-x86_64-pixel2-v1
+      - name: Prepare API 34 emulator snapshot on cache miss
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: default
+          arch: x86_64
+          profile: pixel_2
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-metrics
+          disable-animations: true
+          emulator-boot-timeout: 1200
+          pre-emulator-launch-script: adb start-server
+          script: echo "API 34 emulator snapshot prepared."
       - name: Run Room and Keystore tests on API 34 emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
-          target: google_apis
+          target: default
           arch: x86_64
           profile: pixel_2
-          emulator-options: -no-window -gpu swiftshader -no-snapshot -noaudio -no-boot-anim -no-metrics
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot-save -noaudio -no-boot-anim -no-metrics
           disable-animations: true
-          emulator-boot-timeout: 600
+          emulator-boot-timeout: 1200
+          pre-emulator-launch-script: adb start-server
           script: ./gradlew :core:storage:connectedDebugAndroidTest :core:identity:connectedDebugAndroidTest
       - name: Upload API 34 instrumentation reports
         if: always()
@@ -92,11 +117,11 @@ jobs:
           retention-days: 7
 
   identity-api31-instrumentation:
-    # Use the same explicit software-CPU-emulation opt-in for the minimum API job.
+    # Match API 34's TCG, AOSP image, ADB pre-start and snapshot strategy.
     env:
       ANDROID_I_WANT_MY_TCG: "yes"
     runs-on: ubuntu-22.04
-    timeout-minutes: 35
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -107,18 +132,40 @@ jobs:
           java-version: "17"
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
+      - name: Restore API 31 emulator cache
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: familymesh-avd-api31-${{ runner.os }}-${{ runner.arch }}-default-x86_64-pixel2-v1
+      - name: Prepare API 31 emulator snapshot on cache miss
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 31
+          target: default
+          arch: x86_64
+          profile: pixel_2
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-metrics
+          disable-animations: true
+          emulator-boot-timeout: 1200
+          pre-emulator-launch-script: adb start-server
+          script: echo "API 31 emulator snapshot prepared."
       - name: Run Keystore tests on minimum supported API 31
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 31
-          target: google_apis
+          target: default
           arch: x86_64
           profile: pixel_2
-          emulator-options: -no-window -gpu swiftshader -no-snapshot -noaudio -no-boot-anim -no-metrics
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot-save -noaudio -no-boot-anim -no-metrics
           disable-animations: true
-          # API 31 TCG boot took about 611s in run #45166958142; 600s expired just before boot completed.
-          # Allow additional startup headroom on hosted runners before instrumentation begins.
-          emulator-boot-timeout: 900
+          emulator-boot-timeout: 1200
+          pre-emulator-launch-script: adb start-server
           script: ./gradlew :core:identity:connectedDebugAndroidTest
       - name: Upload API 31 identity instrumentation reports
         if: always()

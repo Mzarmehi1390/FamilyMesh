@@ -850,3 +850,29 @@ Verify the new PR #2 head with CI, including the three new cancellation-helper u
 
 - A new PR #2 CI run is required to verify the API 31 test command now executes. No API 31 pass is claimed yet.
 - No local Android SDK/Gradle build or physical-device test was available in this automation environment.
+
+
+## 2026-11-24 — Emulator CI startup reliability and repeat-run cost
+
+### Latest repository state and diagnosis
+
+- Re-synchronized against PR #2 head `90de4eaaa6b7505dd3c06e0c43c8d755c9437803`; `main` remains at `968b580283b2ce17d0deda83beab4675ec55b845`.
+- Android CI run [#45191763315](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45191763315) completed with `verify` passing: the COSE primitive verifier, JVM unit tests, Debug APK assembly, Room schema generation, and artifact uploads all succeeded.
+- API 34 instrumentation did not start: the emulator never reported `sys.boot_completed=1` before the configured 600-second boot window. No Room/Keystore assertions ran and no JUnit result exists for this job.
+- API 31 reached `sys.boot_completed=1`, but the action then failed while sending its unlock key event: ADB returned `Broken pipe (32)` / exit code 224. The Gradle instrumentation command did not start. This is an emulator/ADB startup failure, not a Keystore assertion failure.
+- The earlier TCG opt-in removed the explicit unsupported-acceleration error, but did not make cold boots reliable. The workflow therefore must not report either API's latest instrumentation result as passing.
+
+### Change
+
+- Use the AOSP `default` system image instead of `google_apis`; the Room and Android Keystore suites do not use Google Play services.
+- Switch to the action's recommended `swiftshader_indirect` software-rendering mode.
+- Start the ADB server explicitly before launching each emulator.
+- Add separate API 31/API 34 AVD caches and create a clean Quick Boot snapshot on a cache miss; subsequent CI attempts can restore the prepared emulator instead of paying the full cold-boot cost every time.
+- Raise the first-boot window to 1,200 seconds and job timeout to 45 minutes so the TCG fallback has bounded startup headroom.
+- Keep the same test commands and API coverage. No application runtime, persistence schema, protocol, cryptographic, authorization, or transport behavior changes.
+
+### Validation boundary
+
+- Workflow and status-document changes are committed together to the existing PR #2 branch.
+- The next PR CI run is the required validation of the new AOSP image, ADB pre-start, and snapshot-cache path. Until that run finishes, no new API 31/API 34 instrumentation pass is claimed.
+- No local Android SDK/emulator build or physical-device profile was available in this run; no performance or battery improvement is claimed.
