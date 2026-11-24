@@ -940,3 +940,29 @@ Verify the new PR #2 head with CI, including the three new cancellation-helper u
 - The staged parser tests received a focused Kotlin/JVM check under JDK 21 with a minimal JUnit-compatible stub, but this is not the repository Gradle/JDK 17 verification.
 - The new workflow and parser changes have not yet been exercised by GitHub Actions. They must be fast-forwarded to PR #2 only as a review candidate and validated by a fresh complete CI run.
 - No Room schema, protocol wire format, authorization, messaging, or transport behavior changed in these two staged commits.
+
+
+## 2026-11-24 — PR #2 head 7930484: complete API 31/API 34 CI validation
+
+### Verified evidence
+
+Android CI [run #45406912355](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45406912355) completed with all three jobs successful on PR #2 head `79304843f42ad1ef1fc0e331c2f562a2da731302`.
+
+- `verify`: `./gradlew testDebugUnitTest` completed successfully; `./gradlew assembleDebug` completed successfully; Room schema generation and artifact uploads completed successfully. The job also ran the draft COSE v2 primitive KAT verifier.
+- API 34 job: `:core:storage:connectedDebugAndroidTest` completed 9/9 tests with 0 skipped and 0 failed; `:core:identity:connectedDebugAndroidTest` completed 8/8 with 0 skipped and 0 failed.
+- API 31 job: `:core:identity:connectedDebugAndroidTest` completed 8/8 with 0 skipped and 0 failed.
+- The logs show transient ADB exit-code-1 polling during emulator startup and emulator-console warnings, followed by successful execution of both Gradle instrumentation commands and `BUILD SUCCESSFUL`.
+- Uploaded artifacts: Debug APK, Room schema snapshot, API 34 instrumentation reports, and API 31 instrumentation reports.
+
+### Changes covered by this validation
+
+- Explicit P-256 public-point validation at the existing v1 X.509 SPKI import boundary, including point-at-infinity, coordinate range, and curve-equation checks, with malformed-point JVM coverage.
+- Single-boot AOSP AVD/system-image cache workflow for API 31 and API 34; no separate warm-up/snapshot restore path.
+- Node 24-compatible major versions of the GitHub Actions used by the workflow.
+
+### Boundaries and next work
+
+- This validates the tested PR head on GitHub-hosted emulator images. It does not prove hardware-backed Keystore protection, remote attestation, physical-device behavior, or performance/battery improvements.
+- PR #2 remains Draft and unmerged; main remains unchanged. Room remains v7.
+- The COSE v2 proposal is still not approved. Complete four-artifact schemas/vectors, two independent COSE implementations, DER-to-R||S and low-S policy, key-ID migration, time/expiry/replay semantics, owner-issued decision authority, exact FMJA1 replay identity, and owner trust/revocation/recovery remain open.
+- Do not implement v7→v8 or enable production authorization/network transport until the relevant ADRs and security review are approved.
