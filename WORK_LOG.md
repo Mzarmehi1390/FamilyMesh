@@ -1067,3 +1067,12 @@ Android CI [run #45406912355](https://github.com/Mzarmehi1390/FamilyMesh/actions
 - Run the unit suite in the Android CI `verify` job before the direct repository-policy check.
 - Local validation against the staged FamilyMesh manifest and data-extraction XML passed. The unit suite passed 15/15; Python bytecode compilation passed.
 - This validates the verifier and staged XML structure only. Android Gradle/Lint/Emulator CI for the integrated commit remains pending; no Android build result is inferred from these Python checks.
+
+
+## 2026-11-25 — Remove the redundant adaptive-icon API qualifier
+
+- The integrated candidate's Lint artifact from run #45556670546 reported 18 app warnings and zero warnings in each core module. The earlier missing data-extraction-rules and missing launcher-icon findings are gone.
+- The new adaptive icon was placed in `mipmap-anydpi-v26`, but the app's `minSdk` is 31. Lint correctly identified the API-26 resource qualifier as redundant.
+- Move `ic_launcher.xml` to `mipmap-anydpi` without changing its adaptive foreground, background, or monochrome layers.
+- The `verify` job for run #45556670546 passed the COSE KAT, 15 backup-policy regression tests, direct backup-policy check, JVM tests, Android Lint, Debug APK assembly, Room schema export, and artifact uploads. API 31/API 34 instrumentation jobs were still running when this note was added.
+- The qualifier correction is staged separately and requires a fresh full CI run before it is considered validated.
