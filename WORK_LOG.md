@@ -1048,3 +1048,12 @@ Android CI [run #45406912355](https://github.com/Mzarmehi1390/FamilyMesh/actions
 - Changes are staged on `staging/manifest-backup-and-icon-20261125` from `8a744e44da561e5622272a39f669c5b599535104`; they are not integrated into PR #2 yet.
 - The current PR CI run #45554437797 is still validating Android-provider parser tests and Lint report upload. This branch requires its own fresh CI after integration.
 - No runtime, encryption, key, database, authorization, or transport behavior is intentionally changed.
+
+
+## 2026-11-25 — Add a regression guard for Android backup exclusions
+
+- Add a dependency-free Python verifier for the manifest and Android 12+ data-extraction rules.
+- Require `android:allowBackup=false`, the explicit `@xml/data_extraction_rules` reference, and a launcher icon reference.
+- Require both cloud-backup and device-transfer sections to exclude all supported app data domains, with no include rules.
+- Run the verifier in the Android CI `verify` job before Gradle tasks so a future manifest/rules edit cannot silently re-enable backup or device-to-device transfer.
+- The verifier and CI step are staged on `staging/manifest-backup-and-icon-20261125`; a local Python check and fresh PR CI run are required before considering this gate validated.
