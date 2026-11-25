@@ -37,6 +37,35 @@ class P256PublicKeyParserTest {
         assertNull(P256PublicKeyParser.decode(invalidPoint))
     }
 
+    @Test
+    fun rejectsP256PointAtInfinity() {
+        val encoded = p256SubjectPublicKeyInfo(byteArrayOf(0x00))
+        assertNull(P256PublicKeyParser.decode(encoded))
+    }
+
+    private fun p256SubjectPublicKeyInfo(point: ByteArray): ByteArray {
+        val algorithmIdentifier = hexBytes("301306072a8648ce3d020106082a8648ce3d030107")
+        val bitString = der(0x03, byteArrayOf(0x00) + point)
+        return der(0x30, algorithmIdentifier + bitString)
+    }
+
+    private fun hexBytes(value: String): ByteArray =
+        ByteArray(value.length / 2) { index ->
+            value.substring(index * 2, index * 2 + 2).toInt(16).toByte()
+        }
+
+    private fun der(tag: Int, content: ByteArray): ByteArray =
+        byteArrayOf(tag.toByte()) + derLength(content.size) + content
+
+    private fun derLength(length: Int): ByteArray {
+        if (length < 128) return byteArrayOf(length.toByte())
+        val byteCount = (32 - Integer.numberOfLeadingZeros(length) + 7) / 8
+        val encoded = ByteArray(byteCount) { index ->
+            (length ushr ((byteCount - index - 1) * 8)).toByte()
+        }
+        return byteArrayOf((0x80 or byteCount).toByte()) + encoded
+    }
+
     private fun keyPair(curve: String) = KeyPairGenerator.getInstance("EC").run {
         initialize(ECGenParameterSpec(curve))
         generateKeyPair()
