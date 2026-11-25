@@ -1057,3 +1057,13 @@ Android CI [run #45406912355](https://github.com/Mzarmehi1390/FamilyMesh/actions
 - Require both cloud-backup and device-transfer sections to exclude all supported app data domains, with no include rules.
 - Run the verifier in the Android CI `verify` job before Gradle tasks so a future manifest/rules edit cannot silently re-enable backup or device-to-device transfer.
 - The verifier and CI step are staged on `staging/manifest-backup-and-icon-20261125`; a local Python check and fresh PR CI run are required before considering this gate validated.
+
+
+## 2026-11-25 — Add fail-closed negative tests for Android backup policy
+
+- Refactor `tools/verify_android_backup_rules.py` into a path-injectable validation function so its policy can be tested without changing repository files.
+- Reject unexpected extraction sections (including cross-platform transfer), unknown child rules, includes, duplicate or missing domains, partial-path exclusions, and missing manifest attributes.
+- Add 15 Python unit tests: one valid-policy case and 14 negative cases covering manifest attributes, XML structure, and both transfer modes.
+- Run the unit suite in the Android CI `verify` job before the direct repository-policy check.
+- Local validation against the staged FamilyMesh manifest and data-extraction XML passed. The unit suite passed 15/15; Python bytecode compilation passed.
+- This validates the verifier and staged XML structure only. Android Gradle/Lint/Emulator CI for the integrated commit remains pending; no Android build result is inferred from these Python checks.
