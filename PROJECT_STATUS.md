@@ -3,9 +3,11 @@
 Last audited: 2026-11-25
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
 Default branch: `main` at `968b580283b2ce17d0deda83beab4675ec55b845` (unchanged; no candidate changes merged)
-Current integration candidate: [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2), branch `build/gradle-wrapper-8.13-20261109`, pre-staging head `a5a86de07ded532685249bf734111915cde20646` (open, Draft, unmerged).
-Latest complete CI: [run #45552834794](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45552834794) passed all three jobs on that head. The verify job passed the COSE primitive KAT, JVM unit tests, aggregate Android Lint `lintDebug`, Debug APK assembly, and Room schema export. API 31 identity passed 8/8; API 34 storage passed 9/9; API 34 identity passed 8/8; all instrumentation suites had zero failures, errors, or skips.
-Staged follow-up: `staging/android-p256-provider-coverage-20261125` adds three Android-provider P-256 parser instrumentation tests and Lint report artifact upload. These changes are not yet integrated or validated by CI.
+Current integration candidate: [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2), branch `build/gradle-wrapper-8.13-20261109`, head `754e7065eaa414c9689db6f299ba3a9dc30729db` (open, Draft, unmerged).
+Latest completed full CI: [run #45556670546](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45556670546) passed all three jobs on the immediately preceding head `997421221cf2ba4e9bcbae4db403620276a79ddf`. Verify passed COSE KAT, 15 backup-policy unit tests, direct backup-policy verification, JVM tests, aggregate Lint, Debug APK assembly, Room schema export, and artifact uploads. API 31 identity passed 11/11; API 34 storage 9/9; API 34 identity 11/11; all had zero failures/errors/skips.
+Current-head validation: [run #45626115545](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45626115545) is in progress for `754e7065eaa414c9689db6f299ba3a9dc30729db`; results are pending.
+The current head adds the adaptive-icon qualifier correction, Room 2.8.5 patch update, and JVM/Android-provider P-256 point-at-infinity rejection tests. These additions are not validated until run #45626115545 completes.
+Lint evidence from run #45556670546: 18 warnings in `:app`, zero in each core module; 16 version/toolchain suggestions, one `OldTargetApi`, and one `ObsoleteSdkInt`. The current head addresses the obsolete icon qualifier and updates Room; the next Lint artifact must confirm the remaining count.
 Protocol review drafts: ADR 0003 and ADR 0006 (proposals only; not production-approved)
 
 ## Overall state
@@ -25,7 +27,7 @@ production authorization are not implemented.
 | Native Android + Compose foundation | IMPLEMENTED_AND_TESTED | CI builds debug APK |
 | Modular Gradle architecture | IMPLEMENTED_AND_TESTED | Five modules present |
 | Room / DataStore local storage | IMPLEMENTED_AND_INSTRUMENTED | Room schema v7; DAO tests and fixture-backed migrations from v1–v7 pass on API 34 in PR #2 candidate; no v7→v8 validation |
-| Android Keystore device signing | IMPLEMENTED_WITH_EMULATOR_EVIDENCE | Latest PR #2 CI run #45552834794 passed API 31 identity 8/8 and API 34 identity 8/8; physical-device/hardware-backed assurance and attestation remain unverified |
+| Android Keystore device signing | IMPLEMENTED_WITH_EMULATOR_EVIDENCE | Latest completed PR #2 CI run #45556670546 passed API 31 identity 11/11 and API 34 identity 11/11; physical-device/hardware-backed assurance and attestation remain unverified |
 | Signed enrollment proof | IMPLEMENTED_AND_TESTED | Bounded local codec and verifier tests |
 | Local nonce replay protection | IMPLEMENTED_AND_TESTED | One database only; not distributed |
 | Initial-owner trust bootstrap/pinning | IMPLEMENTED_AND_TESTED | Manual out-of-band fingerprint comparison |
@@ -42,17 +44,19 @@ production authorization are not implemented.
 
 ## Latest verification
 
-- Android CI [run #45552834794](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45552834794) passed all three jobs on PR #2 head `a5a86de07ded532685249bf734111915cde20646`.
-- Verify: COSE primitive KAT, `testDebugUnitTest`, aggregate `lintDebug` across app and all four core Android modules, Debug APK assembly, Room schema export, and artifact uploads passed. The lint task took 37 seconds; detailed lint reports are not yet uploaded by this run.
-- API 31 identity instrumentation: 8/8 tests passed, 0 failures/errors/skips.
-- API 34 storage instrumentation: 9/9 passed; API 34 identity instrumentation: 8/8 passed; both had 0 failures/errors/skips.
-- The staged follow-up adds direct Android-provider tests for the shared P-256 parser and lint-report artifacts; neither is included in run #45552834794 and both require a fresh PR CI run.
-- No local Android build, physical-device profile, hardware-backed attestation, or performance/battery benchmark was run. No numeric performance gain is claimed.
+- Android CI [run #45556670546](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45556670546) passed all three jobs on the prior candidate head `997421221cf2ba4e9bcbae4db403620276a79ddf`.
+- Verify: COSE primitive KAT, 15 backup-policy regression tests, direct Android manifest/rules verification, `testDebugUnitTest`, aggregate `lintDebug` across all five Android modules, Debug APK assembly, Room schema export, and configured artifacts all passed.
+- API 31 identity/Keystore instrumentation: 11/11 passed, 0 failures/errors/skips.
+- API 34 storage instrumentation: 9/9 passed; API 34 identity/Keystore instrumentation: 11/11 passed; zero failures/errors/skips.
+- The JUnit XML artifacts were downloaded and inspected directly. The API 31 and API 34 Keystore suites include Android-provider acceptance of generated P-256 keys and rejection of off-curve and out-of-field points.
+- The Lint artifact reports 18 app warnings and zero warnings in the four core modules. The current candidate moves the adaptive icon out of the redundant `mipmap-anydpi-v26` qualifier and updates Room to 2.8.5; the new run must confirm the resulting Lint report.
+- The current candidate head `754e7065eaa414c9689db6f299ba3a9dc30729db` is under [CI run #45626115545](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45626115545); its final result is pending. No success is inferred for the six newly integrated commits.
+- No local Android build, physical-device profile, hardware-backed attestation, or battery/performance benchmark was run. No numeric performance gain is claimed.
 - No candidate changes have been merged to `main`.
 
 ## Immediate priority
 
-Integrate the staged Android-provider P-256 parser tests and lint-report upload into PR #2, then require a fresh API 31/API 34 CI run. Continue protocol design review without implementing production COSE v2, Room v8, owner-ledger semantics, authorization, or network transport until the relevant ADR decisions and independent interoperability gates are approved.
+Wait for run #45626115545 on the current PR #2 head. If all three jobs pass, inspect the new Lint artifact and confirm the Room 2.8.5 patch and point-at-infinity tests. Then resume the ADR-gated enrollment protocol review. Do not implement production COSE v2, Room v8, owner-ledger semantics, production authorization, or network transport until their respective interoperability and security decisions are approved.
 
 ## Protocol audit progress
 
