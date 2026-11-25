@@ -1076,3 +1076,13 @@ Android CI [run #45406912355](https://github.com/Mzarmehi1390/FamilyMesh/actions
 - Move `ic_launcher.xml` to `mipmap-anydpi` without changing its adaptive foreground, background, or monochrome layers.
 - The `verify` job for run #45556670546 passed the COSE KAT, 15 backup-policy regression tests, direct backup-policy check, JVM tests, Android Lint, Debug APK assembly, Room schema export, and artifact uploads. API 31/API 34 instrumentation jobs were still running when this note was added.
 - The qualifier correction is staged separately and requires a fresh full CI run before it is considered validated.
+
+
+## 2026-11-25 — Stage P-256 infinity coverage and a focused Room patch update
+
+- Add JVM and Android-provider tests that construct a valid P-256 SubjectPublicKeyInfo envelope carrying the SEC1 point-at-infinity encoding and require the shared parser to reject it.
+- A standalone Kotlin/JDK 21 harness using the current parser implementation accepted a generated valid P-256 key and rejected point-at-infinity, off-curve, and out-of-field fixtures. The 27-byte infinity SPKI structure was also inspected with OpenSSL ASN.1 parsing. This is a focused local check, not a substitute for the repository Gradle tests or Android instrumentation.
+- Stage Room 2.8.5 across the shared version catalog. Its official release note identifies a fix for suspending queries and invalidation tracker operations after database close; no Room schema or migration is changed.
+- Move the adaptive icon resource from `mipmap-anydpi-v26` to `mipmap-anydpi`, because the app minSdk is 31 and the previous v26 qualifier generated an `ObsoleteSdkInt` Lint warning. The icon layers themselves are unchanged.
+- These follow-up changes are staged on `staging/manifest-backup-and-icon-20261125`; they are not yet included in the currently running PR CI head `997421221cf2ba4e9bcbae4db403620276a79ddf`.
+- Defer the broad Lint-suggested toolchain upgrades. Official compatibility tables show AGP 9.5 requires Gradle 9.6.0, while Kotlin 2.4.21's fully supported AGP range currently ends at 9.3.1; Koin 4.2.2 is built with Kotlin 2.3.20. Treating every Lint "newer version" hint as an independent bump would create an unreviewed, potentially incompatible stack. Review the toolchain as one coordinated migration with the full test matrix.
