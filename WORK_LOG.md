@@ -1095,3 +1095,28 @@ Android CI [run #45406912355](https://github.com/Mzarmehi1390/FamilyMesh/actions
 - API 31 Keystore instrumentation completed **11/11**, with 0 failures, 0 errors, and 0 skipped tests; JUnit suite time was 30.743 seconds. The uploaded JUnit XML was downloaded and inspected directly.
 - API 34 storage instrumentation remained in progress at the latest check. No final workflow success is claimed until that job completes.
 - The later staged Room 2.8.5, adaptive-icon qualifier, and P-256 point-at-infinity changes are not included in this run.
+
+
+## 2026-11-25 — Complete CI validation and integrate focused follow-ups
+
+### Verified completed candidate
+
+- PR #2 head `997421221cf2ba4e9bcbae4db403620276a79ddf` passed Android CI [run #45556670546](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45556670546); all three jobs completed successfully.
+- `verify` passed the COSE primitive KAT, 15 backup-policy verifier tests, direct manifest/data-extraction policy check, JVM unit tests, aggregate `lintDebug`, Debug APK assembly, Room schema export, and artifact uploads.
+- API 31 Keystore instrumentation: 11/11 passed, 0 failures/errors/skips.
+- API 34 storage instrumentation: 9/9 passed; API 34 identity/Keystore instrumentation: 11/11 passed; zero failures/errors/skips. JUnit XML artifacts were downloaded and inspected directly.
+- Lint reported 18 warnings in the app and zero in each core module: 8 `GradleDependency`, 5 `NewerVersionAvailable`, 3 `AndroidGradlePluginVersion`, 1 `OldTargetApi`, and 1 `ObsoleteSdkInt`. The two earlier missing launcher-icon and data-extraction-rules findings are absent.
+- The run confirms emulator execution and the tested software Keystore behavior only; it does not establish hardware-backed assurance, attestation, or physical-device compatibility.
+
+### Reviewed fast-forward to current PR head
+
+- Compared PR #2 head `997421221cf2ba4e9bcbae4db403620276a79ddf` with `staging/manifest-backup-and-icon-20261125`; the staging branch was exactly six commits ahead and had no divergence.
+- Fast-forwarded PR #2 branch `build/gradle-wrapper-8.13-20261109` to `754e7065eaa414c9689db6f299ba3a9dc30729db` using an expected-head check. No main-branch update or history rewrite was performed.
+- The six commits add: the adaptive-icon resource move from `mipmap-anydpi-v26` to `mipmap-anydpi` without changing its layers; Room 2.8.5; and JVM plus Android-provider tests rejecting SEC1 point-at-infinity SPKI imports.
+- The Room 2.8.5 release note (2026-09-09) describes a targeted closed-database behavior fix; no Room entity or schema migration was changed. [Official AndroidX Room release notes](https://developer.android.com/jetpack/androidx/releases/room).
+- Current-head Android CI [run #45626115545](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45626115545) was triggered after the fast-forward and is still in progress at this log update. Its outcome is pending; no result is claimed for the six new commits.
+
+### Next action and boundary
+
+- Inspect all jobs and JUnit/Lint artifacts from run #45626115545 before marking the current head validated.
+- Keep PR #2 Draft and unmerged. Room remains v7; the production COSE profile, four-artifact parity, signature canonicality, distributed replay policy, owner authority, revocation/recovery, production authorization, E2EE, and all network transports remain separate review gates.
