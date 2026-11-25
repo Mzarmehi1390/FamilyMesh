@@ -988,3 +988,23 @@ Android CI [run #45406912355](https://github.com/Mzarmehi1390/FamilyMesh/actions
 - A fresh PR CI run is required to confirm the root `lintDebug` task resolves across all Android modules and that existing sources pass the analyzer.
 - Until that run completes, Android Lint is **pending**, not passed. Existing green CI results above predate this new gate.
 - No performance, battery, startup, or memory improvement is claimed.
+
+
+## 2026-11-25 — Stage Android-provider P-256 parser instrumentation
+
+### Audit rationale
+
+- The shared P-256 parser now performs explicit field-bound and curve-equation checks, and its JVM tests pass in the integrated PR CI.
+- The verifier is also used on Android devices, where the JCA provider and Android Keystore-generated X.509 public-key encoding are platform-specific. Existing Keystore instrumentation verified signatures through JCA, but did not directly exercise the shared parser.
+
+### Staged tests
+
+- Add an Android instrumentation test that feeds an Android Keystore-generated P-256 SPKI through `P256PublicKeyParser`.
+- Add Android-provider negative cases for an off-curve point and a coordinate equal to the P-256 field prime.
+- Keep these as test-only changes; no production parser, key format, protocol, persistence, or authorization behavior changes.
+
+### Validation boundary
+
+- Staged on `staging/android-p256-provider-coverage-20261125`, based on `a5a86de07ded532685249bf734111915cde20646`; not yet integrated into PR #2.
+- No Android emulator or Gradle test has been run for these new cases yet. They require API 31 and API 34 instrumentation in a fresh PR CI run.
+- The existing PR run [#45552834794](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45552834794) is still validating the preceding Android Lint gate and must finish before the staged branch is fast-forwarded into PR #2.
