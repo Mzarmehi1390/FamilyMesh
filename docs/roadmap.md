@@ -11,8 +11,12 @@
 - [x] Basic launch screen and shared theme
 - [x] Unit-test baseline
 - [x] GitHub Actions workflow
-- [x] Verify unit tests and debug APK on the clean GitHub Actions Ubuntu/JDK 17/Gradle 8.13 environment (latest full integration candidate: PR #2 run #45406912355, 2026-11-24; verify, API 31 identity, and API 34 storage/identity jobs all passed)
+- [x] Verify unit tests, lint, debug APK, Room schema, and Android instrumentation on GitHub Actions Ubuntu/JDK 17/Gradle 8.13 (PR #2 run #45556670546 passed all three jobs on 2026-11-25: API 31 identity 11/11; API 34 storage 9/9 and identity 11/11; current follow-up head is pending run #45626115545)
 - [x] Add and validate the official Gradle 8.13 Wrapper (JAR and distribution checksums pinned; PR #2 CI run #43602180283 passed)
+- [x] Add Android 12+ cloud-backup and device-transfer exclusions with a fail-closed verifier and 15 regression tests (PR #2 run #45556670546 passed)
+- [x] Add an adaptive launcher icon and remove its redundant API-26 resource qualifier (the qualifier move is on current PR #2 head; CI run #45626115545 pending)
+- [x] Update Room 2.8.4 to the focused 2.8.5 patch release (no schema change; current-head CI pending)
+- [x] Reject P-256 point-at-infinity imports in JVM and Android-provider tests (current-head CI pending)
 
 ## Milestone 1 — Domain and identity
 
@@ -91,7 +95,7 @@ Required gates:
 - [ ] Define replay protection and nonce retention across multiple devices
 - [ ] Define trusted owner ceremony, ownership transfer, revocation, and recovery
 - [ ] Threat-model the complete enrollment flow, including local database tampering, clock skew, compromised devices, and offline peers
-- [x] Add Android API 31+ Keystore instrumentation coverage (PR #2 run #45406912355: API 31 identity 8/8; API 34 storage 9/9 and identity 8/8 passed; this verifies tested platform behavior, not hardware backing or attestation)
+- [x] Add Android API 31+ Keystore instrumentation coverage (PR #2 run #45556670546: API 31 identity 11/11; API 34 storage 9/9 and identity 11/11 passed; this verifies tested platform behavior, not hardware backing or attestation)
 - [x] Add `MigrationTestHelper` coverage for Room start versions 1–7, representative row preservation, and final SQLite constraints
 - [x] Pass the fixture-backed Room migration suite on API 34 (run #43231837501: 7 tests, 0 failures/errors/skips; v1–v7 migration and preservation assertions passed)
 - [x] Execute deterministic concurrent DAO coverage for same-artifact imports with different receipt times and concurrent opposite outcomes (PR #2 run #43602180283 passed; tests characterize current DAO outcomes only and do not choose product idempotency/conflict policy)
