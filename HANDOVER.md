@@ -1,17 +1,18 @@
 # FamilyMesh Handover
 
-Last synchronized: 2026-11-24
+Last synchronized: 2026-11-25
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
 Default branch: `main`
 
 ## Last verified repository state
 
-- Default branch `main` remains at `968b580283b2ce17d0deda83beab4675ec55b845`; no candidate changes have been merged.
-- Active integration candidate: [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2), branch `build/gradle-wrapper-8.13-20261109`. Its combined scope includes the Gradle Wrapper, historical Room migration fixtures/tests, Keystore instrumentation, the primitive COSE fixture verifier, stable Compose observation Flows, and cancellation-safe Home screen operations.
-- Latest pre-fix candidate CI: [run #45166958142](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45166958142). The `verify` job and API 34 storage/Keystore instrumentation passed. API 31's emulator reported boot completion after approximately 611 seconds, just beyond its 600-second action timeout; cleanup then returned ADB exit 224. The Gradle instrumentation command did not start and no API 31 JUnit result was produced. This is a hosted-emulator startup timeout, not a test assertion failure.
-- This update raises only the API 31 emulator boot window to 900 seconds. CI for the resulting commit is pending; no new API 31 test pass is claimed.
-- PR #2 remains Draft pending validation and owner review. PR #1 is superseded. PRs #3 and #4 are standalone candidates whose changes are already included in PR #2; do not merge them independently.
-- Branch protection is disabled. No candidate source or documentation changes have been merged to `main`.
+- `main` remains at `968b580283b2ce17d0deda83beab4675ec55b845`; no candidate changes are merged.
+- Active integration candidate: [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2), branch `build/gradle-wrapper-8.13-20261109`. Before this update its head was `785733affcab42ec640819ce154e51099d2ecfaa`; PR #2 remains open, Draft, and unmerged.
+- The exact source head `79304843f42ad1ef1fc0e331c2f562a2da731302` passed [CI run #45406912355](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45406912355): JVM tests/KAT, Debug APK, Room schema export, API 31 identity 8/8, API 34 storage 9/9, and API 34 identity 8/8. All instrumentation suites had zero failures and zero skips.
+- Follow-up documentation-only head `785733affcab42ec640819ce154e51099d2ecfaa` passed all three jobs in [CI run #45412603517](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45412603517).
+- This update adds `./gradlew lintDebug` to the verify job. The next PR run must establish that the aggregate Android Lint task resolves and passes; do not mark it green before then.
+- PR #1 is superseded for integration. PRs #3 and #4 contain work already included in PR #2; do not merge them independently.
+- Branch protection is disabled. Keep PR #2 Draft pending the new CI result, protocol/security review, and owner review.
 
 ## Product and architecture invariants
 

@@ -966,3 +966,25 @@ Android CI [run #45406912355](https://github.com/Mzarmehi1390/FamilyMesh/actions
 - PR #2 remains Draft and unmerged; main remains unchanged. Room remains v7.
 - The COSE v2 proposal is still not approved. Complete four-artifact schemas/vectors, two independent COSE implementations, DER-to-R||S and low-S policy, key-ID migration, time/expiry/replay semantics, owner-issued decision authority, exact FMJA1 replay identity, and owner trust/revocation/recovery remain open.
 - Do not implement v7→v8 or enable production authorization/network transport until the relevant ADRs and security review are approved.
+
+
+## 2026-11-25 — Add Android Lint to the integration verification gate
+
+### Fresh repository synchronization
+
+- Default branch `main` remains at `968b580283b2ce17d0deda83beab4675ec55b845`; no candidate has been merged.
+- PR #2 remains open, Draft, and unmerged. Its actual head before this change was `785733affcab42ec640819ce154e51099d2ecfaa`; the preceding source/integration head was `79304843f42ad1ef1fc0e331c2f562a2da731302`.
+- Android CI run [#45406912355](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45406912355) passed all three jobs on source head `79304843f42ad1ef1fc0e331c2f562a2da731302`: JVM verification/KAT/Debug APK/Room schema export, API 31 identity 8/8, API 34 storage 9/9, and API 34 identity 8/8; all instrumentation suites had zero failures and zero skipped tests.
+- Follow-up run [#45412603517](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45412603517) passed all three jobs on `785733affcab42ec640819ce154e51099d2ecfaa`; that commit changed the roadmap's CI reference only.
+- No local Android SDK/Gradle execution or physical-device performance profile was available in this run.
+
+### Change
+
+- Add `./gradlew lintDebug` to the `verify` job after JVM unit tests. This asks the Android Gradle Plugin's Android Lint task to analyze the Debug variant in the multi-module Android build before APK packaging.
+- This is a CI quality gate only; no application runtime, cryptography, protocol, persistence schema, authorization, or transport behavior changes.
+
+### Validation boundary
+
+- A fresh PR CI run is required to confirm the root `lintDebug` task resolves across all Android modules and that existing sources pass the analyzer.
+- Until that run completes, Android Lint is **pending**, not passed. Existing green CI results above predate this new gate.
+- No performance, battery, startup, or memory improvement is claimed.

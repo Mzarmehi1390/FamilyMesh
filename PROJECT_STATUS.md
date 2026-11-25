@@ -1,11 +1,11 @@
 # FamilyMesh Project Status
 
-Last audited: 2026-11-24
+Last audited: 2026-11-25
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
 Default branch: `main` at `968b580283b2ce17d0deda83beab4675ec55b845` (unchanged; no candidate changes merged)
-Current integration candidate: [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2), branch `build/gradle-wrapper-8.13-20261109`.
-Latest pre-fix CI: [run #45166958142](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45166958142): `verify` and API 34 storage/Keystore instrumentation passed. API 31 emulator boot completed after approximately 611 seconds, just beyond the 600-second timeout; ADB cleanup returned exit 224 and Gradle instrumentation did not start. This is infrastructure timeout evidence, not a test assertion failure.
-The API 31 emulator boot timeout is increased to 900 seconds in the current candidate update; its new CI result is pending.
+Current integration candidate: [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2), branch `build/gradle-wrapper-8.13-20261109`, pre-change head `785733affcab42ec640819ce154e51099d2ecfaa` (open, Draft, unmerged).
+Latest source validation: [Android CI run #45406912355](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45406912355) passed all three jobs on source head `79304843f42ad1ef1fc0e331c2f562a2da731302`: JVM/KAT/Debug APK/Room export, API 31 identity 8/8, API 34 storage 9/9, and API 34 identity 8/8, with zero instrumentation failures or skips. Follow-up docs-only head `785733affcab42ec640819ce154e51099d2ecfaa` also passed all three jobs in [run #45412603517](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45412603517).
+Current CI change: add an Android Lint `lintDebug` gate; validation for this new task is pending on the next PR run.
 Protocol review drafts: ADR 0003 and ADR 0006 (proposals only; not production-approved)
 
 ## Overall state
