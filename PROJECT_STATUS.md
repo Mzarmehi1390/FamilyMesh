@@ -3,9 +3,9 @@
 Last audited: 2026-11-25
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
 Default branch: `main` at `968b580283b2ce17d0deda83beab4675ec55b845` (unchanged; no candidate changes merged)
-Current integration candidate: [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2), branch `build/gradle-wrapper-8.13-20261109`, pre-change head `785733affcab42ec640819ce154e51099d2ecfaa` (open, Draft, unmerged).
-Latest source validation: [Android CI run #45406912355](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45406912355) passed all three jobs on source head `79304843f42ad1ef1fc0e331c2f562a2da731302`: JVM/KAT/Debug APK/Room export, API 31 identity 8/8, API 34 storage 9/9, and API 34 identity 8/8, with zero instrumentation failures or skips. Follow-up docs-only head `785733affcab42ec640819ce154e51099d2ecfaa` also passed all three jobs in [run #45412603517](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45412603517).
-Current CI change: add an Android Lint `lintDebug` gate; validation for this new task is pending on the next PR run.
+Current integration candidate: [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2), branch `build/gradle-wrapper-8.13-20261109`, pre-staging head `a5a86de07ded532685249bf734111915cde20646` (open, Draft, unmerged).
+Latest complete CI: [run #45552834794](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45552834794) passed all three jobs on that head. The verify job passed the COSE primitive KAT, JVM unit tests, aggregate Android Lint `lintDebug`, Debug APK assembly, and Room schema export. API 31 identity passed 8/8; API 34 storage passed 9/9; API 34 identity passed 8/8; all instrumentation suites had zero failures, errors, or skips.
+Staged follow-up: `staging/android-p256-provider-coverage-20261125` adds three Android-provider P-256 parser instrumentation tests and Lint report artifact upload. These changes are not yet integrated or validated by CI.
 Protocol review drafts: ADR 0003 and ADR 0006 (proposals only; not production-approved)
 
 ## Overall state
@@ -25,7 +25,7 @@ production authorization are not implemented.
 | Native Android + Compose foundation | IMPLEMENTED_AND_TESTED | CI builds debug APK |
 | Modular Gradle architecture | IMPLEMENTED_AND_TESTED | Five modules present |
 | Room / DataStore local storage | IMPLEMENTED_AND_INSTRUMENTED | Room schema v7; DAO tests and fixture-backed migrations from v1–v7 pass on API 34 in PR #2 candidate; no v7→v8 validation |
-| Android Keystore device signing | IMPLEMENTED_WITH_PARTIAL_EMULATOR_EVIDENCE | API 31 and API 34 passed on an earlier PR #2 head; latest API 31 attempt stopped at emulator boot timeout before tests; physical-device/hardware-backed assurance remains unverified |
+| Android Keystore device signing | IMPLEMENTED_WITH_EMULATOR_EVIDENCE | Latest PR #2 CI run #45552834794 passed API 31 identity 8/8 and API 34 identity 8/8; physical-device/hardware-backed assurance and attestation remain unverified |
 | Signed enrollment proof | IMPLEMENTED_AND_TESTED | Bounded local codec and verifier tests |
 | Local nonce replay protection | IMPLEMENTED_AND_TESTED | One database only; not distributed |
 | Initial-owner trust bootstrap/pinning | IMPLEMENTED_AND_TESTED | Manual out-of-band fingerprint comparison |
@@ -38,19 +38,21 @@ production authorization are not implemented.
 | BLE / Wi-Fi Direct / internet P2P / relay | NOT_STARTED | No transport implementation |
 | Cross-device synchronization | NOT_STARTED | Manual text transfer only |
 | Gradle Wrapper | IMPLEMENTED_AND_CI_VERIFIED_ON_PR | Official Gradle 8.13 POSIX/Windows wrapper with pinned JAR/distribution checksums on PR #2 candidate |
-| Android instrumentation / device validation | PARTIAL_EMULATOR_COVERAGE_ON_PR | Room v1–v7 migration, DAO, and Keystore instrumentation passed on API 34; API 31 Keystore passed on an earlier head but latest attempt timed out before Gradle; future schema v8 and physical devices remain unverified |
+| Android instrumentation / device validation | PARTIAL_EMULATOR_COVERAGE_ON_PR | Latest PR #2 run #45552834794 passed API 31 Keystore 8/8, API 34 Room/storage 9/9, and API 34 identity 8/8; Room migration coverage remains v1–v7 only; future v7→v8 and physical devices remain unverified |
 
 ## Latest verification
 
-- Run #45166958142 on the prior PR #2 head passed the COSE primitive fixture verifier, JVM unit tests, Debug APK assembly, Room schema generation, artifact uploads, and API 34 Room/Keystore instrumentation.
-- The API 31 emulator booted at approximately 611 seconds, just after the 600-second timeout. ADB cleanup failed with exit 224; the Gradle Keystore test task never started and no API 31 JUnit report was produced.
-- The current update increases only the API 31 emulator boot window to 900 seconds. A new CI run must verify that the test task executes; its result is pending.
-- No local Gradle/Android build was run in this automation environment. Emulator CI does not establish physical-device compatibility, hardware-backed Keystore protection, or production security approval.
+- Android CI [run #45552834794](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45552834794) passed all three jobs on PR #2 head `a5a86de07ded532685249bf734111915cde20646`.
+- Verify: COSE primitive KAT, `testDebugUnitTest`, aggregate `lintDebug` across app and all four core Android modules, Debug APK assembly, Room schema export, and artifact uploads passed. The lint task took 37 seconds; detailed lint reports are not yet uploaded by this run.
+- API 31 identity instrumentation: 8/8 tests passed, 0 failures/errors/skips.
+- API 34 storage instrumentation: 9/9 passed; API 34 identity instrumentation: 8/8 passed; both had 0 failures/errors/skips.
+- The staged follow-up adds direct Android-provider tests for the shared P-256 parser and lint-report artifacts; neither is included in run #45552834794 and both require a fresh PR CI run.
+- No local Android build, physical-device profile, hardware-backed attestation, or performance/battery benchmark was run. No numeric performance gain is claimed.
 - No candidate changes have been merged to `main`.
 
 ## Immediate priority
 
-Verify the API 31 Keystore instrumentation after the boot-timeout adjustment. Continue the Identity & Trusted Enrollment protocol review in parallel at the design/test level; keep production authorization and network transport blocked until canonical encoding, key IDs, signature representation, replay scope, trust ceremony, revocation, and recovery semantics are reviewed.
+Integrate the staged Android-provider P-256 parser tests and lint-report upload into PR #2, then require a fresh API 31/API 34 CI run. Continue protocol design review without implementing production COSE v2, Room v8, owner-ledger semantics, authorization, or network transport until the relevant ADR decisions and independent interoperability gates are approved.
 
 ## Protocol audit progress
 

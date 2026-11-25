@@ -7,20 +7,22 @@ Default branch: `main`
 ## Last verified repository state
 
 - `main` remains at `968b580283b2ce17d0deda83beab4675ec55b845`; no candidate changes are merged.
-- Active integration candidate: [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2), branch `build/gradle-wrapper-8.13-20261109`. Before this update its head was `785733affcab42ec640819ce154e51099d2ecfaa`; PR #2 remains open, Draft, and unmerged.
-- The exact source head `79304843f42ad1ef1fc0e331c2f562a2da731302` passed [CI run #45406912355](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45406912355): JVM tests/KAT, Debug APK, Room schema export, API 31 identity 8/8, API 34 storage 9/9, and API 34 identity 8/8. All instrumentation suites had zero failures and zero skips.
-- Follow-up documentation-only head `785733affcab42ec640819ce154e51099d2ecfaa` passed all three jobs in [CI run #45412603517](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45412603517).
-- This update adds `./gradlew lintDebug` to the verify job. The next PR run must establish that the aggregate Android Lint task resolves and passes; do not mark it green before then.
+- PR #2 is open, Draft, and unmerged. Its branch is `build/gradle-wrapper-8.13-20261109`; the latest validated head before the staged Android-provider tests was `a5a86de07ded532685249bf734111915cde20646`.
+- Android CI [run #45552834794](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45552834794) passed all three jobs on that head. Verify passed the COSE primitive KAT, JVM unit tests, aggregate Android Lint, Debug APK assembly, Room schema export, and artifacts.
+- API 31 Keystore instrumentation passed 8/8. API 34 Room/storage instrumentation passed 9/9 and identity instrumentation passed 8/8. All three suites had zero failures, errors, or skipped tests.
+- Aggregate `lintDebug` ran successfully for `:app`, `:core:common`, `:core:designsystem`, `:core:identity`, and `:core:storage`. Its detailed HTML/XML reports were not uploaded in run #45552834794.
+- Staged branch `staging/android-p256-provider-coverage-20261125` adds three Android-provider P-256 parser tests plus lint-report artifact upload. These changes still require a fresh CI run after integration.
 - PR #1 is superseded for integration. PRs #3 and #4 contain work already included in PR #2; do not merge them independently.
-- Branch protection is disabled. Keep PR #2 Draft pending the new CI result, protocol/security review, and owner review.
+- Branch protection is disabled. Keep PR #2 Draft pending validation of the staged tests, protocol/security review, and owner review.
 
 ## Product and architecture invariants
 
 - Native Android only: Kotlin, Jetpack Compose, Gradle Kotlin DSL.
 - Preserve modular architecture: `app`, `core:common`, `core:storage`,
   `core:designsystem`, `core:identity`.
-- FamilyMesh remains private, decentralized, and end-to-end encrypted by
-  design. Do not replace P2P with a centralized messaging backend.
+- FamilyMesh is intended to become private, decentralized, and end-to-end
+  encrypted. E2EE is not implemented yet; do not replace the planned P2P
+  architecture with a centralized messaging backend.
 - Never claim E2EE, network P2P, BLE, Wi-Fi Direct, relay, or production
   membership authorization exists; those are not implemented.
 - Keep all authorization fail-closed until a reviewed trusted membership
@@ -85,7 +87,7 @@ should be implemented until independent vectors and platform tests validate it.
    `DenyAllFamilyMembershipResolver` remains the default.
 5. No device revocation, recovery, cross-device synchronization, network
    transport, BLE, Wi-Fi Direct, internet P2P, relay, or E2EE messaging.
-6. Keystore instrumentation passed on API 31 and API 34 on an earlier candidate head; the latest API 31 attempt was blocked before Gradle by emulator startup timeout. Physical-device and hardware-backed assurance remain unverified.
+6. Keystore instrumentation passed on API 31 and API 34 in run #45552834794. Physical-device and hardware-backed assurance/attestation remain unverified.
 7. Room v1–v7 migration and DAO instrumentation passed on API 34 in the PR #2 candidate; future v7→v8 behavior remains unverified.
 8. The PR #2 candidate adds the official Gradle 8.13 Wrapper with pinned JAR/distribution checksums; main remains unchanged until review.
 9. Original Master Engineering Prompt was not present among the accessible
@@ -94,7 +96,7 @@ should be implemented until independent vectors and platform tests validate it.
 
 ## Next exact engineering action
 
-First verify that the increased API 31 emulator boot window allows the Keystore instrumentation command to execute. Then continue ADR 0003's COSE v2 review with cross-language known-answer vectors for key representation, protected headers, external AAD, Sig_structure, and ECDSA DER/R||S conversion. Keep networking and authorization integration blocked until replay scope, trust lifecycle, revocation, recovery, and independent interoperability review are resolved.
+Integrate the staged Android-provider P-256 parser tests and lint-report upload into PR #2, then run the complete API 31/API 34 CI matrix. After that, continue ADR 0003's COSE v2 review with cross-language known-answer vectors for key representation, protected headers, external AAD, Sig_structure, and ECDSA DER/R||S conversion. Keep networking and authorization integration blocked until replay scope, trust lifecycle, revocation, recovery, and independent interoperability review are resolved.
 
 
 ## Latest lifecycle audit (documentation proposal)

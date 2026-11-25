@@ -1,6 +1,6 @@
 # FamilyMesh
 
-Private, decentralized, end-to-end encrypted family messaging for Android.
+Android-only project for private, decentralized family messaging. End-to-end encryption is a planned requirement, not an implemented capability.
 
 ## Project status
 

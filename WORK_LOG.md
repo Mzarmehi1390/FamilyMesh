@@ -983,11 +983,14 @@ Android CI [run #45406912355](https://github.com/Mzarmehi1390/FamilyMesh/actions
 - Add `./gradlew lintDebug` to the `verify` job after JVM unit tests. This asks the Android Gradle Plugin's Android Lint task to analyze the Debug variant in the multi-module Android build before APK packaging.
 - This is a CI quality gate only; no application runtime, cryptography, protocol, persistence schema, authorization, or transport behavior changes.
 
-### Validation boundary
+### Validation result
 
-- A fresh PR CI run is required to confirm the root `lintDebug` task resolves across all Android modules and that existing sources pass the analyzer.
-- Until that run completes, Android Lint is **pending**, not passed. Existing green CI results above predate this new gate.
-- No performance, battery, startup, or memory improvement is claimed.
+- Android CI [run #45552834794](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45552834794) completed successfully on PR #2 head `a5a86de07ded532685249bf734111915cde20646`; all three jobs passed.
+- The verify job completed the COSE primitive KAT, `testDebugUnitTest` (39 seconds), aggregate `lintDebug` (37 seconds), `assembleDebug` (14 seconds), Room schema generation (7 seconds), and both existing artifacts.
+- The `lintDebug` task executed for `:app`, `:core:common`, `:core:designsystem`, `:core:identity`, and `:core:storage`. It exited successfully. The detailed HTML/XML reports were not uploaded in this run, so no issue-count claim is made.
+- API 31 Keystore instrumentation: 8 tests, 0 failures, 0 errors, 0 skipped; JUnit suite time 33.024 seconds.
+- API 34 storage instrumentation: 9 tests, 0 failures, 0 errors, 0 skipped; JUnit suite time 109.933 seconds. API 34 identity instrumentation: 8 tests, 0 failures, 0 errors, 0 skipped; JUnit suite time 28.071 seconds.
+- No physical-device, hardware-backed attestation, or performance/battery profile was run. No numeric performance gain is claimed.
 
 
 ## 2026-11-25 — Stage Android-provider P-256 parser instrumentation
@@ -1006,8 +1009,8 @@ Android CI [run #45406912355](https://github.com/Mzarmehi1390/FamilyMesh/actions
 ### Validation boundary
 
 - Staged on `staging/android-p256-provider-coverage-20261125`, based on `a5a86de07ded532685249bf734111915cde20646`; not yet integrated into PR #2.
-- No Android emulator or Gradle test has been run for these new cases yet. They require API 31 and API 34 instrumentation in a fresh PR CI run.
-- The existing PR run [#45552834794](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45552834794) is still validating the preceding Android Lint gate and must finish before the staged branch is fast-forwarded into PR #2.
+- A local Kotlin/JVM check with JDK 21 compiled the fixture helper and confirmed that a generated P-256 SPKI is 91 bytes and both malformed-point fixtures preserve the DER length. This checks the test helper only; it is not an Android-provider or repository Gradle test.
+- The existing PR run [#45552834794](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45552834794) completed successfully, but it predates these three new instrumentation tests. They still require API 31 and API 34 execution in a fresh PR CI run.
 
 
 ## 2026-11-25 — Preserve Android Lint reports as CI artifacts
@@ -1016,3 +1019,11 @@ Android CI [run #45406912355](https://github.com/Mzarmehi1390/FamilyMesh/actions
 - This makes analyzer findings inspectable after the hosted runner is gone and supports evidence-based cleanup rather than relying only on the Gradle exit code.
 - The upload is staged on `staging/android-p256-provider-coverage-20261125` after the Android-provider parser instrumentation tests.
 - Validation is pending a fresh PR CI run; no report contents or issue count are claimed yet.
+
+
+## 2026-11-25 — Full CI validation of Android Lint integration candidate
+
+- PR #2 candidate head `a5a86de07ded532685249bf734111915cde20646` passed [Android CI run #45552834794](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45552834794); `verify`, API 31 identity, and API 34 storage/identity jobs all completed successfully.
+- Aggregate Android Lint ran across all five Android modules and passed. The next candidate additionally uploads the HTML/XML reports so findings can be inspected; this artifact-upload change has not yet been exercised.
+- API 31 identity: 8/8; API 34 storage: 9/9; API 34 identity: 8/8. All suites had zero failures, errors, or skipped tests.
+- No runtime behavior, Room schema, protocol, cryptography, authorization, or transport changed in this validation cycle.
