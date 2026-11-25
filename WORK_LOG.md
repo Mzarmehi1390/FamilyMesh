@@ -1027,3 +1027,24 @@ Android CI [run #45406912355](https://github.com/Mzarmehi1390/FamilyMesh/actions
 - Aggregate Android Lint ran across all five Android modules and passed. The next candidate additionally uploads the HTML/XML reports so findings can be inspected; this artifact-upload change has not yet been exercised.
 - API 31 identity: 8/8; API 34 storage: 9/9; API 34 identity: 8/8. All suites had zero failures, errors, or skipped tests.
 - No runtime behavior, Room schema, protocol, cryptography, authorization, or transport changed in this validation cycle.
+
+
+## 2026-11-25 — Triage Android Lint security and launcher findings
+
+### Report findings
+
+- The uploaded Android Lint artifact from [run #45554437797](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45554437797) contains 19 app warnings and zero warnings in each of the four core modules.
+- Two findings are directly actionable without changing protocol or platform compatibility: missing launcher icon and missing Android 12+ data-extraction rules.
+- Keep `android:allowBackup="false"` and explicitly exclude app data from both cloud backup and device-to-device transfer. Android's official guidance notes that `allowBackup=false` may not disable device-to-device transfer on some Android 12+ manufacturers, so the transfer rules must be explicit.
+- Add a simple adaptive FamilyMesh network-node launcher icon, including a monochrome layer for themed-icon support.
+
+### Deferred warnings
+
+- Keep `targetSdk = 36`; Lint's OldTargetApi warning is not a reason to jump to an unreleased or untested target. Revisit only with the next stable platform and behavior-change testing.
+- Do not blindly upgrade AGP/Gradle, Kotlin/KSP, Compose BOM, Lifecycle, Room, DataStore, Koin, or Coroutines solely to silence version-availability warnings. Review release notes, plugin compatibility, Room schema/KSP behavior, and run the full CI matrix before any coordinated dependency update.
+
+### Validation boundary
+
+- Changes are staged on `staging/manifest-backup-and-icon-20261125` from `8a744e44da561e5622272a39f669c5b599535104`; they are not integrated into PR #2 yet.
+- The current PR CI run #45554437797 is still validating Android-provider parser tests and Lint report upload. This branch requires its own fresh CI after integration.
+- No runtime, encryption, key, database, authorization, or transport behavior is intentionally changed.
