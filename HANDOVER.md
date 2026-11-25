@@ -55,14 +55,19 @@ Default branch: `main`
 
 ## Latest code changes and verification
 
-The main-branch implementation baseline is unchanged. The separate PR #2 candidate adds validation infrastructure only:
+The main-branch implementation baseline is unchanged. The PR #2 integration candidate includes:
 
 - Official Gradle 8.13 POSIX/Windows Wrapper with pinned distribution and JAR checksums.
 - Authentic Room schema fixtures for versions 1–7 and `MigrationTestHelper` coverage of every supported start version.
 - Android Keystore instrumentation on API 31 and API 34, including stable identity, non-exportability, signing/verification, and fail-closed missing/corrupt key metadata cases.
 - DAO concurrency characterization for same-artifact/different-receipt-time imports and opposite decision artifacts.
+- Stable Room-backed Compose observation Flows and cancellation-safe Home screen suspend operations.
+- Common v1 P-256 SPKI import validation for field bounds and curve membership.
+- Aggregate Android Lint `lintDebug` in CI.
 
-Run #43602180283 attempt 4 passed all three CI jobs on an earlier candidate head. On the newer head, run #45166958142 passed `verify` and API 34 storage/Keystore instrumentation. API 31 did not reach Gradle tests because TCG emulator boot completed at approximately 611 seconds, just after the configured 600-second timeout. The API 31 timeout is now 900 seconds; the new CI result is pending. Emulator results do not prove hardware-backed keys or physical-device compatibility.
+Android CI [run #45552834794](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45552834794) passed all three jobs on candidate head `a5a86de07ded532685249bf734111915cde20646`. The verify job passed the COSE primitive KAT, JVM unit tests, Android Lint, Debug APK assembly, Room schema export, and artifact uploads. API 31 identity passed 8/8; API 34 storage passed 9/9 and identity passed 8/8, all with zero failures, errors, or skipped tests.
+
+The staged follow-up branch adds direct Android-provider tests for the shared P-256 parser and uploads the HTML/XML Lint reports. Those staged changes are not part of run #45552834794 and require a fresh PR CI run. Emulator results do not prove hardware-backed Keystore assurance or physical-device compatibility.
 
 ## Current work package
 
