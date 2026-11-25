@@ -1086,3 +1086,12 @@ Android CI [run #45406912355](https://github.com/Mzarmehi1390/FamilyMesh/actions
 - Move the adaptive icon resource from `mipmap-anydpi-v26` to `mipmap-anydpi`, because the app minSdk is 31 and the previous v26 qualifier generated an `ObsoleteSdkInt` Lint warning. The icon layers themselves are unchanged.
 - These follow-up changes are staged on `staging/manifest-backup-and-icon-20261125`; they are not yet included in the currently running PR CI head `997421221cf2ba4e9bcbae4db403620276a79ddf`.
 - Defer the broad Lint-suggested toolchain upgrades. Official compatibility tables show AGP 9.5 requires Gradle 9.6.0, while Kotlin 2.4.21's fully supported AGP range currently ends at 9.3.1; Koin 4.2.2 is built with Kotlin 2.3.20. Treating every Lint "newer version" hint as an independent bump would create an unreviewed, potentially incompatible stack. Review the toolchain as one coordinated migration with the full test matrix.
+
+
+## 2026-11-25 — Partial validation update for backup-policy integration
+
+- Android CI run [#45556670546](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45556670546) is running on PR head `997421221cf2ba4e9bcbae4db403620276a79ddf`.
+- The `verify` job completed successfully, including the 15 backup-policy unit tests, direct manifest/rules verifier, JVM tests, Android Lint, Debug APK assembly, Room schema export, and configured artifacts.
+- API 31 Keystore instrumentation completed **11/11**, with 0 failures, 0 errors, and 0 skipped tests; JUnit suite time was 30.743 seconds. The uploaded JUnit XML was downloaded and inspected directly.
+- API 34 storage instrumentation remained in progress at the latest check. No final workflow success is claimed until that job completes.
+- The later staged Room 2.8.5, adaptive-icon qualifier, and P-256 point-at-infinity changes are not included in this run.
