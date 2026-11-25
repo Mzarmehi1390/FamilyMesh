@@ -1008,3 +1008,11 @@ Android CI [run #45406912355](https://github.com/Mzarmehi1390/FamilyMesh/actions
 - Staged on `staging/android-p256-provider-coverage-20261125`, based on `a5a86de07ded532685249bf734111915cde20646`; not yet integrated into PR #2.
 - No Android emulator or Gradle test has been run for these new cases yet. They require API 31 and API 34 instrumentation in a fresh PR CI run.
 - The existing PR run [#45552834794](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45552834794) is still validating the preceding Android Lint gate and must finish before the staged branch is fast-forwarded into PR #2.
+
+
+## 2026-11-25 — Preserve Android Lint reports as CI artifacts
+
+- Extend the staged Android CI change to upload all module-level Debug Lint HTML and XML reports, including when an earlier verification step fails.
+- This makes analyzer findings inspectable after the hosted runner is gone and supports evidence-based cleanup rather than relying only on the Gradle exit code.
+- The upload is staged on `staging/android-p256-provider-coverage-20261125` after the Android-provider parser instrumentation tests.
+- Validation is pending a fresh PR CI run; no report contents or issue count are claimed yet.

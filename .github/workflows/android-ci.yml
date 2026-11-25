@@ -33,6 +33,16 @@ jobs:
         run: ./gradlew testDebugUnitTest
       - name: Run Android Lint
         run: ./gradlew lintDebug
+      - name: Upload Android Lint reports
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: android-lint-reports
+          path: |
+            **/build/reports/lint-results-*.html
+            **/build/reports/lint-results-*.xml
+          if-no-files-found: warn
+          retention-days: 7
       - name: Assemble debug APK
         run: ./gradlew assembleDebug
       - name: Generate Room schema snapshot
