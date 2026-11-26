@@ -9,6 +9,11 @@ import java.security.PrivateKey
 import java.security.Signature
 import java.security.KeyFactory
 import java.security.spec.X509EncodedKeySpec
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -176,6 +181,70 @@ class AndroidKeystoreDeviceKeyManagerInstrumentedTest {
         )
 
         assertNull(P256PublicKeyParser.decode(invalidPoint))
+    }
+
+    @Test
+    fun sharedP256Parser_rejectsTrailingBytesOnAndroidProvider() = runBlocking {
+        val encoded = manager.createPublicIdentity().publicKeyBytes
+        assertNull(P256PublicKeyParser.decode(encoded + byteArrayOf(0x00)))
+    }
+
+    @Test
+    fun sharedP256Parser_rejectsNonMinimalDerLengthOnAndroidProvider() = runBlocking {
+        val encoded = manager.createPublicIdentity().publicKeyBytes
+        val contentLength = encoded[1].toInt() and 0xff
+        assertTrue("P-256 SPKI fixture should use a short-form DER length", contentLength < 128)
+        val nonCanonical = byteArrayOf(encoded[0], 0x81.toByte(), contentLength.toByte()) +
+            encoded.copyOfRange(2, encoded.size)
+
+        assertNull(P256PublicKeyParser.decode(nonCanonical))
+    }
+
+    @Test
+    fun concurrentIdentityCreationAcrossManagerInstances_hasSingleWinner() = runBlocking {
+        val secondManager = AndroidKeystoreDeviceKeyManager(context)
+        val start = CompletableDeferred<Unit>()
+        val attempts = coroutineScope {
+            val pending = listOf(manager, secondManager).map { candidate ->
+                async(Dispatchers.IO) {
+                    start.await()
+                    runCatching { candidate.createPublicIdentity() }
+                }
+            }
+            start.complete(Unit)
+            pending.awaitAll()
+        }
+
+        assertEquals(1, attempts.count { it.isSuccess })
+        assertEquals(
+            1,
+            attempts.count {
+                it.exceptionOrNull() is DeviceKeyManagerException.IdentityAlreadyExists
+            },
+        )
+        val winner = attempts.single { it.isSuccess }.getOrThrow()
+        assertEquals(winner, manager.getPublicIdentity())
+        assertEquals(winner, secondManager.getPublicIdentity())
+    }
+
+    @Test
+    fun readDuringProvisioning_neverObservesPartiallyWrittenIdentityMarker() = runBlocking {
+        val secondManager = AndroidKeystoreDeviceKeyManager(context)
+        val start = CompletableDeferred<Unit>()
+        val creation = async(Dispatchers.IO) {
+            start.await()
+            manager.createPublicIdentity()
+        }
+        val observation = async(Dispatchers.IO) {
+            start.await()
+            runCatching { secondManager.getPublicIdentity() }
+        }
+        start.complete(Unit)
+
+        val created = creation.await()
+        val observed = observation.await().getOrThrow()
+        assertTrue(observed == null || observed == created)
+        assertEquals(created, secondManager.getPublicIdentity())
     }
 
     @Test

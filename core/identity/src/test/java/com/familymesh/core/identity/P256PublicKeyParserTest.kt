@@ -6,6 +6,7 @@ import java.security.spec.ECGenParameterSpec
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class P256PublicKeyParserTest {
@@ -35,6 +36,23 @@ class P256PublicKeyParserTest {
         val invalidPoint = encoded.withUncompressedPoint(P256_FIELD_PRIME, BigInteger.ONE)
 
         assertNull(P256PublicKeyParser.decode(invalidPoint))
+    }
+
+    @Test
+    fun rejectsTrailingBytesAfterSubjectPublicKeyInfo() {
+        val encoded = keyPair("secp256r1").public.encoded
+        assertNull(P256PublicKeyParser.decode(encoded + byteArrayOf(0x00)))
+    }
+
+    @Test
+    fun rejectsNonMinimalDerSequenceLength() {
+        val encoded = keyPair("secp256r1").public.encoded
+        val contentLength = encoded[1].toInt() and 0xff
+        assertTrue("P-256 SPKI fixture should use a short-form DER length", contentLength < 128)
+        val nonCanonical = byteArrayOf(encoded[0], 0x81.toByte(), contentLength.toByte()) +
+            encoded.copyOfRange(2, encoded.size)
+
+        assertNull(P256PublicKeyParser.decode(nonCanonical))
     }
 
     @Test

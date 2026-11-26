@@ -21,13 +21,33 @@ internal object P256PublicKeyParser {
             val key = KeyFactory.getInstance("EC")
                 .generatePublic(X509EncodedKeySpec(encoded)) as? ECPublicKey
                 ?: return null
+            // KeyFactory may accept BER-like aliases (for example, a
+            // non-minimal DER length) and silently normalize them on output.
+            // Fingerprints are over the original SPKI bytes, so require one
+            // byte-stable DER representation for each accepted public key.
+            val canonicalEncoding = key.encoded ?: return null
+            if (!canonicalEncoding.contentEquals(encoded)) return null
+            if (isValidP256(key)) key else null
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    /**
+     * Validates an already-decoded provider key without reparsing its SPKI.
+     * The Android Keystore certificate is platform-produced, so callers that
+     * already hold its ECPublicKey can enforce the same curve/point checks
+     * without an additional KeyFactory allocation.
+     */
+    fun isValidP256(key: ECPublicKey): Boolean {
+        return try {
             val expected = AlgorithmParameters.getInstance("EC").run {
                 init(ECGenParameterSpec("secp256r1"))
                 getParameterSpec(ECParameterSpec::class.java)
             }
-            if (key.params.isP256EquivalentTo(expected) && key.hasValidP256Point()) key else null
+            key.params.isP256EquivalentTo(expected) && key.hasValidP256Point()
         } catch (_: Exception) {
-            null
+            false
         }
     }
 
