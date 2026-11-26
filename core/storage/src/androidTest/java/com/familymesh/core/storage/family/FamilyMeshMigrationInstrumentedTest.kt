@@ -40,15 +40,15 @@ class FamilyMeshMigrationInstrumentedTest {
                 *FamilyMeshDatabase.migrationsForTesting(),
             )
             try {
-                assertEquals(1, count(migrated, "family_spaces"))
-                assertEquals(1, count(migrated, "family_members"))
+                assertEquals("startVersion=$startVersion: family_spaces row", 1, count(migrated, "family_spaces"))
+                assertEquals("startVersion=$startVersion: family_members row", 1, count(migrated, "family_members"))
                 assertEquals(1_000L, scalarLong(migrated, "SELECT createdAtEpochMillis FROM family_spaces WHERE id = 'family-$startVersion'"))
-                assertEquals(if (startVersion >= 2) 1 else 0, count(migrated, "consumed_enrollment_nonces"))
-                assertEquals(if (startVersion >= 3) 1 else 0, count(migrated, "pending_enrollment_requests"))
-                assertEquals(if (startVersion >= 4) 1 else 0, count(migrated, "initial_owner_trust"))
-                assertEquals(if (startVersion >= 5) 1 else 0, count(migrated, "trusted_initial_owners"))
-                assertEquals(if (startVersion >= 6) 1 else 0, count(migrated, "enrollment_decisions"))
-                assertEquals(if (startVersion >= 7) 1 else 0, count(migrated, "authenticated_family_devices"))
+                assertEquals("startVersion=$startVersion: consumed_enrollment_nonces", if (startVersion >= 2) 1 else 0, count(migrated, "consumed_enrollment_nonces"))
+                assertEquals("startVersion=$startVersion: pending_enrollment_requests", if (startVersion >= 3) 1 else 0, count(migrated, "pending_enrollment_requests"))
+                assertEquals("startVersion=$startVersion: initial_owner_trust", if (startVersion >= 4) 1 else 0, count(migrated, "initial_owner_trust"))
+                assertEquals("startVersion=$startVersion: trusted_initial_owners", if (startVersion >= 5) 1 else 0, count(migrated, "trusted_initial_owners"))
+                assertEquals("startVersion=$startVersion: enrollment_decisions", if (startVersion >= 6) 1 else 0, count(migrated, "enrollment_decisions"))
+                assertEquals("startVersion=$startVersion: authenticated_family_devices", if (startVersion >= 7) 1 else 0, count(migrated, "authenticated_family_devices"))
                 assertFinalConstraints(migrated, startVersion)
             } finally {
                 migrated.close()
@@ -105,6 +105,11 @@ class FamilyMeshMigrationInstrumentedTest {
     }
 
     private fun assertFinalConstraints(database: SupportSQLiteDatabase, startVersion: Int) {
+        // MigrationTestHelper opens a raw SQLite connection, unlike Room's normal runtime helper.
+        // Enable FK enforcement explicitly so this test exercises the same delete behavior as Room.
+        database.execSQL("PRAGMA foreign_keys = ON")
+        assertEquals("startVersion=$startVersion: SQLite foreign-key enforcement", 1, scalarLong(database, "PRAGMA foreign_keys"))
+
         val expectedIndices = listOf(
             "index_family_members_familySpaceId",
             "index_pending_enrollment_requests_receivedAtEpochMillis",
@@ -153,9 +158,9 @@ class FamilyMeshMigrationInstrumentedTest {
             "initial_owner_trust",
             "enrollment_decisions",
             "authenticated_family_devices",
-        ).forEach { table -> assertEquals(0, count(database, table)) }
+).forEach { table -> assertEquals("startVersion=$startVersion: $table should cascade", 0, count(database, table)) }
         // Historical v5 intentionally has no FK, so this row survives family deletion.
-        assertEquals(if (startVersion >= 5) 1 else 0, count(database, "trusted_initial_owners"))
+        assertEquals("startVersion=$startVersion: trusted_initial_owners no-FK behavior", if (startVersion >= 5) 1 else 0, count(database, "trusted_initial_owners"))
     }
 
     private fun count(database: SupportSQLiteDatabase, table: String): Int =

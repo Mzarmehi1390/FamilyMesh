@@ -51,10 +51,12 @@ jobs:
           retention-days: 7
 
   storage-instrumentation:
-    # Keep emulator execution on the known Ubuntu 22.04 image while isolating
-    # the repeated Android Emulator/ADB startup failure seen on Ubuntu 24.04.
+    # Hosted Linux runners lack nested hardware acceleration for the emulator.
+    # Force QEMU TCG instead of asking the emulator to boot with acceleration off.
     runs-on: ubuntu-22.04
-    timeout-minutes: 35
+    timeout-minutes: 40
+    env:
+      ANDROID_I_WANT_MY_TCG: "yes"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -70,13 +72,14 @@ jobs:
       - name: Run Room storage tests on emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 34
+          # The storage module supports API 31+, so test on the lightest supported image.
+          api-level: 31
           target: google_apis
           arch: x86_64
           profile: pixel_2
           emulator-options: -no-window -gpu swiftshader -no-snapshot -noaudio -no-boot-anim -no-metrics
           disable-animations: true
-          emulator-boot-timeout: 600
+          emulator-boot-timeout: 900
           script: gradle :core:storage:connectedDebugAndroidTest
       - name: Upload instrumentation reports
         if: always()
