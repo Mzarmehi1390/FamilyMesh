@@ -1,0 +1,299 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 4,
+    "identityHash": "d10dbf2b2cf47e97ec562729347ff5c4",
+    "entities": [
+      {
+        "tableName": "family_spaces",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `createdAtEpochMillis` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAtEpochMillis",
+            "columnName": "createdAtEpochMillis",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "family_members",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `familySpaceId` TEXT NOT NULL, `displayName` TEXT NOT NULL, `role` TEXT NOT NULL, `joinedAtEpochMillis` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`familySpaceId`) REFERENCES `family_spaces`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "familySpaceId",
+            "columnName": "familySpaceId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "displayName",
+            "columnName": "displayName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "role",
+            "columnName": "role",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "joinedAtEpochMillis",
+            "columnName": "joinedAtEpochMillis",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_family_members_familySpaceId",
+            "unique": false,
+            "columnNames": [
+              "familySpaceId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_family_members_familySpaceId` ON `${TABLE_NAME}` (`familySpaceId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "family_spaces",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "familySpaceId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "consumed_enrollment_nonces",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`nonceDigest` TEXT NOT NULL, `familySpaceId` TEXT NOT NULL, `requestId` TEXT NOT NULL, `consumedAtEpochMillis` INTEGER NOT NULL, `expiresAtEpochMillis` INTEGER NOT NULL, PRIMARY KEY(`nonceDigest`))",
+        "fields": [
+          {
+            "fieldPath": "nonceDigest",
+            "columnName": "nonceDigest",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "familySpaceId",
+            "columnName": "familySpaceId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "requestId",
+            "columnName": "requestId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "consumedAtEpochMillis",
+            "columnName": "consumedAtEpochMillis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "expiresAtEpochMillis",
+            "columnName": "expiresAtEpochMillis",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "nonceDigest"
+          ]
+        }
+      },
+      {
+        "tableName": "pending_enrollment_requests",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`requestId` TEXT NOT NULL, `familySpaceId` TEXT NOT NULL, `deviceKeyId` TEXT NOT NULL, `requestedRole` TEXT NOT NULL, `createdAtEpochMillis` INTEGER NOT NULL, `expiresAtEpochMillis` INTEGER NOT NULL, `receivedAtEpochMillis` INTEGER NOT NULL, PRIMARY KEY(`familySpaceId`, `requestId`), FOREIGN KEY(`familySpaceId`) REFERENCES `family_spaces`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "requestId",
+            "columnName": "requestId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "familySpaceId",
+            "columnName": "familySpaceId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceKeyId",
+            "columnName": "deviceKeyId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "requestedRole",
+            "columnName": "requestedRole",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAtEpochMillis",
+            "columnName": "createdAtEpochMillis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "expiresAtEpochMillis",
+            "columnName": "expiresAtEpochMillis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "receivedAtEpochMillis",
+            "columnName": "receivedAtEpochMillis",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "familySpaceId",
+            "requestId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_pending_enrollment_requests_receivedAtEpochMillis",
+            "unique": false,
+            "columnNames": [
+              "receivedAtEpochMillis"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_pending_enrollment_requests_receivedAtEpochMillis` ON `${TABLE_NAME}` (`receivedAtEpochMillis`)"
+          },
+          {
+            "name": "index_pending_enrollment_requests_deviceKeyId",
+            "unique": false,
+            "columnNames": [
+              "deviceKeyId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_pending_enrollment_requests_deviceKeyId` ON `${TABLE_NAME}` (`deviceKeyId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "family_spaces",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "familySpaceId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "initial_owner_trust",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`familySpaceId` TEXT NOT NULL, `ownerMemberId` TEXT NOT NULL, `ownerDeviceKeyId` TEXT NOT NULL, `establishedAtEpochMillis` INTEGER NOT NULL, PRIMARY KEY(`familySpaceId`), FOREIGN KEY(`familySpaceId`) REFERENCES `family_spaces`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "familySpaceId",
+            "columnName": "familySpaceId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ownerMemberId",
+            "columnName": "ownerMemberId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ownerDeviceKeyId",
+            "columnName": "ownerDeviceKeyId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "establishedAtEpochMillis",
+            "columnName": "establishedAtEpochMillis",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "familySpaceId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_initial_owner_trust_ownerDeviceKeyId",
+            "unique": false,
+            "columnNames": [
+              "ownerDeviceKeyId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_initial_owner_trust_ownerDeviceKeyId` ON `${TABLE_NAME}` (`ownerDeviceKeyId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "family_spaces",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "familySpaceId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd10dbf2b2cf47e97ec562729347ff5c4')"
+    ]
+  }
+}
