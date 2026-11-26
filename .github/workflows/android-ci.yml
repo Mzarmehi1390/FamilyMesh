@@ -51,10 +51,12 @@ jobs:
           retention-days: 7
 
   storage-instrumentation:
-    # Keep emulator execution on the known Ubuntu 22.04 image while isolating
-    # the repeated Android Emulator/ADB startup failure seen on Ubuntu 24.04.
+    # Hosted Linux runners lack nested hardware acceleration for the emulator.
+    # Force QEMU TCG instead of asking the emulator to boot with acceleration off.
     runs-on: ubuntu-22.04
     timeout-minutes: 35
+    env:
+      ANDROID_I_WANT_MY_TCG: "yes"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
