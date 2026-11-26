@@ -14,8 +14,20 @@ membership finalization.
 This is **not** a production-ready messaging system. There is no end-to-end
 message encryption, peer-to-peer transport, relay, cross-device membership
 synchronization, production authorization resolver, device revocation, or
-recovery protocol yet. See the [project status](PROJECT_STATUS.md),
-[handover](HANDOVER.md), and [roadmap](docs/roadmap.md).
+recovery protocol yet.
+
+## Continue development (humans and AI)
+
+| Doc | Purpose |
+| --- | --- |
+| **[docs/HANDOFF.md](docs/HANDOFF.md)** | Short entry for takeover / automation |
+| **[HANDOVER.md](HANDOVER.md)** | Detailed next actions and blockers |
+| **[PROJECT_STATUS.md](PROJECT_STATUS.md)** | Capability matrix and CI evidence |
+| **[docs/AGENTS.md](docs/AGENTS.md)** | Rules for coding agents |
+| **[docs/roadmap.md](docs/roadmap.md)** | Milestone checklist |
+| **[WORK_LOG.md](WORK_LOG.md)** | Chronological log |
+
+Preferred agent branch when present: `develop/agent-ready` (merge to `main` when ready).
 
 ## Platform and stack
 
@@ -42,6 +54,7 @@ gradle assembleDebug
 
 GitHub Actions runs both commands on Ubuntu with JDK 17 and Gradle 8.13.
 Successful runs publish the `familymesh-debug-apk` artifact for seven days.
+Instrumentation tests for `:core:storage` may run on an API 34 emulator in CI.
 
 ## Security notes
 
