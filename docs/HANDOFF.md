@@ -49,3 +49,11 @@ From HANDOVER (verify against latest `main` each run):
 3. Execute as many unblocked checklist items as possible in one sprint
 4. Commit via GitHub tools; refresh HANDOVER/PROJECT_STATUS/WORK_LOG when status changes
 5. Reply to the owner in **Persian** with commits, CI links, and remaining blockers
+
+
+## Verified CI refresh — 2026-11-26
+
+- PR #2 candidate head `8f94a1a3dc26e124a748212077b6e70bdfff44f6` passed all three jobs in [Android CI run #45760437373](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45760437373): verify, API 31 identity/Keystore instrumentation, and API 34 storage/Keystore instrumentation.
+- PR #2 remains Draft/unmerged. Its source changes are not part of `main` or this documentation branch yet.
+- PR #3/#4 instrumentation failures were emulator-startup failures (ADB could not find emulator-5554); their verify jobs passed. Their changes are superseded for integration by PR #2.
+- Room remains v7. Keep ADR 0006/0008/0012 implementation gates closed pending explicit approval; authorization remains fail-closed; do not replace lost device keys.
