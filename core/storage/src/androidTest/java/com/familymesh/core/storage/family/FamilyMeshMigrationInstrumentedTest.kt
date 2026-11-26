@@ -105,6 +105,11 @@ class FamilyMeshMigrationInstrumentedTest {
     }
 
     private fun assertFinalConstraints(database: SupportSQLiteDatabase, startVersion: Int) {
+        // MigrationTestHelper opens a raw SQLite connection, unlike Room's normal runtime helper.
+        // Enable FK enforcement explicitly so this test exercises the same delete behavior as Room.
+        database.execSQL("PRAGMA foreign_keys = ON")
+        assertEquals("startVersion=$startVersion: SQLite foreign-key enforcement", 1, scalarLong(database, "PRAGMA foreign_keys"))
+
         val expectedIndices = listOf(
             "index_family_members_familySpaceId",
             "index_pending_enrollment_requests_receivedAtEpochMillis",
