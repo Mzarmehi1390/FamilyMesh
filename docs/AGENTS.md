@@ -47,7 +47,7 @@ Private, decentralized, **end-to-end encrypted by design** family messaging on *
 
 ## Build / CI notes
 
-- No Gradle Wrapper yet → CI installs Gradle 8.13 + JDK 17
+- `main` / this branch still lack the Gradle Wrapper; PR #2 carries a pinned Gradle 8.13 wrapper candidate and has passed its current CI, but remains Draft/unmerged.
 - `android-ci.yml`: unit tests, assembleDebug, APK artifact; storage instrumentation on emulator
 - Do not treat a green `verify` job alone as full security or migration proof
 
