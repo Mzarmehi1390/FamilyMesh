@@ -1,3 +1,13 @@
+## 2026-11-26 — Verified integration-candidate CI refresh
+
+- Inspected the live repository: default branch is `main`; `develop/agent-ready` exists and is exactly one documentation-only commit ahead of `main` (README.md, docs/AGENTS.md, docs/HANDOFF.md; no source changes on this branch).
+- Open integration candidate: [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2), head `8f94a1a3dc26e124a748212077b6e70bdfff44f6` (`build/gradle-wrapper-8.13-20261109`). It remains Draft and unmerged.
+- Refreshed GitHub Actions run [#45760437373](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45760437373) (run 217): **all three jobs completed successfully** — `verify`, API 31 identity/Keystore instrumentation, and API 34 storage/Keystore instrumentation. The verify job passed the COSE primitive KAT, backup-policy checks, JVM tests, Android Lint, Debug APK assembly, Room schema export, and artifact uploads. Instrumentation report artifacts were uploaded. This supersedes the older PR #2 description saying instrumentation was still running.
+- PR #3 (`eafc7dea65064bf82cf3abe9cea2cd376ba0f23d`) and PR #4 (`e8c46f2dd6f0c68542474ac26799fd2b9b853023`) each had a green `verify` job but failed the separate storage-instrumentation job because ADB could not find `emulator-5554` and timed out waiting for emulator boot; Gradle instrumentation tests did not execute in those failed jobs. Their relevant COSE and Compose-flow changes are already described as included in PR #2; do not merge their older branches independently.
+- The PR #2 CI result validates that candidate head only. It does **not** mean those changes are merged into `main` or `develop/agent-ready`. No source code, Room schema, expiry policy, protocol policy, authorization, key-recovery, or transport behavior was changed by this status refresh.
+- Room remains v7. Do not implement the proposed v8 owner-decision ledger/FMJA1 digest or alter expiry semantics until the ADR 0006/0008/0012 gates are explicitly approved. Keep membership authorization fail-closed and never replace a lost device key.
+- No numerical CPU, memory, battery, network, or latency improvement is claimed; no device profiling was performed.
+
 # FamilyMesh Handover
 
 Last synchronized: 2026-11-04
