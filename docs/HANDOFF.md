@@ -33,7 +33,7 @@ From HANDOVER (verify against latest `main` each run):
 1. Prefer **green CI** and expanding Room migration / instrumentation coverage (historical fixtures v1–v7, MigrationTestHelper).
 2. **Do not** implement Room v8 owner-ledger / FMJA1 digest until ADR gates (0006 expiry policy, 0008/0012 design approval) are satisfied — document and test toward those gates if blocked.
 3. Protocol review remains open (COSE v2 draft ADR 0003; custom v1 envelopes still ship).
-4. PR #2 contains a pinned Gradle 8.13 Wrapper candidate; it has passed its current CI but remains Draft/unmerged, so `main` still does not include it.
+4. PR #2 contains a pinned Gradle 8.13 Wrapper candidate and remains Draft/unmerged, so `main` still does not include it. Its latest head and CI state are recorded in the 2026-11-27 synchronization below; do not rely on the earlier green run for the newer head.
 
 ## What NOT to do
 
