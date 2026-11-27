@@ -1,8 +1,9 @@
-## 2026-11-27 — Migration instrumentation CASCADE restored on develop/agent-ready
+## 2026-11-27 — Migration instrumentation CASCADE restored and CI green on develop/agent-ready
 
 - Storage-instrumentation failed because MigrationTestHelper connections leave foreign_keys OFF; DELETE did not cascade.
 - Fixed by enabling `PRAGMA foreign_keys = ON` in FamilyMeshMigrationInstrumentedTest (commit 5bab532b).
 - Historical v1–v7 schema fixtures remain checked in. Identity fail-closed unit tests remain expanded.
+- Android CI run [#45992543396](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45992543396) (run 262) completed successfully: both `verify` and `storage-instrumentation` passed on head `3f7acd73719f601a41d559bf8ef947b85fa0918e`.
 - Integration candidate [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2) remains Draft.
 - Room remains v7. Do not implement the proposed v8 owner-decision ledger/FMJA1 digest or alter expiry semantics until the ADR 0006/0008/0012 gates are explicitly approved. Keep membership authorization fail-closed and never replace a lost device key.
 - No numerical performance gain is claimed; no device profiling was performed.
@@ -32,7 +33,7 @@ production authorization are not implemented.
 |---|---|---|
 | Native Android + Compose foundation | IMPLEMENTED_AND_TESTED | CI builds debug APK |
 | Modular Gradle architecture | IMPLEMENTED_AND_TESTED | Five modules present |
-| Room / DataStore local storage | IMPLEMENTED_AND_INSTRUMENTED | Room schema v7; historical fixtures v1–v7 checked in; MigrationTestHelper coverage present and CASCADE assertions now correct |
+| Room / DataStore local storage | IMPLEMENTED_AND_INSTRUMENTED | Room schema v7; historical fixtures v1–v7 checked in; MigrationTestHelper coverage present and CASCADE assertions now correct; latest CI green |
 | Android Keystore device signing | IMPLEMENTED_AND_INSTRUMENTED | P-256-only verification enforced; API 31 and API 34 instrumentation green on PR #2 |
 | Signed enrollment proof | IMPLEMENTED_AND_TESTED | Bounded local codec and verifier tests |
 | Local nonce replay protection | IMPLEMENTED_AND_TESTED | One database only; not distributed |
@@ -46,7 +47,7 @@ production authorization are not implemented.
 | BLE / Wi-Fi Direct / internet P2P / relay | NOT_STARTED | No transport implementation |
 | Cross-device synchronization | NOT_STARTED | Manual text transfer only |
 | Gradle Wrapper | IN_PROGRESS | Pinned 8.13 wrapper on PR #2 (green CI); not yet on main |
-| Android instrumentation / device validation | PARTIALLY_VERIFIED | Full suite green on PR #2 candidate; historical migrations covered there; fixtures and CASCADE fix now present on docs branch (pending next CI confirmation) |
+| Android instrumentation / device validation | PARTIALLY_VERIFIED | Full suite green on PR #2 candidate; historical migrations covered there; fixtures and CASCADE fix now present on docs branch with green CI |
 
 ## Immediate priority
 
