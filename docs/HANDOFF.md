@@ -30,7 +30,7 @@ FamilyMesh is a **native Android** app for private family messaging. Milestone 0
 
 From HANDOVER (verify against latest `main` each run):
 
-1. Prefer **green CI** and expanding Room migration / instrumentation coverage (historical fixtures v1–v7 checked in; foreign-key PRAGMA now enabled in migration tests; latest CI green).
+1. Prefer **green CI** and expanding Room migration / instrumentation coverage (historical fixtures v1–v7 checked in; foreign-key PRAGMA now enabled in migration tests; latest CI green on develop/agent-ready).
 2. **Do not** implement Room v8 owner-ledger / FMJA1 digest until ADR gates (0006 expiry policy, 0008/0012 design approval) are satisfied — document and test toward those gates if blocked.
 3. Protocol review remains open (COSE v2 draft ADR 0003; custom v1 envelopes still ship). Negative-test outline added for KAT 0001.
 4. PR #2 contains a pinned Gradle 8.13 Wrapper candidate and remains Draft/unmerged, so `main` still does not include it. Its current head has full green CI.
@@ -50,10 +50,10 @@ From HANDOVER (verify against latest `main` each run):
 4. Commit via GitHub tools; refresh HANDOVER/PROJECT_STATUS/WORK_LOG when status changes
 5. Reply to the owner in **Persian** with commits, CI links, and remaining blockers
 
-## 2026-11-27 — Migration test CASCADE restored and CI green
+## 2026-11-27 — Latest green CI confirmed (run #268)
 
-- Enabled `PRAGMA foreign_keys = ON` in FamilyMeshMigrationInstrumentedTest so DELETE cascades correctly on MigrationTestHelper connections (commit 5bab532b).
-- Android CI run [#45992543396](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45992543396) passed both `verify` and `storage-instrumentation` on this branch.
-- Added documentation-only negative-test outline for the COSE v2 primitive KAT.
+- Android CI run [#46000688306](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/46000688306) passed both `verify` and `storage-instrumentation` on head `4603456a6a215835b188093d231c1aacad81ad1e`.
+- Historical schema fixtures and CASCADE/PRAGMA fix remain validated.
+- Protocol negative-test outline remains in place for review support.
 - PR #2 remains the integration candidate.
 - Room remains v7. Keep ADR 0006/0008/0012 implementation gates closed. Authorization remains fail-closed; do not replace lost device keys.
