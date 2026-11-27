@@ -7,12 +7,12 @@ Default branch: `main`
 ## Last verified repository state
 
 - `main` remains unchanged at `968b580283b2ce17d0deda83beab4675ec55b845`; no candidate changes have been merged.
-- PR #2 remains open, Draft, and unmerged. Its current branch head is `117a690d30f5888fcd78c005e1b9c230a1be50e9` on `build/gradle-wrapper-8.13-20261109`.
+- PR #2 remains open, Draft, and unmerged. Its current branch head is `0ae5de68516d081832da6dd4ba9bb49faf8017a5` on `build/gradle-wrapper-8.13-20261109`.
 - The latest completed source validation is Android CI [run #45885409892](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45885409892) on source head `09eaa3832ac50e13b27506953d310adfae4b2f46`; all three jobs passed.
 - The downloaded JUnit XML reports show API 31 identity 16/16, API 34 identity 16/16, and API 34 storage 9/9: 41 instrumentation cases total, with zero failures/errors/skips.
 - The verify job passed the COSE primitive KAT, all 15 backup-policy verifier tests, direct manifest/rules verification, JVM unit tests, aggregate `lintDebug`, Debug APK assembly, Room schema export, and artifact uploads.
 - The Lint XML artifact contains 13 warnings in `:app` and zero in each core module (5 `NewerVersionAvailable`, 4 `GradleDependency`, 3 `AndroidGradlePluginVersion`, 1 `OldTargetApi`).
-- The current PR head `117a690d30f5888fcd78c005e1b9c230a1be50e9` contains documentation-only updates and is pending Android CI [run #45943577511](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45943577511). Do not label this exact head CI-verified until the run completes.
+- The current PR head `0ae5de68516d081832da6dd4ba9bb49faf8017a5` contains documentation-only updates and is pending Android CI [run #45943697888](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45943697888). Do not label this exact head CI-verified until the run completes.
 - PR #1 is superseded for integration. The COSE primitive verifier/vector from PR #3 and stable Compose Flow work from PR #4 are present in PR #2; do not merge those older branches independently.
 - Branch protection is disabled. Keep PR #2 Draft pending protocol/security review and owner review.
 

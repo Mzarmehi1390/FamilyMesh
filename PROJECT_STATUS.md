@@ -3,9 +3,9 @@
 Last audited: 2026-11-27
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
 Default branch: `main` at `968b580283b2ce17d0deda83beab4675ec55b845` (unchanged; no candidate changes merged)
-Current integration candidate: [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2), branch `build/gradle-wrapper-8.13-20261109`, head `117a690d30f5888fcd78c005e1b9c230a1be50e9` (open, Draft, unmerged).
+Current integration candidate: [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2), branch `build/gradle-wrapper-8.13-20261109`, head `0ae5de68516d081832da6dd4ba9bb49faf8017a5` (open, Draft, unmerged).
 Latest completed full CI: [run #45885409892](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45885409892) passed all three jobs on exact source head `09eaa3832ac50e13b27506953d310adfae4b2f46`. The verify, API 31 identity/Keystore, and API 34 storage/identity jobs all passed. JUnit XML artifacts were downloaded and inspected: API 31 identity 16/16; API 34 identity 16/16; API 34 storage 9/9 (41 instrumentation cases total, zero failures/errors/skips).
-The current head contains documentation-only follow-ups after that green source head. Android CI [run #45943577511](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45943577511) is pending on head `117a690d30f5888fcd78c005e1b9c230a1be50e9`; do not claim this documentation head has completed CI until that run finishes.
+The current head contains documentation-only follow-ups after that green source head. Android CI [run #45943697888](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45943697888) is pending on head `0ae5de68516d081832da6dd4ba9bb49faf8017a5`; do not claim this documentation head has completed CI until that run finishes.
 Lint evidence from the exact green source head: 13 warnings in `:app`, zero in each of the four core modules. Categories: 5 `NewerVersionAvailable`, 4 `GradleDependency`, 3 `AndroidGradlePluginVersion`, and 1 `OldTargetApi`. The downloaded XML reports were parsed; no `ObsoleteSdkInt` warning remains.
 Protocol review drafts: ADR 0003 and ADR 0006 (proposals only; not production-approved).
 
@@ -47,7 +47,7 @@ production authorization are not implemented.
 - `verify`: COSE primitive KAT, 15 backup-policy regression tests, direct manifest/data-extraction policy verification, JVM unit tests, aggregate `lintDebug`, Debug APK assembly, Room schema export, and configured artifact uploads passed.
 - JUnit XML artifacts were downloaded and parsed: API 31 identity/Keystore 16/16; API 34 identity/Keystore 16/16; API 34 storage 9/9. Total 41 instrumentation cases, with zero failures, errors, or skips.
 - The Lint XML artifact contains 13 app warnings and zero in `:core:common`, `:core:designsystem`, `:core:identity`, and `:core:storage`: five `NewerVersionAvailable`, four `GradleDependency`, three `AndroidGradlePluginVersion`, and one `OldTargetApi`.
-- Documentation-only commits have advanced PR #2 beyond the green source head. Current head `117a690d30f5888fcd78c005e1b9c230a1be50e9` is under CI run [#45943577511](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45943577511), which is pending. Do not transfer the previous green result to this new head until the run completes.
+- Documentation-only commits have advanced PR #2 beyond the green source head. Current head `0ae5de68516d081832da6dd4ba9bb49faf8017a5` is under CI run [#45943697888](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45943697888), which is pending. Do not transfer the previous green result to this new head until the run completes.
 - The successful emulator run does not prove hardware-backed Keystore assurance, remote attestation, physical-device compatibility, or security against a compromised operating system.
 - No local Android build, physical-device profile, hardware-backed attestation, or battery/performance benchmark was run. No numeric performance gain is claimed.
 - No candidate changes have been merged to `main`.

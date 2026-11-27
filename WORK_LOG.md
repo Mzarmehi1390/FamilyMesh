@@ -1141,3 +1141,10 @@ Android CI [run #45406912355](https://github.com/Mzarmehi1390/FamilyMesh/actions
 - Confirmed current time semantics: epoch milliseconds, no selected max TTL/skew; proof uses `createdAt <= now < expiresAt`; owner decision time is within the request interval and not in the future; acceptance event time is not before the decision, not in the future, and before request expiry. No separate authenticated owner receipt time is encoded.
 - Added the source revalidation addendum to ADR 0004. No runtime, cryptography, wire format, database, authorization, or transport change was made.
 - PR #2 current documentation head `117a690d30f5888fcd78c005e1b9c230a1be50e9` is under CI run #45943577511; validation is pending. The preceding source head `09eaa3832ac50e13b27506953d310adfae4b2f46` passed run #45885409892, including 41/41 instrumentation cases.
+
+
+## 2026-11-27 — Documentation-head synchronization
+
+- Current PR #2 head is `0ae5de68516d081832da6dd4ba9bb49faf8017a5`; Android CI run [#45943697888](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45943697888) is pending for this exact head.
+- The preceding run #45943577511 was cancelled when the next documentation commit superseded its head. The last completed green source validation remains run #45885409892 on `09eaa3832ac50e13b27506953d310adfae4b2f46`, with 41/41 instrumentation cases.
+- No source/runtime or protocol implementation changes were made by the documentation synchronization.
