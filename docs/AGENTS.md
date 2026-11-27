@@ -55,9 +55,9 @@ Private, decentralized, **end-to-end encrypted by design** family messaging on *
 
 Maximize useful work per run: fix CI, close test gaps, advance the **current** work package from HANDOVER, update status docs. Stop only when blocked on product/security decisions listed in ADRs (e.g. expiry policy ADR 0006) or on human review gates.
 
-## 2026-11-27 — Protocol-review support expanded with KAT 0003
+## 2026-11-27 — Protocol-review support: complete primitive KAT set
 
-- `develop/agent-ready` (PR #5) now includes COSE v2 primitive KAT 0003 (ApplicantAcceptance context) plus updated negative-test outline and ADR 0003 references. Three primitive vectors total.
+- `develop/agent-ready` (PR #5) now includes COSE v2 primitive KATs 0001–0004 covering all four artifact contexts, plus updated negative-test outline and ADR 0003 references.
 - Prior green Android CI runs on this branch remain valid for the storage/fixture work. New documentation commits have triggered fresh CI (in progress at time of writing).
 - Integration candidate PR #2 remains Draft at head `f47634412bf0f2c9b967a1f55fe6cdf567b79244` with its own green CI.
 - Historical Room fixtures and migration CASCADE coverage are validated on this branch.

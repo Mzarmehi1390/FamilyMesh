@@ -1,22 +1,21 @@
 # FamilyMesh Work Log
 
-## 2026-11-27 — Added COSE v2 primitive KAT 0003 (ApplicantAcceptance context)
+## 2026-11-27 — Added COSE v2 primitive KATs 0003 and 0004 (complete primitive set)
 
 ### Observation / Action
 
-- Generated and checked in a third reproducible primitive known-answer vector covering the applicant-acceptance artifact context (distinct content type and external AAD from KAT 0001 and KAT 0002).
-- Updated the negative-test outline to apply the rejection checklist to all three vectors and to note cross-artifact binding coverage.
-- Updated ADR 0003 to reference all three primitive fixtures.
+- Generated and checked in primitive known-answer vectors for the remaining two artifact contexts: applicant-acceptance (KAT 0003) and initial-owner-trust (KAT 0004).
+- Updated the negative-test outline and ADR 0003 to reference the complete set of four primitive fixtures covering all artifact contexts.
 - All changes are documentation-only. No runtime, schema, cryptographic implementation, or authorization changes.
 
 ### Impact
 
-- Protocol-review support now has three concrete primitive vectors demonstrating different artifact contexts. One remaining: initial-owner trust.
+- Protocol-review support now has primitive vectors for every artifact context defined in the draft ADR 0003. Full payload schemas and independent cross-implementation verification remain open.
 - Room remains v7; ADR 0006/0008/0012 implementation gates unchanged. Authorization remains fail-closed.
 
 ### Next
 
-- Continue protocol-review support (final KAT for initial-owner trust, malformed corpus details) without claiming production COSE.
+- Continue protocol-review support (full payload schemas, malformed corpus details, ADR clarity) without claiming production COSE.
 - Keep v8 implementation blocked pending ADR gates.
 
 ---

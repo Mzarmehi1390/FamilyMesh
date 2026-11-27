@@ -1,6 +1,6 @@
-## 2026-11-27 — Protocol-review support: added COSE v2 primitive KAT 0003
+## 2026-11-27 — Protocol-review support: complete primitive KAT set (0001–0004)
 
-- Added a third reproducible primitive known-answer vector for the applicant-acceptance artifact context. Negative-test outline and ADR 0003 now reference KAT 0001, 0002, and 0003.
+- Added reproducible primitive known-answer vectors for all four artifact contexts (enrollment-proof, owner-decision, applicant-acceptance, initial-owner-trust). Negative-test outline and ADR 0003 now reference the full set.
 - Documentation-only; does not implement a COSE parser, approve the draft profile, or change runtime/schema.
 - Historical v1–v7 schema fixtures and foreign-key PRAGMA fix remain validated by prior green CI on this branch.
 - Integration candidate [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2) remains Draft with green CI on its head.
@@ -39,7 +39,7 @@ production authorization are not implemented.
 | Signed owner decision | IMPLEMENTED_AND_TESTED | Service resolves the pin itself; tests reject missing, mismatched, and ambiguous pins |
 | Applicant acceptance + owner finalization | IMPLEMENTED_AND_TESTED | Both signatures verified; local Room v7 record |
 | Production membership authorization | BLOCKED | No trusted resolver; default denies all |
-| Canonical COSE protocol | IN_PROGRESS | Draft v2 profile + three primitive KATs (enrollment-proof, owner-decision, applicant-acceptance) + negative-test outline; not production |
+| Canonical COSE protocol | IN_PROGRESS | Draft v2 profile + four primitive KATs (all artifact contexts) + negative-test outline; not production |
 | Invitations / revocation / recovery | NOT_STARTED | Requires reviewed lifecycle and authority model |
 | E2EE messaging | NOT_STARTED | No message crypto implementation |
 | BLE / Wi-Fi Direct / internet P2P / relay | NOT_STARTED | No transport implementation |
