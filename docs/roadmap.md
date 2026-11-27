@@ -11,7 +11,7 @@
 - [x] Basic launch screen and shared theme
 - [x] Unit-test baseline
 - [x] GitHub Actions workflow
-- [x] Verify unit tests, lint, debug APK, Room schema, and Android instrumentation on GitHub Actions Ubuntu/JDK 17/Gradle 8.13 (PR #2 run #45760437373 passed all three jobs on exact head 8f94a1a3dc26e124a748212077b6e70bdfff44f6)
+- [x] Verify unit tests, lint, debug APK, Room schema, and Android instrumentation on GitHub Actions Ubuntu/JDK 17/Gradle 8.13 (PR #2 run #45885409892 passed all three jobs on exact head 09eaa3832ac50e13b27506953d310adfae4b2f46)
 - [x] Add and validate the official Gradle 8.13 Wrapper (JAR and distribution checksums pinned)
 - [x] Add Android 12+ cloud-backup and device-transfer exclusions with a fail-closed verifier and 15 regression tests
 - [x] Add an adaptive launcher icon and remove its redundant API-26 resource qualifier
@@ -138,3 +138,23 @@ vectors, platform tests, and security review are complete.
 5. Only after those gates are approved, implement the selected protocol and
    corresponding migration/tests. Keep network transport and production
    authorization disabled until then.
+
+
+## 2026-11-27 — Current integration candidate validation
+
+PR #2 head `09eaa3832ac50e13b27506953d310adfae4b2f46` passed Android CI [run #45885409892](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45885409892) on
+2026-11-26. All three jobs passed: `verify`, API 31 identity/Keystore
+instrumentation, and API 34 storage/identity instrumentation. The verify job
+completed the COSE primitive KAT, 15 backup-policy tests, direct policy
+verification, JVM unit tests, aggregate Lint, Debug APK assembly, Room schema
+export, and artifact uploads.
+
+The downloaded Lint XML reports contain 13 warnings in `:app` and zero in
+all four core modules: five `NewerVersionAvailable`, four
+`GradleDependency`, three `AndroidGradlePluginVersion`, and one
+`OldTargetApi`. No `ObsoleteSdkInt` warning remains.
+
+This validates the named candidate and CI emulator images only. PR #2 remains
+Draft and unmerged; `main` is unchanged. It does not establish hardware-backed
+Keystore assurance, remote attestation, physical-device compatibility, or
+production protocol approval.
