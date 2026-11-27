@@ -44,19 +44,13 @@ production authorization are not implemented.
 
 ## Latest verification
 
-- Android CI [run #45556670546](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45556670546) passed all three jobs on the prior candidate head `997421221cf2ba4e9bcbae4db403620276a79ddf`.
-- Verify: COSE primitive KAT, 15 backup-policy regression tests, direct Android manifest/rules verification, `testDebugUnitTest`, aggregate `lintDebug` across all five Android modules, Debug APK assembly, Room schema export, and configured artifacts all passed.
-- API 31 identity/Keystore instrumentation: 11/11 passed, 0 failures/errors/skips.
-- API 34 storage instrumentation: 9/9 passed; API 34 identity/Keystore instrumentation: 11/11 passed; zero failures/errors/skips.
-- The JUnit XML artifacts were downloaded and inspected directly. The API 31 and API 34 Keystore suites include Android-provider acceptance of generated P-256 keys and rejection of off-curve and out-of-field points.
-- The Lint artifact reports 18 app warnings and zero warnings in the four core modules. The current candidate moves the adaptive icon out of the redundant `mipmap-anydpi-v26` qualifier and updates Room to 2.8.5; the new run must confirm the resulting Lint report.
-- The current candidate head `754e7065eaa414c9689db6f299ba3a9dc30729db` is under [CI run #45626115545](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45626115545); its final result is pending. No success is inferred for the six newly integrated commits.
+- Android CI [run #45885409892](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45885409892) passed all three jobs on exact PR #2 head `09eaa3832ac50e13b27506953d310adfae4b2f46`.
+- `verify`: COSE primitive KAT, 15 backup-policy regression tests, direct manifest/data-extraction policy verification, JVM unit tests, aggregate `lintDebug`, Debug APK assembly, Room schema export, and all configured artifact uploads passed.
+- API 31 identity/Keystore instrumentation and API 34 storage/identity instrumentation jobs both passed. The uploaded JUnit reports are available in the run artifacts; this record does not infer hardware-backed Keystore assurance or physical-device compatibility.
+- The Lint XML artifact was downloaded and inspected: 13 app warnings, zero in `:core:common`, `:core:designsystem`, `:core:identity`, and `:core:storage`. Remaining app findings: five `NewerVersionAvailable`, four `GradleDependency`, three `AndroidGradlePluginVersion`, and one `OldTargetApi`.
+- The run validates this exact candidate head and its configured emulator images only. It does not prove hardware-backed Keystore assurance, remote attestation, physical-device compatibility, or security against a compromised operating system.
 - No local Android build, physical-device profile, hardware-backed attestation, or battery/performance benchmark was run. No numeric performance gain is claimed.
 - No candidate changes have been merged to `main`.
-
-## Immediate priority
-
-Wait for run #45626115545 on the current PR #2 head. If all three jobs pass, inspect the new Lint artifact and confirm the Room 2.8.5 patch and point-at-infinity tests. Then resume the ADR-gated enrollment protocol review. Do not implement production COSE v2, Room v8, owner-ledger semantics, production authorization, or network transport until their respective interoperability and security decisions are approved.
 
 ## Protocol audit progress
 
