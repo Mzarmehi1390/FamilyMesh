@@ -93,18 +93,7 @@ jobs:
           emulator-boot-timeout: 1200
           pre-emulator-launch-script: adb start-server
           script: |
-            set +e
-            for attempt in 1 2; do
-              echo "=== Instrumentation attempt $attempt ==="
-              gradle :core:storage:connectedDebugAndroidTest
-              exit_code=$?
-              if [ $exit_code -eq 0 ]; then
-                exit 0
-              fi
-              echo "Attempt $attempt failed with exit $exit_code; retrying once if possible..."
-              sleep 10
-            done
-            exit $exit_code
+            set +e; gradle :core:storage:connectedDebugAndroidTest; exit_code=$?; if [ $exit_code -ne 0 ]; then echo "First attempt failed with $exit_code; retrying once..."; sleep 10; gradle :core:storage:connectedDebugAndroidTest; exit_code=$?; fi; exit $exit_code
       - name: Save API 31 AVD and system-image cache
         if: steps.avd-cache.outputs.cache-hit != 'true' && steps.run-api31-tests.outcome == 'success'
         uses: actions/cache/save@v4
