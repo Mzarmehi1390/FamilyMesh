@@ -32,7 +32,7 @@ From HANDOVER (verify against latest `main` each run):
 
 1. Prefer **green CI** and expanding Room migration / instrumentation coverage (historical fixtures v1–v7 checked in; foreign-key PRAGMA now enabled in migration tests; latest CI green on develop/agent-ready).
 2. **Do not** implement Room v8 owner-ledger / FMJA1 digest until ADR gates (0006 expiry policy, 0008/0012 design approval) are satisfied — document and test toward those gates if blocked.
-3. Protocol review remains open (COSE v2 draft ADR 0003; custom v1 envelopes still ship). Negative-test outline added for KAT 0001.
+3. Protocol review remains open (COSE v2 draft ADR 0003; custom v1 envelopes still ship). Two primitive KATs (0001 enrollment-proof, 0002 owner-decision) and negative-test outline are in place for review support.
 4. PR #2 contains a pinned Gradle 8.13 Wrapper candidate and remains Draft/unmerged, so `main` still does not include it. Its current head has full green CI.
 
 ## What NOT to do
@@ -50,10 +50,9 @@ From HANDOVER (verify against latest `main` each run):
 4. Commit via GitHub tools; refresh HANDOVER/PROJECT_STATUS/WORK_LOG when status changes
 5. Reply to the owner in **Persian** with commits, CI links, and remaining blockers
 
-## 2026-11-27 — Latest green CI confirmed (run #268)
+## 2026-11-27 — Protocol-review support: KAT 0002 added
 
-- Android CI run [#46000688306](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/46000688306) passed both `verify` and `storage-instrumentation` on head `4603456a6a215835b188093d231c1aacad81ad1e`.
-- Historical schema fixtures and CASCADE/PRAGMA fix remain validated.
-- Protocol negative-test outline remains in place for review support.
+- Added COSE v2 primitive KAT 0002 for the owner-decision context and updated the negative-test outline and ADR 0003.
+- Prior Android CI runs on this branch remain green.
 - PR #2 remains the integration candidate.
 - Room remains v7. Keep ADR 0006/0008/0012 implementation gates closed. Authorization remains fail-closed; do not replace lost device keys.
