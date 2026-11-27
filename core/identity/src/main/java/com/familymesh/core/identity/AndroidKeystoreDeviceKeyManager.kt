@@ -11,6 +11,7 @@ import java.security.KeyFactory
 import java.security.KeyPairGenerator
 import java.security.KeyStore
 import java.security.PrivateKey
+import java.security.interfaces.ECPublicKey
 import java.security.Signature
 import java.security.UnrecoverableKeyException
 import java.security.cert.X509Certificate
@@ -19,6 +20,8 @@ import java.util.Date
 import javax.security.auth.x500.X500Principal
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /**
  * Android Keystore implementation for the proposed P-256 device signing key.
@@ -34,70 +37,76 @@ class AndroidKeystoreDeviceKeyManager(
     private val preferences = appContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
 
     override suspend fun getPublicIdentity(): DevicePublicIdentity? = withContext(Dispatchers.IO) {
-        val keyStore = loadKeyStore()
-        readIdentity(keyStore)
+        identityStateMutex.withLock {
+            val keyStore = loadKeyStore()
+            readIdentity(keyStore)
+        }
     }
 
     override suspend fun createPublicIdentity(): DevicePublicIdentity = withContext(Dispatchers.IO) {
-        val keyStore = loadKeyStore()
-        val marker = preferences.getString(PREFERENCE_KEY_ID, null)
+        identityStateMutex.withLock {
+            val keyStore = loadKeyStore()
+            val marker = preferences.getString(PREFERENCE_KEY_ID, null)
 
-        if (keyStore.containsAlias(KEY_ALIAS)) {
-            throw DeviceKeyManagerException.IdentityAlreadyExists()
-        }
-        if (marker != null) {
-            throw DeviceKeyManagerException.KeyMaterialMissing()
-        }
-
-        try {
-            val now = System.currentTimeMillis().coerceAtLeast(1L)
-            val generator = KeyPairGenerator.getInstance(
-                KeyProperties.KEY_ALGORITHM_EC,
-                ANDROID_KEYSTORE,
-            )
-            val spec = KeyGenParameterSpec.Builder(
-                KEY_ALIAS,
-                KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY,
-            )
-                .setAlgorithmParameterSpec(ECGenParameterSpec(CURVE))
-                .setDigests(KeyProperties.DIGEST_SHA256)
-                .setCertificateSubject(X500Principal(CERTIFICATE_SUBJECT))
-                .setCertificateSerialNumber(BigInteger.valueOf(now))
-                .setCertificateNotBefore(Date(now))
-                .setCertificateNotAfter(Date(CERTIFICATE_NOT_AFTER))
-                .build()
-            generator.initialize(spec)
-            generator.generateKeyPair()
-
-            val identity = readIdentity(keyStore, requireMarker = false)
-                ?: throw DeviceKeyManagerException.KeyMaterialMissing()
-            val saved = preferences.edit()
-                .putString(PREFERENCE_KEY_ID, identity.keyId)
-                .commit()
-            if (!saved) {
-                runCatching { keyStore.deleteEntry(KEY_ALIAS) }
-                throw DeviceKeyManagerException.KeyStoreUnavailable()
+            if (keyStore.containsAlias(KEY_ALIAS)) {
+                throw DeviceKeyManagerException.IdentityAlreadyExists()
             }
-            identity
-        } catch (failure: DeviceKeyManagerException) {
-            throw failure
-        } catch (failure: GeneralSecurityException) {
-            runCatching { keyStore.deleteEntry(KEY_ALIAS) }
-            throw DeviceKeyManagerException.UnsupportedKeyConfiguration(failure)
-        } catch (failure: Exception) {
-            runCatching { keyStore.deleteEntry(KEY_ALIAS) }
-            throw DeviceKeyManagerException.KeyStoreUnavailable(failure)
+            if (marker != null) {
+                throw DeviceKeyManagerException.KeyMaterialMissing()
+            }
+
+            try {
+                val now = System.currentTimeMillis().coerceAtLeast(1L)
+                val generator = KeyPairGenerator.getInstance(
+                    KeyProperties.KEY_ALGORITHM_EC,
+                    ANDROID_KEYSTORE,
+                )
+                val spec = KeyGenParameterSpec.Builder(
+                    KEY_ALIAS,
+                    KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY,
+                )
+                    .setAlgorithmParameterSpec(ECGenParameterSpec(CURVE))
+                    .setDigests(KeyProperties.DIGEST_SHA256)
+                    .setCertificateSubject(X500Principal(CERTIFICATE_SUBJECT))
+                    .setCertificateSerialNumber(BigInteger.valueOf(now))
+                    .setCertificateNotBefore(Date(now))
+                    .setCertificateNotAfter(Date(CERTIFICATE_NOT_AFTER))
+                    .build()
+                generator.initialize(spec)
+                generator.generateKeyPair()
+
+                val identity = readIdentity(keyStore, requireMarker = false)
+                    ?: throw DeviceKeyManagerException.KeyMaterialMissing()
+                val saved = preferences.edit()
+                    .putString(PREFERENCE_KEY_ID, identity.keyId)
+                    .commit()
+                if (!saved) {
+                    runCatching { keyStore.deleteEntry(KEY_ALIAS) }
+                    throw DeviceKeyManagerException.KeyStoreUnavailable()
+                }
+                identity
+            } catch (failure: DeviceKeyManagerException) {
+                throw failure
+            } catch (failure: GeneralSecurityException) {
+                runCatching { keyStore.deleteEntry(KEY_ALIAS) }
+                throw DeviceKeyManagerException.UnsupportedKeyConfiguration(failure)
+            } catch (failure: Exception) {
+                runCatching { keyStore.deleteEntry(KEY_ALIAS) }
+                throw DeviceKeyManagerException.KeyStoreUnavailable(failure)
+            }
         }
     }
 
     override suspend fun sign(message: ByteArray): ByteArray = withContext(Dispatchers.IO) {
-        val keyStore = loadKeyStore()
-        val identity = readIdentity(keyStore)
-            ?: throw DeviceKeyManagerException.KeyMaterialMissing()
-        if (identity.publicKeyBytes.isEmpty()) {
-            throw DeviceKeyManagerException.CorruptKeyMaterial()
+        val privateKey = identityStateMutex.withLock {
+            val keyStore = loadKeyStore()
+            val identity = readIdentity(keyStore)
+                ?: throw DeviceKeyManagerException.KeyMaterialMissing()
+            if (identity.publicKeyBytes.isEmpty()) {
+                throw DeviceKeyManagerException.CorruptKeyMaterial()
+            }
+            getPrivateKey(keyStore)
         }
-        val privateKey = getPrivateKey(keyStore)
         try {
             Signature.getInstance(SIGNATURE_ALGORITHM).run {
                 initSign(privateKey)
@@ -112,9 +121,11 @@ class AndroidKeystoreDeviceKeyManager(
     }
 
     override suspend fun getSecurityLevel(): DeviceKeySecurityLevel = withContext(Dispatchers.IO) {
-        val keyStore = loadKeyStore()
-        readIdentity(keyStore) ?: throw DeviceKeyManagerException.KeyMaterialMissing()
-        val privateKey = getPrivateKey(keyStore)
+        val privateKey = identityStateMutex.withLock {
+            val keyStore = loadKeyStore()
+            readIdentity(keyStore) ?: throw DeviceKeyManagerException.KeyMaterialMissing()
+            getPrivateKey(keyStore)
+        }
         try {
             val keyInfo = KeyFactory.getInstance(privateKey.algorithm, ANDROID_KEYSTORE)
                 .getKeySpec(privateKey, KeyInfo::class.java)
@@ -151,7 +162,15 @@ class AndroidKeystoreDeviceKeyManager(
             throw DeviceKeyManagerException.CorruptKeyMaterial()
         }
 
-        val keyId = DeviceKeyFingerprint.fromEncodedPublicKey(publicKey.encoded)
+        val ecPublicKey = publicKey as? ECPublicKey
+            ?: throw DeviceKeyManagerException.CorruptKeyMaterial()
+        if (!P256PublicKeyParser.isValidP256(ecPublicKey)) {
+            throw DeviceKeyManagerException.CorruptKeyMaterial()
+        }
+        val encodedPublicKey = publicKey.encoded
+            ?: throw DeviceKeyManagerException.CorruptKeyMaterial()
+
+        val keyId = DeviceKeyFingerprint.fromEncodedPublicKey(encodedPublicKey)
         if (marker != null && marker != keyId) {
             throw DeviceKeyManagerException.CorruptKeyMaterial()
         }
@@ -169,7 +188,7 @@ class AndroidKeystoreDeviceKeyManager(
 
         return DevicePublicIdentity(
             keyId = keyId,
-            publicKeyBytes = publicKey.encoded,
+            publicKeyBytes = encodedPublicKey,
             createdAtEpochMillis = certificate.notBefore.time.coerceAtLeast(0L),
         )
     }
@@ -196,6 +215,11 @@ class AndroidKeystoreDeviceKeyManager(
     }
 
     private companion object {
+        // The device signing alias is process-wide for this application.
+        // Serialize provisioning and identity reads across manager instances
+        // so no caller can observe the alias before its marker is committed.
+        val identityStateMutex = Mutex()
+
         const val ANDROID_KEYSTORE = "AndroidKeyStore"
         const val KEY_ALIAS = "familymesh.device.signing.v1"
         const val PREFERENCES_NAME = "familymesh_device_identity"

@@ -4,6 +4,10 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -141,6 +145,53 @@ class EnrollmentNonceDaoInstrumentedTest {
     }
 
     @Test
+    fun persistDecision_concurrentSameArtifactWithDifferentReceiptTimes_exposesCurrentConflict() = runBlocking {
+        assertTrue(dao.consumeNonce(nonce(), pending(), nowEpochMillis = 1_500L))
+
+        // Characterization only: ADR 0014 leaves the desired receipt-time/idempotency
+        // semantics open. This records the current DAO behavior without approving it.
+        val firstReceipt = decision()
+        val secondReceipt = firstReceipt.copy(recordedAtEpochMillis = 1_700L)
+        val results = persistConcurrently(
+            first = firstReceipt,
+            firstNowEpochMillis = 1_600L,
+            second = secondReceipt,
+            secondNowEpochMillis = 1_700L,
+        )
+
+        assertEquals(1, results.count { it == "RECORDED" })
+        assertEquals(1, results.count { it == "CONFLICT" })
+        val stored = dao.getDecision(FAMILY_ID, REQUEST_ID)
+        assertTrue(stored == firstReceipt || stored == secondReceipt)
+        assertNull(dao.getPendingRequest(FAMILY_ID, REQUEST_ID))
+    }
+
+    @Test
+    fun persistDecision_concurrentOppositeArtifacts_keepsSingleWinner() = runBlocking {
+        assertTrue(dao.consumeNonce(nonce(), pending(), nowEpochMillis = 1_500L))
+
+        val approval = decision()
+        val rejection = approval.copy(
+            outcome = "REJECTED",
+            decidedAtEpochMillis = 1_700L,
+            signatureBase64 = "c2lnMg==",
+            recordedAtEpochMillis = 1_700L,
+        )
+        val results = persistConcurrently(
+            first = approval,
+            firstNowEpochMillis = 1_600L,
+            second = rejection,
+            secondNowEpochMillis = 1_700L,
+        )
+
+        assertEquals(1, results.count { it == "RECORDED" })
+        assertEquals(1, results.count { it == "CONFLICT" })
+        val stored = dao.getDecision(FAMILY_ID, REQUEST_ID)
+        assertTrue(stored == approval || stored == rejection)
+        assertNull(dao.getPendingRequest(FAMILY_ID, REQUEST_ID))
+    }
+
+    @Test
     fun finalizeAuthenticatedDevice_isIdempotentAndRejectsConflictingReplay() = runBlocking {
         assertTrue(dao.consumeNonce(nonce(), pending(), nowEpochMillis = 1_500L))
         val device = AuthenticatedFamilyDeviceEntity(
@@ -187,6 +238,25 @@ class EnrollmentNonceDaoInstrumentedTest {
 
         assertEquals(0, rowCount("pending_enrollment_requests"))
         assertEquals(0, rowCount("authenticated_family_devices"))
+    }
+
+    private suspend fun persistConcurrently(
+        first: EnrollmentDecisionEntity,
+        firstNowEpochMillis: Long,
+        second: EnrollmentDecisionEntity,
+        secondNowEpochMillis: Long,
+    ): List<String> = coroutineScope {
+        val start = CompletableDeferred<Unit>()
+        val firstResult = async(Dispatchers.IO) {
+            start.await()
+            dao.persistDecision(first, firstNowEpochMillis)
+        }
+        val secondResult = async(Dispatchers.IO) {
+            start.await()
+            dao.persistDecision(second, secondNowEpochMillis)
+        }
+        start.complete(Unit)
+        listOf(firstResult.await(), secondResult.await())
     }
 
     private fun rowCount(tableName: String): Int {

@@ -1,10 +1,13 @@
 # FamilyMesh Project Status
 
-Last verified: 2026-11-04
+Last audited: 2026-11-27
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
-Branch: `main`
-Latest repository commit: `7112f0ae2bfbb36a37e186b3a9eb4775d3e81213` (historical schema audit documentation; latest successful full CI baseline remains run #176)
-Protocol review drafts: ADR 0003 and ADR 0006 (proposals only; not production-approved)
+Default branch: `main` at `968b580283b2ce17d0deda83beab4675ec55b845` (unchanged; no candidate changes merged)
+Current integration candidate: [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2), branch `build/gradle-wrapper-8.13-20261109`, head `0ae5de68516d081832da6dd4ba9bb49faf8017a5` (open, Draft, unmerged).
+Latest completed full CI: [run #45885409892](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45885409892) passed all three jobs on exact source head `09eaa3832ac50e13b27506953d310adfae4b2f46`. The verify, API 31 identity/Keystore, and API 34 storage/identity jobs all passed. JUnit XML artifacts were downloaded and inspected: API 31 identity 16/16; API 34 identity 16/16; API 34 storage 9/9 (41 instrumentation cases total, zero failures/errors/skips).
+The current head contains documentation-only follow-ups after that green source head. Android CI [run #45943697888](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45943697888) is pending on head `0ae5de68516d081832da6dd4ba9bb49faf8017a5`; do not claim this documentation head has completed CI until that run finishes.
+Lint evidence from the exact green source head: 13 warnings in `:app`, zero in each of the four core modules. Categories: 5 `NewerVersionAvailable`, 4 `GradleDependency`, 3 `AndroidGradlePluginVersion`, and 1 `OldTargetApi`. The downloaded XML reports were parsed; no `ObsoleteSdkInt` warning remains.
+Protocol review drafts: ADR 0003 and ADR 0006 (proposals only; not production-approved).
 
 ## Overall state
 
@@ -22,8 +25,8 @@ production authorization are not implemented.
 |---|---|---|
 | Native Android + Compose foundation | IMPLEMENTED_AND_TESTED | CI builds debug APK |
 | Modular Gradle architecture | IMPLEMENTED_AND_TESTED | Five modules present |
-| Room / DataStore local storage | IMPLEMENTED_AND_INSTRUMENTED | Room schema v7; six DAO tests passed on API 34 in CI run #173; historical migrations remain unverified |
-| Android Keystore device signing | IMPLEMENTED_UNVERIFIED | P-256-only verification enforced; unit tests; device/API instrumentation pending |
+| Room / DataStore local storage | IMPLEMENTED_AND_INSTRUMENTED | Room schema v7; DAO tests and fixture-backed migrations from v1–v7 pass on API 34 in PR #2 candidate; no v7→v8 validation |
+| Android Keystore device signing | IMPLEMENTED_WITH_EMULATOR_EVIDENCE | Latest completed PR #2 CI run #45556670546 passed API 31 identity 11/11 and API 34 identity 11/11; physical-device/hardware-backed assurance and attestation remain unverified |
 | Signed enrollment proof | IMPLEMENTED_AND_TESTED | Bounded local codec and verifier tests |
 | Local nonce replay protection | IMPLEMENTED_AND_TESTED | One database only; not distributed |
 | Initial-owner trust bootstrap/pinning | IMPLEMENTED_AND_TESTED | Manual out-of-band fingerprint comparison |
@@ -35,29 +38,19 @@ production authorization are not implemented.
 | E2EE messaging | NOT_STARTED | No message crypto implementation |
 | BLE / Wi-Fi Direct / internet P2P / relay | NOT_STARTED | No transport implementation |
 | Cross-device synchronization | NOT_STARTED | Manual text transfer only |
-| Gradle Wrapper | NOT_STARTED | CI installs Gradle 8.13 |
-| Android instrumentation / device validation | PARTIALLY_VERIFIED | Six Room DAO tests passed on API 34 in runs #172, #173, and #176; historical migrations and device-specific validation remain outstanding |
+| Gradle Wrapper | IMPLEMENTED_AND_CI_VERIFIED_ON_PR | Official Gradle 8.13 POSIX/Windows wrapper with pinned JAR/distribution checksums on PR #2 candidate |
+| Android instrumentation / device validation | PARTIAL_EMULATOR_COVERAGE_ON_PR | Latest PR #2 run #45552834794 passed API 31 Keystore 8/8, API 34 Room/storage 9/9, and API 34 identity 8/8; Room migration coverage remains v1–v7 only; future v7→v8 and physical devices remain unverified |
 
 ## Latest verification
 
-CI run [#41672460808](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41672460808)
-completed successfully for the documentation baseline:
-- `testDebugUnitTest`
-- `assembleDebug`
-- debug APK artifact upload
-
-This is CI evidence only; it is not a production security review or device
-instrumentation result. Documentation commits after the last verified baseline are not covered by
-that successful run. The latest lifecycle-audit commit is 86cc551; Android CI
-run #41677314967 was queued/in progress at the last check, so its result is
-not yet confirmed.
-
-## Immediate priority
-
-Complete the Identity & Trusted Enrollment protocol review. Keep authorization
-integration and network transport blocked until canonical encoding, key IDs,
-signature representation, replay scope, trust ceremony, and recovery/
-revocation semantics have been reviewed.
+- Android CI [run #45885409892](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45885409892) passed all three jobs on exact source head `09eaa3832ac50e13b27506953d310adfae4b2f46`.
+- `verify`: COSE primitive KAT, 15 backup-policy regression tests, direct manifest/data-extraction policy verification, JVM unit tests, aggregate `lintDebug`, Debug APK assembly, Room schema export, and configured artifact uploads passed.
+- JUnit XML artifacts were downloaded and parsed: API 31 identity/Keystore 16/16; API 34 identity/Keystore 16/16; API 34 storage 9/9. Total 41 instrumentation cases, with zero failures, errors, or skips.
+- The Lint XML artifact contains 13 app warnings and zero in `:core:common`, `:core:designsystem`, `:core:identity`, and `:core:storage`: five `NewerVersionAvailable`, four `GradleDependency`, three `AndroidGradlePluginVersion`, and one `OldTargetApi`.
+- Documentation-only commits have advanced PR #2 beyond the green source head. Current head `0ae5de68516d081832da6dd4ba9bb49faf8017a5` is under CI run [#45943697888](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45943697888), which is pending. Do not transfer the previous green result to this new head until the run completes.
+- The successful emulator run does not prove hardware-backed Keystore assurance, remote attestation, physical-device compatibility, or security against a compromised operating system.
+- No local Android build, physical-device profile, hardware-backed attestation, or battery/performance benchmark was run. No numeric performance gain is claimed.
+- No candidate changes have been merged to `main`.
 
 ## Protocol audit progress
 
@@ -210,3 +203,127 @@ revocation semantics have been reviewed.
 - The exported schema metadata is consistent with the source migration chain. This does not yet prove SQLite migration execution or row preservation.
 - No migration test fixtures have yet been checked into `core/storage/schemas`; no MigrationTestHelper suite has been run. Room remains v7.
 - Next: refresh terminal status of all seven export jobs, check in authentic fixtures, add migration tests from versions 1–7, and run them on API 34. Do not implement v8 until the existing ADR approval gates are satisfied.
+
+
+## Historical Room migration fixture integration — 2026-11-08
+
+- Refreshed Android CI run [#41879166661](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41879166661) on main commit `968b580283b2ce17d0deda83beab4675ec55b845`: the `verify` job passed unit tests, debug APK assembly, and current Room v7 schema export.
+- The `storage-instrumentation` job started the API 34 emulator and executed 7 tests. Six completed successfully; the migration test failed before its first migration assertion because `MigrationTestHelper` could not load `com.familymesh.core.storage.family.FamilyMeshDatabase/1.json` from androidTest assets. This is a missing-fixture packaging failure, not a reported migration SQL or row-preservation assertion failure.
+- Confirmed all seven historical schema-export matrix jobs in run [#41864521401](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/41864521401) completed successfully. Downloaded v1–v7 JSON files parse and declare their matching versions; entity counts progress from 2 to 8. The v7 fixture SHA-256 matches the current main schema snapshot exactly.
+- Added all seven historical fixtures to branch `fix/room-migration-schema-fixtures-20261108` under `core/storage/schemas/com.familymesh.core.storage.family.FamilyMeshDatabase/`, which is already configured as the androidTest assets source.
+- No runtime, Room entity, schema version, protocol, cryptography, expiry, or transport behavior changed. Migration correctness remains unverified until the fixture-backed API 34 run passes and its JUnit XML is inspected.
+
+
+## Historical Room migrations and reproducible Gradle build — 2026-11-13
+
+- Combined PR #2 branch head `2897397fa2e9f672f891c2f2f61f26ada901a372` passed Android CI run [#43231837501](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/43231837501): both `verify` and `storage-instrumentation` succeeded.
+- Downloaded artifact #13952322275 and inspected the JUnit XML: 7 test cases, 0 failures, 0 errors, 0 skipped on API 34.
+- The migration test iterated all supported start versions 1–7, seeded representative records, migrated each database to v7, and verified preserved rows, expected tables, indexes, unique device-key enforcement, and family foreign-key cascades. The v5 trusted-owner row intentionally remains outside the historical FK cascade.
+- The official Gradle 8.13 wrapper, unit tests, Debug APK assembly, Room schema generation, and artifact uploads passed in the same CI run.
+- The current Room schema remains v7. No v8 migration or production runtime/protocol/crypto/transport behavior was changed.
+- Next: run the deterministic DAO concurrency tests added for same signed artifacts with different local receipt times and concurrent opposite outcomes. Keep the intended same-artifact receipt-time semantics open until explicitly reviewed under ADR 0014; keep owner-ledger/v8 work gated on ADR 0006/0008/0012.
+
+
+## 2026-11-18 — PR #2 integration candidate validation refresh
+
+- The default branch remains unchanged at `968b580283b2ce17d0deda83beab4675ec55b845`; this work is still isolated on `build/gradle-wrapper-8.13-20261109` and has not been merged.
+- PR #2 candidate head: `dc16231b10276443b5169876c4af2ff1232c824e`.
+- Android CI run [#43602180283](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/43602180283), attempt 4, completed successfully on 2026-11-17. All three jobs passed: `verify`, API 34 `storage-instrumentation`, and API 31 `identity-api31-instrumentation`.
+- The verify job passed JVM unit tests, Debug APK assembly, Room schema generation, and artifact uploads. API 34 instrumentation passed the Room v1–v7 migration suite, DAO concurrency characterizations, and Keystore tests; API 31 Keystore instrumentation also passed.
+- Room remains schema v7. The historical migration result validates supported v1–v7 paths only; it is not evidence for a future v7→v8 migration.
+- The same-artifact/different-receipt-time and opposite-decision DAO tests are characterization tests. They do not approve idempotency, conflict, expiry, or owner-decision product semantics.
+- PR #1 remains superseded for integration by PR #2 and must not be merged independently.
+- No production runtime, Room entity/schema version, protocol, cryptographic behavior, expiry policy, or network transport changed in this validation stage.
+
+### Next work and safety gates
+
+Continue the identity/trusted-enrollment review without enabling messaging transport or production authorization. The unresolved gates remain: independent COSE/CBOR vectors for all four artifacts; deterministic encoding and ECDSA low-S policy; v1/v2 key-ID and serialization migration; expiry and replay-retention semantics; trusted owner ceremony, ownership transfer, revocation, recovery; and a threat model covering clock rollback, local database tampering, backup/restore, and offline peers. Do not implement the owner decision ledger or a v7→v8 migration until ADR 0006/0008/0012 semantics are reviewed and approved.
+
+
+## 2026-11-21 integration update
+
+- PR #2 now also includes memoized Room-backed Compose observation Flows. The authenticated-device Flow is keyed by both its repository and selected family-space ID.
+- PR #2 now runs the test-only Python/OpenSSL verifier for COSE primitive KAT 0001 in the existing wrapper-based `verify` job.
+- The verifier is fixture-level validation only; it does not approve the draft COSE profile, implement a production parser, or close the full interoperability gate.
+
+
+## 2026-11-23 — Hosted Linux emulator startup root-cause fix
+
+### Investigation
+
+- Inspected PR #2 head `d7ebfd44ae9d5bf81b5ed02e164764947759fb6a` and Android CI run [#45114550680](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45114550680).
+- The `verify` job passed the COSE primitive fixture verifier, JVM unit tests, Debug APK assembly, Room schema generation, and both artifact uploads.
+- Both API 31 and API 34 instrumentation jobs failed before Gradle instrumentation started. Raw job logs explicitly reported: `Software CPU emulation (-accel off) is not supported. A hardware CPU accelerator is required (or set ANDROID_I_WANT_MY_TCG=yes to force TCG software emulation).` The runner also reported that hardware acceleration was unavailable.
+- This is an emulator-host capability/configuration failure, not a test assertion failure. No instrumentation result is claimed for run #45114550680.
+
+### Change
+
+- Set job-level `ANDROID_I_WANT_MY_TCG: "yes"` in both hosted-Linux emulator jobs so QEMU TCG software CPU emulation is explicitly permitted when KVM/hardware acceleration is unavailable.
+- Kept the API levels, emulator image, test commands, timeout, and test coverage unchanged.
+- Workflow fix commit: `78f68e1dff252d9e9865d6a25606252e7a9c19e7`.
+
+### Validation boundary
+
+- The workflow edit is committed to PR #2's existing integration branch. A new CI run must confirm whether TCG can boot these images and whether instrumentation tests execute. Until that run completes, emulator validation remains pending.
+- No Kotlin runtime, database schema, protocol, cryptography, authorization, or transport behavior changed. No performance gain is claimed.
+
+
+## 2026-11-23 — Remove duplicate cancellation handlers in Home screen
+
+### Audit finding
+
+- Re-read the complete 921-line `FamilyMeshHomeScreen.kt` on the active integration branch after the prior cancellation-safety change.
+- Found four consecutive duplicate `catch (cancelled: CancellationException) { throw cancelled }` clauses in owner approval, decision import, applicant acceptance signing, and owner finalization actions.
+- These duplicate clauses added no behavior and obscured the cancellation/error boundary.
+
+### Change
+
+- Removed exactly four redundant cancellation handlers while retaining one cancellation rethrow before each ordinary `Exception` handler.
+- Confirmed by source-level audit that no duplicate adjacent cancellation-handler pairs remain and that no `runCatching` calls remain in this screen.
+- Commit: `595b189e5707f26666d14fa6886e9f0b010be2ed`.
+
+### Validation boundary
+
+- No local Android build is available in this session. The updated PR CI must compile and test this cleanup.
+- This is a behavior-preserving cleanup; no performance gain is claimed. No domain, Room schema, protocol, cryptographic, authorization, or transport behavior changed.
+
+
+## 2026-11-24 — Latest emulator CI result and mitigation
+
+PR #2 remains the only integration candidate; `main` is unchanged at `968b580283b2ce17d0deda83beab4675ec55b845`. On candidate head `90de4eaaa6b7505dd3c06e0c43c8d755c9437803`, Android CI run [#45191763315](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45191763315) passed the complete `verify` job (COSE primitive KAT, JVM unit tests, Debug APK, Room schema export, and artifacts). Both instrumentation jobs failed before Gradle tests: API 34 timed out before emulator boot completion; API 31 booted but ADB failed on the post-boot unlock command with a broken pipe. These are infrastructure/startup failures, not failed test assertions, and no new instrumentation pass is claimed.
+
+The candidate workflow now uses AOSP `default` images (no Google Play dependency in these suites), `swiftshader_indirect`, explicit ADB-server startup, per-API AVD snapshot caching, a 1,200-second boot window, and a 45-minute job timeout. The next CI run must validate this mitigation before the emulator gate can be closed. Room remains v7; protocol/security gates and all messaging transports remain unchanged.
+
+
+## 2026-11-24 — P-256 public-point validation staged
+
+The shared SPKI parser now has a proposed hardening change to reject EC point-at-infinity, coordinates outside the P-256 field, and points that fail the curve equation. Two JVM negative tests cover an off-curve point and a coordinate equal to the field prime. The change is staged separately while PR #2 run [#45331772915](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45331772915) validates the preceding CI workflow update. No v2 COSE parser or wire schema is introduced; this is not yet CI-verified and must be validated on the next PR head.
+
+
+## 2026-11-24 — Emulator CI findings and next candidate
+
+Run [#45331772915](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45331772915) passed `verify` and API 31 Keystore instrumentation (8/8, no failures/errors/skips). API 31 and API 34 emulator preparation completed, but the API 31 second launch logged Quick Boot snapshot restore Error -22 and fell back to cold boot. The staged candidate therefore removes the extra warm-up boot, disables snapshot restore, caches the AVD definition plus AOSP system image, and runs each API's instrumentation once per job. It also upgrades both workflows to Node 24-native action versions. API 34 instrumentation was still running when this note was prepared; its final result remains pending.
+
+
+## 2026-11-24 — Full PR #2 CI result
+
+Android CI run [#45331772915](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45331772915) completed successfully on candidate head `93adcffc67d75d70d8b9397b1cd9f7308b169160`:
+
+- `verify`: COSE primitive KAT verifier, JVM unit tests, Debug APK assembly, Room schema generation, and artifact uploads passed.
+- API 31 Keystore instrumentation: 8/8 tests passed; 0 failures/skips.
+- API 34 instrumentation: storage 9/9 and identity 8/8 passed; 0 failures/skips.
+
+This closes the CI execution gate for that exact head only. A separate staging branch adds P-256 point validation and a single-boot emulator-cache workflow; neither change is included in this run. A new CI run is required after integrating that candidate. No production COSE v2, E2EE, authorization resolver, P2P, BLE, Wi-Fi Direct, or relay capability is implied.
+
+
+## 2026-11-24 — Verified PR #2 head and Android instrumentation
+
+PR #2 head `79304843f42ad1ef1fc0e331c2f562a2da731302` was validated by Android CI [run #45406912355](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45406912355). All three jobs completed successfully:
+
+- `verify`: draft COSE primitive KAT verifier, JVM unit tests, Debug APK assembly, Room schema generation, and artifact uploads passed.
+- API 34 instrumentation: 9/9 storage tests and 8/8 identity tests passed; no failures or skipped tests.
+- API 31 instrumentation: 8/8 identity tests passed; no failures or skipped tests.
+
+The job logs confirm the instrumentation Gradle commands executed; transient ADB polling and emulator-console warnings did not prevent test execution. The single-boot AVD/system-image cache workflow is now validated for successful execution on this CI run, but no numeric startup or performance improvement is claimed. The P-256 SPKI import hardening and its negative JVM tests are included in this tested head.
+
+PR #2 remains Draft and unmerged; `main` remains at `968b580283b2ce17d0deda83beab4675ec55b845`. Room remains v7. CI emulator success is not evidence of hardware-backed Keystore assurance or physical-device compatibility. COSE v2 interoperability, owner-decision authority, exact acceptance replay identity, expiry/replay policy, revocation/recovery, and production authorization/transport remain gated by their ADR reviews.

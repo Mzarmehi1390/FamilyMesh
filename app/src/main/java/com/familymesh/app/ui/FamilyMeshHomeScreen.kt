@@ -24,7 +24,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -88,11 +88,27 @@ fun FamilyMeshHomeScreen() {
     val enrollmentFinalizationService: EnrollmentFinalizationService = koinInject()
     val enrollmentFinalizationRepository: EnrollmentFinalizationRepository = koinInject()
     val clipboardManager = LocalClipboardManager.current
-    val profile by profileRepository.profile.collectAsState(initial = null)
-    val familySpaces by familySpaceRepository.observeFamilySpaces().collectAsState(initial = emptyList())
-    val pendingEnrollmentRequests by proofAcceptanceService.observePendingRequests().collectAsState(initial = emptyList())
-    val initialOwners by initialOwnerTrustRepository.observeInitialOwners().collectAsState(initial = emptyList())
-    val trustedOwners by initialOwnerPinRepository.observeTrustedOwners().collectAsState(initial = emptyList())
+    val profile by profileRepository.profile.collectAsStateWithLifecycle(initialValue = null)
+
+    // Keep repository Flow instances stable across unrelated UI recompositions.
+    // Recreating mapped Room Flows here would cancel and restart their collectors.
+    val familySpacesFlow = remember(familySpaceRepository) {
+        familySpaceRepository.observeFamilySpaces()
+    }
+    val pendingEnrollmentRequestsFlow = remember(proofAcceptanceService) {
+        proofAcceptanceService.observePendingRequests()
+    }
+    val initialOwnersFlow = remember(initialOwnerTrustRepository) {
+        initialOwnerTrustRepository.observeInitialOwners()
+    }
+    val trustedOwnersFlow = remember(initialOwnerPinRepository) {
+        initialOwnerPinRepository.observeTrustedOwners()
+    }
+
+    val familySpaces by familySpacesFlow.collectAsStateWithLifecycle(initialValue = emptyList())
+    val pendingEnrollmentRequests by pendingEnrollmentRequestsFlow.collectAsStateWithLifecycle(initialValue = emptyList())
+    val initialOwners by initialOwnersFlow.collectAsStateWithLifecycle(initialValue = emptyList())
+    val trustedOwners by trustedOwnersFlow.collectAsStateWithLifecycle(initialValue = emptyList())
     var displayName by remember(profile?.displayName) { mutableStateOf(profile?.displayName.orEmpty()) }
     var familyName by remember { mutableStateOf("") }
     var deviceIdentity by remember { mutableStateOf<DevicePublicIdentity?>(null) }
@@ -100,7 +116,10 @@ fun FamilyMeshHomeScreen() {
     var keySecurityLevel by remember { mutableStateOf<DeviceKeySecurityLevel?>(null) }
     var isCreatingIdentity by remember { mutableStateOf(false) }
     var selectedFamilySpaceId by remember { mutableStateOf("") }
-    val authenticatedDevices by enrollmentFinalizationRepository.observeAuthenticatedDevices(selectedFamilySpaceId).collectAsState(initial = emptyList())
+    val authenticatedDevicesFlow = remember(enrollmentFinalizationRepository, selectedFamilySpaceId) {
+        enrollmentFinalizationRepository.observeAuthenticatedDevices(selectedFamilySpaceId)
+    }
+    val authenticatedDevices by authenticatedDevicesFlow.collectAsStateWithLifecycle(initialValue = emptyList())
     var generatedProofText by remember { mutableStateOf("") }
     var importedProofText by remember { mutableStateOf("") }
     var proofStatus by remember { mutableStateOf<String?>(null) }
@@ -135,7 +154,7 @@ fun FamilyMeshHomeScreen() {
             deviceIdentity = deviceKeyManager.getPublicIdentity()
             identityError = null
             keySecurityLevel = if (deviceIdentity != null) {
-                runCatching { keySecurityInfoProvider.getSecurityLevel() }.getOrNull()
+                runSuspendCatching { keySecurityInfoProvider.getSecurityLevel() }.getOrNull()
             } else null
         } catch (failure: DeviceKeyManagerException) {
             identityError = when (failure) {
@@ -144,7 +163,7 @@ fun FamilyMeshHomeScreen() {
                 is DeviceKeyManagerException.CorruptKeyMaterial -> "This device identity needs recovery. It will not be replaced automatically."
                 else -> "Device identity storage is temporarily unavailable."
             }
-        } catch (_: Exception) {
+        } catch (cancelled: CancellationException) { throw cancelled } catch (_: Exception) {
             identityError = "Could not read this device's signing identity."
         }
     }
@@ -187,7 +206,7 @@ fun FamilyMeshHomeScreen() {
                                             if (established) "Initial owner recorded locally."
                                             else "An initial owner is already recorded for this family space."
                                         )
-                                    } catch (_: Exception) {
+                                    } catch (cancelled: CancellationException) { throw cancelled } catch (_: Exception) {
                                         snackbarHostState.showSnackbar("Could not establish the initial owner.")
                                     } finally {
                                         isEstablishingOwner = false
@@ -227,7 +246,7 @@ fun FamilyMeshHomeScreen() {
                     Button(
                         onClick = {
                             coroutineScope.launch {
-                                runCatching { profileRepository.updateDisplayName(displayName) }
+                                runSuspendCatching { profileRepository.updateDisplayName(displayName) }
                                     .onSuccess { snackbarHostState.showSnackbar("Display name saved on this device.") }
                                     .onFailure { snackbarHostState.showSnackbar("Enter a display name first.") }
                             }
@@ -279,9 +298,7 @@ fun FamilyMeshHomeScreen() {
                                     try {
                                         deviceIdentity = deviceKeyManager.createPublicIdentity()
                                         identityError = null
-                                        keySecurityLevel = runCatching {
-                                            keySecurityInfoProvider.getSecurityLevel()
-                                        }.getOrNull()
+                                        keySecurityLevel = runSuspendCatching { keySecurityInfoProvider.getSecurityLevel() }.getOrNull()
                                         snackbarHostState.showSnackbar("Device signing identity created locally.")
                                     } catch (failure: DeviceKeyManagerException) {
                                         identityError = when (failure) {
@@ -292,7 +309,7 @@ fun FamilyMeshHomeScreen() {
                                             else -> "Could not create a device signing identity."
                                         }
                                         snackbarHostState.showSnackbar(identityError!!)
-                                    } catch (_: Exception) {
+                                    } catch (cancelled: CancellationException) { throw cancelled } catch (_: Exception) {
                                         identityError = "Could not create a device signing identity."
                                         snackbarHostState.showSnackbar(identityError!!)
                                     } finally {
@@ -355,7 +372,7 @@ fun FamilyMeshHomeScreen() {
                                             val proof = DeviceEnrollmentProofSigner(messageSigner).sign(request, identity)
                                             generatedProofText = EnrollmentProofTextCodec.encode(proof, identity)
                                             proofStatus = "Signed request created. It expires in 15 minutes."
-                                        } catch (_: Exception) {
+                                        } catch (cancelled: CancellationException) { throw cancelled } catch (_: Exception) {
                                             proofStatus = "Could not create the signed request. Check the device identity and try again."
                                         } finally {
                                             isProcessingProof = false
@@ -421,7 +438,7 @@ fun FamilyMeshHomeScreen() {
                                                 proofStatus = "Could not safely record this request. Please try again."
                                         }
                                     }
-                                } catch (_: Exception) {
+                                } catch (cancelled: CancellationException) { throw cancelled } catch (_: Exception) {
                                     proofStatus = "The enrollment code is malformed or could not be verified."
                                 } finally {
                                     isProcessingProof = false
@@ -486,9 +503,7 @@ fun FamilyMeshHomeScreen() {
                                                 .sign(request, EnrollmentDecisionOutcome.APPROVED, System.currentTimeMillis().coerceAtLeast(0L))
                                             generatedDecisionText = EnrollmentDecisionTextCodec.encode(signed)
                                             decisionStatus = "Signed approval created. Copy it and send it to the applicant."
-                                        } catch (cancelled: CancellationException) {
-                                            throw cancelled
-                                        } catch (_: Exception) {
+                                        } catch (cancelled: CancellationException) { throw cancelled } catch (_: Exception) {
                                             decisionStatus = "Could not sign: this device must be the trusted initial owner and the request must be valid."
                                         } finally { isProcessingDecision = false }
                                     }
@@ -501,7 +516,7 @@ fun FamilyMeshHomeScreen() {
                                                 .sign(request, EnrollmentDecisionOutcome.REJECTED, System.currentTimeMillis().coerceAtLeast(0L))
                                             generatedDecisionText = EnrollmentDecisionTextCodec.encode(signed)
                                             decisionStatus = "Signed rejection created. Copy it and send it to the applicant."
-                                        } catch (_: Exception) {
+                                        } catch (cancelled: CancellationException) { throw cancelled } catch (_: Exception) {
                                             decisionStatus = "Could not sign: this device must be the trusted initial owner and the request must be valid."
                                         } finally { isProcessingDecision = false }
                                     }
@@ -541,9 +556,7 @@ fun FamilyMeshHomeScreen() {
                                         EnrollmentDecisionAcceptanceResult.CONFLICT -> "A conflicting decision is already recorded."
                                         EnrollmentDecisionAcceptanceResult.STORAGE_UNAVAILABLE -> "Could not safely save the decision."
                                     }
-                                } catch (cancelled: CancellationException) {
-                                    throw cancelled
-                                } catch (_: Exception) {
+                                } catch (cancelled: CancellationException) { throw cancelled } catch (_: Exception) {
                                     decisionStatus = "The decision code is malformed or could not be verified."
                                 } finally { isProcessingDecision = false }
                             }
@@ -590,9 +603,7 @@ fun FamilyMeshHomeScreen() {
                                     )
                                     generatedAcceptanceText = EnrollmentAcceptanceTextCodec.encode(signed)
                                     acceptanceStatus = "Applicant acceptance signed. Transfer the FMJA1 code to the initial-owner device."
-                                } catch (cancelled: CancellationException) {
-                                    throw cancelled
-                                } catch (_: Exception) {
+                                } catch (cancelled: CancellationException) { throw cancelled } catch (_: Exception) {
                                     acceptanceStatus = "Could not sign acceptance. Check that this is an approved decision addressed to this device."
                                 } finally {
                                     isProcessingAcceptance = false
@@ -657,9 +668,7 @@ fun FamilyMeshHomeScreen() {
                                         EnrollmentFinalizationOutcome.StorageUnavailable ->
                                             "Could not safely finalize enrollment. Try again later."
                                     }
-                                } catch (cancelled: CancellationException) {
-                                    throw cancelled
-                                } catch (_: Exception) {
+                                } catch (cancelled: CancellationException) { throw cancelled } catch (_: Exception) {
                                     acceptanceStatus = "The FMJA1 code is malformed or could not be processed."
                                 } finally {
                                     isProcessingAcceptance = false
@@ -696,7 +705,7 @@ fun FamilyMeshHomeScreen() {
                                 ownerFingerprintConfirmation = ""
                                 ownerBundleStatus = "Signature valid. Independent fingerprint comparison is still required."
                             }
-                        } catch (_: Exception) {
+                        } catch (cancelled: CancellationException) { throw cancelled } catch (_: Exception) {
                             ownerBundlePreview = null
                             ownerBundleStatus = "The bundle is malformed or its signature is invalid."
                         }
@@ -729,7 +738,7 @@ fun FamilyMeshHomeScreen() {
                                         InitialOwnerPinResult.ALREADY_PINNED -> "This exact owner key is already pinned."
                                         InitialOwnerPinResult.CONFLICT -> "A different owner key is already pinned. Replacement is blocked."
                                     }
-                                } catch (_: Exception) {
+                                } catch (cancelled: CancellationException) { throw cancelled } catch (_: Exception) {
                                     ownerBundleStatus = "Fingerprint mismatch or local storage error."
                                 } finally { isPinningOwner = false }
                             }
@@ -841,7 +850,7 @@ fun FamilyMeshHomeScreen() {
                 Button(
                     onClick = {
                         coroutineScope.launch {
-                            runCatching {
+                            runSuspendCatching {
                                 familySpaceRepository.createFamilySpace(
                                     name = familyName,
                                     createdAtEpochMillis = System.currentTimeMillis()

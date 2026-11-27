@@ -11,8 +11,12 @@
 - [x] Basic launch screen and shared theme
 - [x] Unit-test baseline
 - [x] GitHub Actions workflow
-- [x] Verify unit tests and debug APK on the clean GitHub Actions Ubuntu/JDK 17/Gradle 8.13 environment (latest verified run: 2026-11-03)
-- [ ] Add and validate the Gradle Wrapper
+- [x] Verify unit tests, lint, debug APK, Room schema, and Android instrumentation on GitHub Actions Ubuntu/JDK 17/Gradle 8.13 (PR #2 run #45885409892 passed all three jobs on exact head 09eaa3832ac50e13b27506953d310adfae4b2f46)
+- [x] Add and validate the official Gradle 8.13 Wrapper (JAR and distribution checksums pinned)
+- [x] Add Android 12+ cloud-backup and device-transfer exclusions with a fail-closed verifier and 15 regression tests
+- [x] Add an adaptive launcher icon and remove its redundant API-26 resource qualifier
+- [x] Update Room to 2.8.5 (no schema change)
+- [x] Reject P-256 point-at-infinity imports in JVM and Android-provider tests
 
 ## Milestone 1 — Domain and identity
 
@@ -79,20 +83,78 @@ decision, acceptance, and owner-side finalization flow is implemented and
 covered by unit tests. Do not begin network transport or claim production
 membership authorization until the protocol review gates are closed.
 
-Required gates:
-- [x] Review current bounded parsing and reject non-canonical Base64URL aliases across all four transfer envelopes
-- [x] Enforce P-256-only public-key parsing at all enrollment signature-verification boundaries
+### Validated on the current integration candidate
+
+PR #2 head `8f94a1a3dc26e124a748212077b6e70bdfff44f6` passed Android CI run
+[#45760437373](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45760437373)
+on 2026-11-26. All three jobs passed:
+
+- `verify`: COSE primitive KAT, 15 backup-policy regression tests, direct
+  backup-policy verification, JVM unit tests, aggregate Android Lint,
+  Debug APK assembly, Room schema export, and artifact uploads.
+- API 31 identity/Keystore instrumentation: 12/12 passed.
+- API 34 storage instrumentation: 9/9 passed; API 34 identity/Keystore
+  instrumentation: 12/12 passed.
+- The uploaded instrumentation reports were inspected; 33 instrumented
+  cases completed with no failures, errors, or skips.
+- Lint reported 13 warnings in `:app` and zero in core modules: five
+  `NewerVersionAvailable`, four `GradleDependency`, three
+  `AndroidGradlePluginVersion`, and one `OldTargetApi`.
+
+This validates the named candidate commit and emulator images only. It does
+not prove physical-device compatibility, hardware-backed Keystore assurance,
+remote attestation, or security against a compromised operating system.
+PR #2 remains Draft and unmerged; `main` has not received these changes.
+
+### Remaining protocol and product gates
+
 - [ ] Select canonical interoperable COSE_Key / COSE_Sign1 wire representation
 - [x] Add first reproducible primitive COSE v2 known-answer vector (one artifact context; not full interoperability approval)
+- [x] Reconstruct primitive KAT 0001 in a separate Python-standard-library/OpenSSL verifier (fixture-level check only; not a second complete CBOR/COSE implementation)
+- [ ] Produce complete schemas and test vectors for all four enrollment artifacts
 - [ ] Define strict ECDSA-to-COSE signature conversion and low-S policy
 - [ ] Finalize versioned public-key serialization and key-ID derivation (current v1 remains SHA-256 over X.509 SPKI with domain separation)
 - [ ] Resolve the gap between the proposed COSE ESP256 profile and current JCA ECDSA / X.509 / custom length-prefixed payload implementation
 - [ ] Define replay protection and nonce retention across multiple devices
 - [ ] Define trusted owner ceremony, ownership transfer, revocation, and recovery
-- [ ] Threat-model the complete enrollment flow, including local database tampering, clock skew, compromised devices, and offline peers
-- [ ] Add Android API 31+ Keystore instrumentation coverage
-- [ ] Add Room migration and transactional persistence tests on Android
+- [ ] Threat-model the complete enrollment flow, including local database tampering, clock rollback, compromised devices, and offline peers
+- [x] Add Android API 31+ Keystore instrumentation coverage (current PR #2 run #45760437373: API 31 identity 12/12; API 34 identity 12/12)
+- [x] Add `MigrationTestHelper` coverage for Room start versions 1–7, representative row preservation, and final SQLite constraints
+- [x] Pass the fixture-backed Room migration suite on API 34 (run #43231837501: 7 tests, 0 failures/errors/skips; v1–v7 migration and preservation assertions passed)
+- [x] Execute deterministic concurrent DAO coverage for same-artifact imports with different receipt times and concurrent opposite outcomes (run #43602180283 passed; tests characterize current DAO outcomes only and do not choose product idempotency/conflict policy)
 
 A draft COSE v2 profile and migration considerations are documented in
 ADR 0003. Its proposals are not production decisions until interoperability
 vectors, platform tests, and security review are complete.
+
+### Next implementation sequence
+
+1. Review the four signed enrollment artifact formats side-by-side and create
+   a field/validation parity matrix against the draft profile.
+2. Resolve the clock, expiry, nonce-retention, and replay semantics in ADR 0006.
+3. Resolve authoritative owner-decision issuance and exact FMJA1 replay
+   identity before designing a Room v8 migration.
+4. Complete the threat model and independent interoperability review.
+5. Only after those gates are approved, implement the selected protocol and
+   corresponding migration/tests. Keep network transport and production
+   authorization disabled until then.
+
+
+## 2026-11-27 — Current integration candidate validation
+
+PR #2 head `09eaa3832ac50e13b27506953d310adfae4b2f46` passed Android CI [run #45885409892](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45885409892) on
+2026-11-26. All three jobs passed: `verify`, API 31 identity/Keystore
+instrumentation, and API 34 storage/identity instrumentation. The verify job
+completed the COSE primitive KAT, 15 backup-policy tests, direct policy
+verification, JVM unit tests, aggregate Lint, Debug APK assembly, Room schema
+export, and artifact uploads.
+
+The downloaded Lint XML reports contain 13 warnings in `:app` and zero in
+all four core modules: five `NewerVersionAvailable`, four
+`GradleDependency`, three `AndroidGradlePluginVersion`, and one
+`OldTargetApi`. No `ObsoleteSdkInt` warning remains.
+
+This validates the named candidate and CI emulator images only. PR #2 remains
+Draft and unmerged; `main` is unchanged. It does not establish hardware-backed
+Keystore assurance, remote attestation, physical-device compatibility, or
+production protocol approval.
