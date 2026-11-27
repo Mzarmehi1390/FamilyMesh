@@ -1,7 +1,7 @@
-## 2026-11-27 — CI stabilization (API 31) applied to docs branch
+## 2026-11-27 — Historical Room schema fixtures checked in on develop/agent-ready
 
-- `develop/agent-ready` CI workflow updated (commit `dec517de`) to use API 31 + AVD cache for storage instrumentation, addressing flaky API 34 boot timeouts.
-- Feature branch `ci/stabilize-emulator-and-expand-negative-tests-20261127` (commit `8a2956a2`) has the same CI change plus expanded fail-closed unit tests for CanonicalBase64Url and P256PublicKeyParser.
+- Authentic v1–v7 Room schema JSON artifacts added to `core/storage/schemas/` (commit `fcacf136`) so MigrationTestHelper coverage can execute on this branch.
+- Previous storage-instrumentation failure was a missing-fixture error, not a migration assertion failure.
 - Integration candidate [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2) remains Draft with full green CI (run #45943777424).
 - Room remains v7. Do not implement the proposed v8 owner-decision ledger/FMJA1 digest or alter expiry semantics until the ADR 0006/0008/0012 gates are explicitly approved. Keep membership authorization fail-closed and never replace a lost device key.
 - No numerical performance gain is claimed; no device profiling was performed.
@@ -10,7 +10,7 @@
 
 Last verified: 2026-11-27
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
-Branch: `main` (source) / `develop/agent-ready` (docs)
+Branch: `main` (source) / `develop/agent-ready` (docs + fixtures)
 Latest repository commit on main: `968b580283b2ce17d0deda83beab4675ec55b845`
 Integration candidate: PR #2 head `f47634412bf0f2c9b967a1f55fe6cdf567b79244` (full green CI)
 Protocol review drafts: ADR 0003 and ADR 0006 (proposals only; not production-approved)
@@ -31,7 +31,7 @@ production authorization are not implemented.
 |---|---|---|
 | Native Android + Compose foundation | IMPLEMENTED_AND_TESTED | CI builds debug APK |
 | Modular Gradle architecture | IMPLEMENTED_AND_TESTED | Five modules present |
-| Room / DataStore local storage | IMPLEMENTED_AND_INSTRUMENTED | Room schema v7; historical fixtures v1–v7 checked in on PR #2/#6; MigrationTestHelper coverage present on candidate |
+| Room / DataStore local storage | IMPLEMENTED_AND_INSTRUMENTED | Room schema v7; historical fixtures v1–v7 now checked in on develop/agent-ready and PR #2/#6; MigrationTestHelper coverage present |
 | Android Keystore device signing | IMPLEMENTED_AND_INSTRUMENTED | P-256-only verification enforced; API 31 and API 34 instrumentation green on PR #2 |
 | Signed enrollment proof | IMPLEMENTED_AND_TESTED | Bounded local codec and verifier tests |
 | Local nonce replay protection | IMPLEMENTED_AND_TESTED | One database only; not distributed |
@@ -45,7 +45,7 @@ production authorization are not implemented.
 | BLE / Wi-Fi Direct / internet P2P / relay | NOT_STARTED | No transport implementation |
 | Cross-device synchronization | NOT_STARTED | Manual text transfer only |
 | Gradle Wrapper | IN_PROGRESS | Pinned 8.13 wrapper on PR #2 (green CI); not yet on main |
-| Android instrumentation / device validation | PARTIALLY_VERIFIED | Full suite green on PR #2 candidate; historical migrations covered there; API 31 CI stabilization applied to docs branch (pending confirmation) |
+| Android instrumentation / device validation | PARTIALLY_VERIFIED | Full suite green on PR #2 candidate; historical migrations covered there; fixtures now present on docs branch (pending next CI confirmation) |
 
 ## Immediate priority
 

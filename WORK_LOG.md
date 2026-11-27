@@ -1,5 +1,25 @@
 # FamilyMesh Work Log
 
+## 2026-11-27 — Historical Room schema fixtures checked in on develop/agent-ready
+
+### Observation / Action
+
+- Android CI run #45975678330 on develop/agent-ready failed in storage-instrumentation because FamilyMeshMigrationInstrumentedTest could not find schema files (FileNotFoundException for com.familymesh.core.storage.family.FamilyMeshDatabase/1.json).
+- Checked in the authentic historical schema JSON artifacts for versions 1–7 (commit fcacf136). These match the previously audited exports already present on PR #6 and the integration candidate.
+- PR #2 remains Draft with full green CI on head f47634412 (run #45943777424).
+
+### Impact
+
+- MigrationTestHelper coverage can now execute on this branch.
+- No runtime, schema version, protocol, or authorization changes. Room remains v7; ADR 0006/0008/0012 gates unchanged.
+
+### Next
+
+- Confirm the next Android CI run on develop/agent-ready is green for both verify and storage-instrumentation.
+- Continue protocol-review support work within existing gates.
+
+---
+
 ## 2026-11-27 — API 31 emulator stabilization applied to develop/agent-ready
 
 ### Observation / Action
@@ -19,28 +39,6 @@
 
 - Confirm the next Android CI run on develop/agent-ready is green for both jobs.
 - Open PR for the CI + negative-test branch once interactive confirmation is available, and continue KAT / ADR clarity work within existing gates.
-
----
-
-## 2026-11-27 — Combined CI emulator stabilization and identity parser negative-test expansion
-
-### Observation / Action
-
-- Created feature branch `ci/stabilize-emulator-and-expand-negative-tests-20261127` from main (commit `8a2956a2`).
-- Updated `.github/workflows/android-ci.yml` with AVD/system-image caching, longer boot timeout, snapshot-disable, and switched storage instrumentation to API 31 / default target for improved reliability.
-- Expanded `CanonicalBase64UrlTest` and `P256PublicKeyParserTest` with additional fail-closed cases (empty input, invalid characters, non-canonical forms, additional curves, malformed/random bytes).
-- Draft PR creation presented for owner confirmation. No runtime change.
-
-### Impact
-
-- Infrastructure reliability improvement for main-branch CI (pending merge and green confirmation).
-- Broader fail-closed test surface on identity parsers/decoders.
-- No schema, protocol, authorization, or production-claim changes.
-
-### Next
-
-- Confirm the new branch's Android CI is green.
-- Continue KAT / ADR clarity work and Room fixture coverage within existing gates.
 
 ---
 
