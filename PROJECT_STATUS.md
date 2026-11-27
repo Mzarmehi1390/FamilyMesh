@@ -1,12 +1,9 @@
-## 2026-11-27 — Migration instrumentation CASCADE restored and CI green on develop/agent-ready
+## 2026-11-27 — Latest green CI confirmed on develop/agent-ready (run #268)
 
-- Storage-instrumentation failed because MigrationTestHelper connections leave foreign_keys OFF; DELETE did not cascade.
-- Fixed by enabling `PRAGMA foreign_keys = ON` in FamilyMeshMigrationInstrumentedTest (commit 5bab532b).
-- Historical v1–v7 schema fixtures remain checked in. Identity fail-closed unit tests remain expanded.
-- Android CI run [#45992543396](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45992543396) (run 262) completed successfully: both `verify` and `storage-instrumentation` passed on head `3f7acd73719f601a41d559bf8ef947b85fa0918e`.
-- Integration candidate [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2) remains Draft.
+- Android CI run [#46000688306](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/46000688306) completed successfully: both `verify` and `storage-instrumentation` passed on head `4603456a6a215835b188093d231c1aacad81ad1e`.
+- Historical v1–v7 schema fixtures and the foreign-key PRAGMA fix in migration tests remain validated.
+- Integration candidate [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2) remains Draft with green CI on its head.
 - Room remains v7. Do not implement the proposed v8 owner-decision ledger/FMJA1 digest or alter expiry semantics until the ADR 0006/0008/0012 gates are explicitly approved. Keep membership authorization fail-closed and never replace a lost device key.
-- No numerical performance gain is claimed; no device profiling was performed.
 
 # FamilyMesh Project Status
 
@@ -41,7 +38,7 @@ production authorization are not implemented.
 | Signed owner decision | IMPLEMENTED_AND_TESTED | Service resolves the pin itself; tests reject missing, mismatched, and ambiguous pins |
 | Applicant acceptance + owner finalization | IMPLEMENTED_AND_TESTED | Both signatures verified; local Room v7 record |
 | Production membership authorization | BLOCKED | No trusted resolver; default denies all |
-| Canonical COSE protocol | IN_PROGRESS | Draft v2 profile + primitive KAT; not production |
+| Canonical COSE protocol | IN_PROGRESS | Draft v2 profile + primitive KAT + negative-test outline; not production |
 | Invitations / revocation / recovery | NOT_STARTED | Requires reviewed lifecycle and authority model |
 | E2EE messaging | NOT_STARTED | No message crypto implementation |
 | BLE / Wi-Fi Direct / internet P2P / relay | NOT_STARTED | No transport implementation |
