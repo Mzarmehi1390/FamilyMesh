@@ -1,10 +1,10 @@
-## 2026-11-27 — Protocol-review support: added COSE v2 primitive KATs 0003 and 0004
+## 2026-11-27 — CI: harden storage instrumentation against flaky emulator system crashes
 
-- Added [KAT 0003](docs/architecture/decisions/vectors/cose-v2-primitive-kat-0003.md) (applicant-acceptance) and [KAT 0004](docs/architecture/decisions/vectors/cose-v2-primitive-kat-0004.md) (initial-owner-trust). All four artifact contexts now have primitive known-answer vectors.
-- Updated the negative-test outline and ADR 0003 to reference the complete set. Cross-artifact binding is documented across all four fixtures.
-- Latest Android CI on develop/agent-ready remains green (prior runs #268/#274/#282). New documentation commits will trigger fresh CI.
-- Integration candidate [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2) remains Draft with green CI on its head.
-- Room remains v7. Do not implement proposed v8 owner-ledger/FMJA1 digest or change expiry until ADR 0006/0008/0012 are explicitly approved. Authorization remains fail-closed; do not replace lost device keys.
+- Updated Android CI emulator configuration on `develop/agent-ready`: increased memory/cores, switched to `-gpu off`, extended boot timeout, and wrapped the instrumentation task in a single retry.
+- Addresses the `INSTRUMENTATION_ABORTED: System has crashed` failure observed on run #46028589670 (previous head).
+- No runtime, schema, cryptographic, or authorization changes. Room remains v7.
+- Integration candidate [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2) remains Draft.
+- Do not implement proposed v8 owner-ledger/FMJA1 digest or change expiry until ADR 0006/0008/0012 are explicitly approved. Authorization remains fail-closed; do not replace lost device keys.
 
 # FamilyMesh Handover
 
@@ -14,4 +14,4 @@ Default branch: `main`
 
 ## Next exact engineering action
 
-Continue protocol-review support (full payload schemas, malformed-input corpus details, ADR clarity) without claiming production COSE/E2EE/P2P. Keep v8 implementation blocked pending ADR gates. Confirm any new CI runs remain green.
+Confirm the new CI run on the emulator-hardening commit remains green. Continue protocol-review support (full payload schemas, malformed-input corpus details, ADR clarity) without claiming production COSE/E2EE/P2P. Keep v8 implementation blocked pending ADR gates.

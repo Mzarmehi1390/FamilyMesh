@@ -30,7 +30,7 @@ FamilyMesh is a **native Android** app for private family messaging. Milestone 0
 
 From HANDOVER (verify against latest `main` each run):
 
-1. Prefer **green CI** and expanding Room migration / instrumentation coverage (historical fixtures v1–v7 checked in; foreign-key PRAGMA now enabled in migration tests; latest CI green on develop/agent-ready).
+1. Prefer **green CI** and expanding Room migration / instrumentation coverage (historical fixtures v1–v7 checked in; foreign-key PRAGMA now enabled in migration tests; emulator job hardened against flaky system crashes).
 2. **Do not** implement Room v8 owner-ledger / FMJA1 digest until ADR gates (0006 expiry policy, 0008/0012 design approval) are satisfied — document and test toward those gates if blocked.
 3. Protocol review remains open (COSE v2 draft ADR 0003; custom v1 envelopes still ship). Four primitive KATs now cover all artifact contexts (0001–0004) plus negative-test outline for review support. Full schemas remain open.
 4. PR #2 contains a pinned Gradle 8.13 Wrapper candidate and remains Draft/unmerged, so `main` still does not include it. Its current head has full green CI.
@@ -50,9 +50,9 @@ From HANDOVER (verify against latest `main` each run):
 4. Commit via GitHub tools; refresh HANDOVER/PROJECT_STATUS/WORK_LOG when status changes
 5. Reply to the owner in **Persian** with commits, CI links, and remaining blockers
 
-## 2026-11-27 — Protocol-review support: complete primitive KAT set added
+## 2026-11-27 — Emulator instrumentation hardened
 
-- Added COSE v2 primitive KATs 0003 and 0004; all four artifact contexts now have fixtures. Updated negative-test outline and ADR 0003.
-- Prior Android CI runs on this branch remain green.
+- Storage-instrumentation job now uses higher memory/cores, `-gpu off`, longer timeout, and a single retry after a system-crash failure on the previous head.
+- Prior green Android CI runs on this branch remain valid for the storage/fixture work.
 - PR #2 remains the integration candidate.
 - Room remains v7. Keep ADR 0006/0008/0012 implementation gates closed. Authorization remains fail-closed; do not replace lost device keys.

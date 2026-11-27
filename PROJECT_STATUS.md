@@ -1,18 +1,18 @@
-## 2026-11-27 — Protocol-review support: complete primitive KAT set (0001–0004)
+## 2026-11-27 — CI emulator instrumentation hardened against flaky crashes
 
-- Added reproducible primitive known-answer vectors for all four artifact contexts (enrollment-proof, owner-decision, applicant-acceptance, initial-owner-trust). Negative-test outline and ADR 0003 now reference the full set.
-- Documentation-only; does not implement a COSE parser, approve the draft profile, or change runtime/schema.
-- Historical v1–v7 schema fixtures and foreign-key PRAGMA fix remain validated by prior green CI on this branch.
-- Integration candidate [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2) remains Draft with green CI on its head.
+- Updated the API 31 storage-instrumentation job with higher memory/cores, `-gpu off`, longer boot timeout, and a single retry wrapper after observing `INSTRUMENTATION_ABORTED: System has crashed` on run #46028589670.
+- CI-only change; does not alter runtime behavior, Room schema, or cryptographic protocol.
+- Historical v1–v7 schema fixtures and foreign-key PRAGMA fix remain in place.
+- Integration candidate [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2) remains Draft.
 - Room remains v7. Do not implement the proposed v8 owner-decision ledger/FMJA1 digest or alter expiry semantics until the ADR 0006/0008/0012 gates are explicitly approved. Keep membership authorization fail-closed and never replace a lost device key.
 
 # FamilyMesh Project Status
 
 Last verified: 2026-11-27
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
-Branch: `main` (source) / `develop/agent-ready` (docs + fixtures + test fixes)
+Branch: `main` (source) / `develop/agent-ready` (docs + fixtures + CI hardening)
 Latest repository commit on main: `968b580283b2ce17d0deda83beab4675ec55b845`
-Integration candidate: PR #2 head `f47634412bf0f2c9b967a1f55fe6cdf567b79244` (full green CI)
+Integration candidate: PR #2 head `f47634412bf0f2c9b967a1f55fe6cdf567b79244` (prior green CI)
 Protocol review drafts: ADR 0003 and ADR 0006 (proposals only; not production-approved)
 
 ## Overall state
@@ -31,7 +31,7 @@ production authorization are not implemented.
 |---|---|---|
 | Native Android + Compose foundation | IMPLEMENTED_AND_TESTED | CI builds debug APK |
 | Modular Gradle architecture | IMPLEMENTED_AND_TESTED | Five modules present |
-| Room / DataStore local storage | IMPLEMENTED_AND_INSTRUMENTED | Room schema v7; historical fixtures v1–v7 checked in; MigrationTestHelper coverage present and CASCADE assertions now correct; latest CI green |
+| Room / DataStore local storage | IMPLEMENTED_AND_INSTRUMENTED | Room schema v7; historical fixtures v1–v7 checked in; MigrationTestHelper coverage present and CASCADE assertions now correct; emulator job hardened |
 | Android Keystore device signing | IMPLEMENTED_AND_INSTRUMENTED | P-256-only verification enforced; API 31 and API 34 instrumentation green on PR #2 |
 | Signed enrollment proof | IMPLEMENTED_AND_TESTED | Bounded local codec and verifier tests |
 | Local nonce replay protection | IMPLEMENTED_AND_TESTED | One database only; not distributed |
@@ -45,7 +45,7 @@ production authorization are not implemented.
 | BLE / Wi-Fi Direct / internet P2P / relay | NOT_STARTED | No transport implementation |
 | Cross-device synchronization | NOT_STARTED | Manual text transfer only |
 | Gradle Wrapper | IN_PROGRESS | Pinned 8.13 wrapper on PR #2 (green CI); not yet on main |
-| Android instrumentation / device validation | PARTIALLY_VERIFIED | Full suite green on PR #2 candidate; historical migrations covered there; fixtures and CASCADE fix now present on docs branch with green CI |
+| Android instrumentation / device validation | PARTIALLY_VERIFIED | Storage job on this branch now includes emulator resource and retry hardening; full suite green on PR #2 candidate |
 
 ## Immediate priority
 

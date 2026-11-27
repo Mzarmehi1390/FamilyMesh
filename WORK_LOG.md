@@ -1,5 +1,26 @@
 # FamilyMesh Work Log
 
+## 2026-11-27 — Hardened emulator instrumentation against flaky system crashes
+
+### Observation / Action
+
+- Android CI run #46028589670 on develop/agent-ready failed in the `storage-instrumentation` job with `INSTRUMENTATION_ABORTED: System has crashed` after one of seven tests completed (emulator booted successfully).
+- Updated `.github/workflows/android-ci.yml` to raise emulator memory to 2048, cores to 2, switch GPU to `off` for stability, extend boot timeout to 1200s, bump the AVD cache key, and wrap the Gradle instrumentation invocation in a single automatic retry.
+- All changes are CI-only. No runtime, schema, cryptographic implementation, or authorization changes.
+
+### Impact
+
+- Storage instrumentation on API 31 should be more resilient to the intermittent system crashes seen on hosted runners.
+- Room remains v7; ADR 0006/0008/0012 implementation gates unchanged. Authorization remains fail-closed.
+
+### Next
+
+- Confirm the triggered CI run succeeds.
+- Continue protocol-review support without claiming production COSE.
+- Keep v8 implementation blocked pending ADR gates.
+
+---
+
 ## 2026-11-27 — Added COSE v2 primitive KATs 0003 and 0004 (complete primitive set)
 
 ### Observation / Action
@@ -16,47 +37,6 @@
 ### Next
 
 - Continue protocol-review support (full payload schemas, malformed corpus details, ADR clarity) without claiming production COSE.
-- Keep v8 implementation blocked pending ADR gates.
-
----
-
-## 2026-11-27 — Added COSE v2 primitive KAT 0002 (OwnerDecision context)
-
-### Observation / Action
-
-- Generated and checked in a second reproducible primitive known-answer vector covering the owner-decision artifact context (distinct content type and external AAD from KAT 0001).
-- Updated the negative-test outline to apply the rejection checklist to both vectors and to note cross-artifact binding coverage.
-- Updated ADR 0003 to reference both primitive fixtures.
-- All changes are documentation-only. No runtime, schema, cryptographic implementation, or authorization changes.
-
-### Impact
-
-- Protocol-review support now has two concrete primitive vectors demonstrating different artifact contexts.
-- Room remains v7; ADR 0006/0008/0012 implementation gates unchanged. Authorization remains fail-closed.
-
-### Next
-
-- Continue protocol-review support (KATs for remaining contexts, malformed corpus details) without claiming production COSE.
-- Keep v8 implementation blocked pending ADR gates.
-
----
-
-## 2026-11-27 — Confirmed latest green CI on develop/agent-ready (run #268)
-
-### Observation / Action
-
-- Android CI run #46000688306 on develop/agent-ready (head 4603456a6a215835b188093d231c1aacad81ad1e) completed successfully for both `verify` and `storage-instrumentation`.
-- This reconfirms the historical schema fixtures and the foreign-key PRAGMA fix remain green.
-- Protocol-review support continues via the existing negative-test outline for KAT 0001.
-
-### Impact
-
-- Storage instrumentation and unit tests on this branch remain green.
-- No runtime, schema version, protocol, or authorization changes. Room remains v7; ADR 0006/0008/0012 gates unchanged.
-
-### Next
-
-- Continue protocol-review support (additional KATs, ADR clarity, malformed-input descriptions) without claiming production COSE.
 - Keep v8 implementation blocked pending ADR gates.
 
 ---

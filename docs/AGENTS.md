@@ -48,17 +48,17 @@ Private, decentralized, **end-to-end encrypted by design** family messaging on *
 ## Build / CI notes
 
 - `main` / this branch still lack the Gradle Wrapper. PR #2 carries the pinned Gradle 8.13 wrapper candidate and remains Draft/unmerged; its latest head `f47634412bf0f2c9b967a1f55fe6cdf567b79244` has green Android CI ([#45943777424](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45943777424)).
-- `android-ci.yml`: unit tests, assembleDebug, APK artifact; storage instrumentation on emulator
+- `android-ci.yml`: unit tests, assembleDebug, APK artifact; storage instrumentation on emulator (now with resource limits, `-gpu off`, and a single retry for flaky system crashes).
 - Do not treat a green `verify` job alone as full security or migration proof
 
 ## Throughput for hourly automations
 
 Maximize useful work per run: fix CI, close test gaps, advance the **current** work package from HANDOVER, update status docs. Stop only when blocked on product/security decisions listed in ADRs (e.g. expiry policy ADR 0006) or on human review gates.
 
-## 2026-11-27 — Protocol-review support: complete primitive KAT set
+## 2026-11-27 — Emulator instrumentation hardened
 
-- `develop/agent-ready` (PR #5) now includes COSE v2 primitive KATs 0001–0004 covering all four artifact contexts, plus updated negative-test outline and ADR 0003 references.
-- Prior green Android CI runs on this branch remain valid for the storage/fixture work. New documentation commits have triggered fresh CI (in progress at time of writing).
+- `develop/agent-ready` (PR #5) now includes CI changes to mitigate flaky `INSTRUMENTATION_ABORTED: System has crashed` failures in the API 31 storage job (higher memory/cores, `-gpu off`, retry).
+- Complete primitive KAT set (0001–0004) remains checked in.
 - Integration candidate PR #2 remains Draft at head `f47634412bf0f2c9b967a1f55fe6cdf567b79244` with its own green CI.
 - Historical Room fixtures and migration CASCADE coverage are validated on this branch.
 - Keep PR #2 Draft pending protocol/security/owner reviews. Do not implement Room v8, owner-ledger/FMJA1 digest, or expiry-policy changes before ADR 0006/0008/0012 approval. Membership authorization remains fail-closed; lost device keys must not be replaced.
