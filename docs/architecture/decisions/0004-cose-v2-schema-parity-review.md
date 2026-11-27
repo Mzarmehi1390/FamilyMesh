@@ -78,3 +78,56 @@ vectors before approval.
 ## Next evidence required
 
 The source-backed inventory is now recorded in [ADR 0005](0005-v1-enrollment-source-field-inventory.md). It confirms the applicant public key in acceptance and surfaces additional parity decisions: proof identity-creation time is transfer metadata rather than signed content; acceptance currently binds the exact encoded decision; constructor character limits differ from UTF-8 byte limits; and all timestamps are epoch milliseconds without upper bounds. Review these choices before freezing CBOR labels. Independent second-implementation verification remains mandatory.
+
+
+## 2026-11-27 source revalidation — exact v1 signing and verification boundaries
+
+Inspected the four Kotlin artifact models/codecs and their key-ID/Base64URL
+helpers on the PR #2 integration branch. This is a source revalidation, not
+a protocol approval.
+
+| Artifact | Transfer envelope | Signed semantic fields | Important non-signed or external context |
+|---|---|---|---|
+| Applicant proof | `FMER1.` | Domain/version, request ID, family ID, applicant key ID, requested role, created/expiry epoch milliseconds, 32-byte nonce | Public key and identity-created timestamp are carried in the transfer envelope; the key bytes are checked against the key ID, but identity-created time is not part of the proof signing payload |
+| Initial-owner trust | `FMOT1.` | Domain/version, family ID, owner member ID, owner key ID, establishment epoch milliseconds, owner public-key bytes | Self-signature establishes possession only; external fingerprint confirmation is still required to trust the owner |
+| Owner decision | `FMOD1.` | Domain/version, family ID, request ID, applicant key ID, owner key ID, APPROVED/REJECTED outcome, decision epoch milliseconds | Verification additionally binds all request/owner identifiers to the exact pending request and locally pinned owner |
+| Applicant acceptance | `FMJA1.` | Domain/version, exact encoded `FMOD1.` text, applicant key ID, applicant public-key bytes, acceptance epoch milliseconds | Verification requires an approved decision and validates both owner and applicant signatures |
+
+All four use custom fixed-order, length-prefixed binary signing payloads,
+not CBOR. Text envelopes use versioned prefixes, bounded fields, and
+canonical unpadded Base64URL. Signatures are produced/verified through JCA
+`SHA256withECDSA`; v1 stores provider DER signature bytes. The current v1
+code does not define COSE fixed-width `R || S`, low-S normalization, or a
+low-S rejection rule. Those remain v2 design gates, not implicit properties
+of the existing implementation.
+
+The key ID is currently lowercase hexadecimal SHA-256 over
+`UTF8("FamilyMesh:device-key:v1\\0") || X.509 SubjectPublicKeyInfo bytes`.
+It is not the draft v2 deterministic-CBOR COSE_Key identifier. The proof's
+identity-created timestamp is transfer metadata and is not covered by the
+applicant proof signature; do not silently treat it as an authenticated
+event-time claim.
+
+All current event timestamps are non-negative signed 64-bit epoch
+milliseconds. The source defines no maximum request lifetime or clock-skew
+allowance. Current checks enforce a half-open proof interval
+`createdAt <= now < expiresAt`; owner decision time is constrained to the
+request interval and not later than the verifier's current time; acceptance
+time cannot predate the decision, exceed verifier time, or reach request
+expiry. The acceptance verifier checks the signed acceptance time against
+expiry, not a separately authenticated owner receipt timestamp. This is the
+existing signed-event-time behavior; it must not be confused with a selected
+future owner-receipt deadline.
+
+The source review confirms the already recorded persistence gates remain
+distinct from wire-schema parity: owner FMOD1 issuance is not durably
+ledgered, the owner inbox state does not transition on issuance, and the
+finalized-row replay fast path does not identify the complete FMJA1 artifact.
+See ADR 0007, 0008, 0011, 0012, and 0013. These issues must be solved through
+the reviewed owner-ledger/replay design, not by changing artifact fields
+speculatively.
+
+No integer CBOR labels, final media types, TTL/skew values, low-S policy,
+owner-authority rule, replay-retention rule, or Room v8 migration is approved
+by this revalidation. No runtime, cryptography, wire format, or database
+change was made.
