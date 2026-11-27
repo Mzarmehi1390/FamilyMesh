@@ -36,4 +36,24 @@ class CanonicalBase64UrlTest {
             // Expected.
         }
     }
+
+    @Test
+    fun rejectsEmptyInput() {
+        try {
+            CanonicalBase64Url.decode("")
+            fail("Expected empty input to be rejected")
+        } catch (_: IllegalArgumentException) {
+            // Expected.
+        }
+    }
+
+    @Test
+    fun rejectsWhitespace() {
+        try {
+            CanonicalBase64Url.decode("ab cd")
+            fail("Expected whitespace to be rejected")
+        } catch (_: IllegalArgumentException) {
+            // Expected.
+        }
+    }
 }
