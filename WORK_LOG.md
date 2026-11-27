@@ -1,5 +1,27 @@
 # FamilyMesh Work Log
 
+## 2026-11-27 — Combined CI emulator stabilization and identity parser negative-test expansion
+
+### Observation / Action
+
+- Created feature branch `ci/stabilize-emulator-and-expand-negative-tests-20261127` from main (commit `8a2956a2`).
+- Updated `.github/workflows/android-ci.yml` with AVD/system-image caching, longer boot timeout, snapshot-disable, and switched storage instrumentation to API 31 / default target for improved reliability.
+- Expanded `CanonicalBase64UrlTest` and `P256PublicKeyParserTest` with additional fail-closed cases (empty input, invalid characters, non-canonical forms, additional curves, malformed/random bytes).
+- Draft PR creation presented for owner confirmation. No runtime change.
+
+### Impact
+
+- Infrastructure reliability improvement for main-branch CI (pending merge and green confirmation).
+- Broader fail-closed test surface on identity parsers/decoders.
+- No schema, protocol, authorization, or production-claim changes.
+
+### Next
+
+- Confirm the new branch's Android CI is green.
+- Continue KAT / ADR clarity work and Room fixture coverage within existing gates.
+
+---
+
 ## 2026-11-27 — Applied CI emulator stabilization to docs branch
 
 ### Observation / Action
@@ -16,27 +38,6 @@
 ### Next
 
 - Confirm the next Android CI run on develop/agent-ready is green.
-- Continue KAT / ADR clarity work and Room fixture coverage within existing gates.
-
----
-
-## 2026-11-27 — CI emulator stabilization and identity parser test hardening
-
-### Observation / Action
-
-- Opened `ci/stabilize-emulator-avd-cache-20261127` from `main` and committed AVD cache + longer boot timeout + snapshot-disable changes to `.github/workflows/android-ci.yml` (commit `4e2353fc`). Targets the flaky emulator boot path seen on docs-branch instrumentation.
-- Opened `test/p256-parser-negative-hardening-20261127` from `main` and added pure unit-test negative cases for `P256PublicKeyParser` and `CanonicalBase64Url` (commits `dcb8e705`, `720243d4`). No runtime change.
-- PR #2 integration candidate remains fully green on its head.
-
-### Impact
-
-- Infrastructure reliability improvement for main-branch CI (pending merge).
-- Expanded fail-closed test surface on identity parsers/decoders.
-- No schema, protocol, authorization, or production-claim changes.
-
-### Next
-
-- Confirm CI green on the new branches.
 - Continue KAT / ADR clarity work and Room fixture coverage within existing gates.
 
 ---
