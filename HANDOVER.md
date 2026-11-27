@@ -1,9 +1,9 @@
-## 2026-11-27 — Identity fail-closed tests expanded; Room fixtures present
+## 2026-11-27 — Migration instrumentation CASCADE fixed; foreign keys enabled in tests
 
-- Expanded CanonicalBase64Url and P256PublicKeyParser unit tests with additional fail-closed cases (commit `3d70f74f`).
-- Authentic Room schema fixtures v1–v7 are checked in (commit `fcacf136`) so MigrationTestHelper can run.
-- Previous storage-instrumentation failure on this branch was a missing-fixture error.
-- Integration candidate [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2) remains Draft with full green CI on head `f47634412` (run #45943777424).
+- Storage-instrumentation on develop/agent-ready failed because MigrationTestHelper connections leave SQLite foreign_keys OFF by default, so DELETE FROM family_spaces did not cascade (expected 0, got 1).
+- Fixed by enabling `PRAGMA foreign_keys = ON` before assertions in FamilyMeshMigrationInstrumentedTest (commit 5bab532b).
+- Historical schema fixtures v1–v7 remain checked in. Identity fail-closed unit tests remain expanded.
+- Integration candidate [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2) remains Draft.
 - Room remains v7. Do not implement proposed v8 owner-ledger/FMJA1 digest or change expiry until ADR 0006/0008/0012 are explicitly approved. Authorization remains fail-closed; do not replace lost device keys.
 
 # FamilyMesh Handover
