@@ -1,21 +1,20 @@
 # FamilyMesh Handover
 
-Last synchronized: 2026-11-25
+Last synchronized: 2026-11-27
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
 Default branch: `main`
 
 ## Last verified repository state
 
 - `main` remains unchanged at `968b580283b2ce17d0deda83beab4675ec55b845`; no candidate changes have been merged.
-- PR #2 remains open, Draft, and unmerged. Its current branch head is `754e7065eaa414c9689db6f299ba3a9dc30729db` on `build/gradle-wrapper-8.13-20261109`.
-- The immediately preceding PR head `997421221cf2ba4e9bcbae4db403620276a79ddf` passed all three jobs in Android CI [run #45556670546](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45556670546).
-- `verify` passed the COSE primitive KAT, all 15 backup-policy verifier tests, direct manifest/rules verification, JVM unit tests, aggregate `lintDebug`, Debug APK assembly, Room schema export, and artifact uploads.
-- API 31 Keystore instrumentation passed **11/11**; API 34 storage passed **9/9** and identity/Keystore passed **11/11**. All suites had zero failures, errors, or skipped tests; uploaded JUnit XML was inspected.
-- The Lint artifact from that run contains 18 warnings in `:app` and zero warnings in each of the four core modules: 16 dependency/toolchain version suggestions, one `OldTargetApi` advisory, and one `ObsoleteSdkInt` warning.
-- After that successful run, six reviewed commits were fast-forwarded from `staging/manifest-backup-and-icon-20261125` onto PR #2: remove the redundant adaptive-icon v26 qualifier, update Room from 2.8.4 to 2.8.5, and add JVM plus Android-provider point-at-infinity rejection tests, with supporting log updates.
-- The new head is being validated by Android CI [run #45626115545](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45626115545); its final result is not yet known. Do not treat the Room patch, icon-resource move, or point-at-infinity additions as CI-verified until this run completes successfully.
+- PR #2 remains open, Draft, and unmerged. Its current branch head is `117a690d30f5888fcd78c005e1b9c230a1be50e9` on `build/gradle-wrapper-8.13-20261109`.
+- The latest completed source validation is Android CI [run #45885409892](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45885409892) on source head `09eaa3832ac50e13b27506953d310adfae4b2f46`; all three jobs passed.
+- The downloaded JUnit XML reports show API 31 identity 16/16, API 34 identity 16/16, and API 34 storage 9/9: 41 instrumentation cases total, with zero failures/errors/skips.
+- The verify job passed the COSE primitive KAT, all 15 backup-policy verifier tests, direct manifest/rules verification, JVM unit tests, aggregate `lintDebug`, Debug APK assembly, Room schema export, and artifact uploads.
+- The Lint XML artifact contains 13 warnings in `:app` and zero in each core module (5 `NewerVersionAvailable`, 4 `GradleDependency`, 3 `AndroidGradlePluginVersion`, 1 `OldTargetApi`).
+- The current PR head `117a690d30f5888fcd78c005e1b9c230a1be50e9` contains documentation-only updates and is pending Android CI [run #45943577511](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45943577511). Do not label this exact head CI-verified until the run completes.
 - PR #1 is superseded for integration. The COSE primitive verifier/vector from PR #3 and stable Compose Flow work from PR #4 are present in PR #2; do not merge those older branches independently.
-- Branch protection is disabled. Keep PR #2 Draft pending successful validation of the current head, protocol/security review, and owner review.
+- Branch protection is disabled. Keep PR #2 Draft pending protocol/security review and owner review.
 
 ## Product and architecture invariants
 

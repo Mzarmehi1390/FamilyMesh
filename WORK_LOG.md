@@ -1129,3 +1129,15 @@ Android CI [run #45406912355](https://github.com/Mzarmehi1390/FamilyMesh/actions
 - Downloaded the `android-lint-reports` artifact and parsed all five module XML reports. `:app` has 13 warnings: five `NewerVersionAvailable`, four `GradleDependency`, three `AndroidGradlePluginVersion`, and one `OldTargetApi`. Each of `:core:common`, `:core:designsystem`, `:core:identity`, and `:core:storage` has zero warnings. No `ObsoleteSdkInt` warning remains.
 - No source/runtime, database schema, protocol, cryptography, authorization, or transport change was made in this validation step. The run is emulator/CI evidence only; no hardware-backed Keystore, attestation, physical-device, or performance claim is made.
 - PR #2 remains Draft and unmerged; `main` is unchanged. Continue with the source-backed four-artifact protocol parity audit and ADR decisions before implementation.
+
+
+## 2026-11-27 — Four-artifact source parity revalidation
+
+- Inspected `SignedDeviceEnrollmentRequest.kt`, `InitialOwnerTrustBundle.kt`, `EnrollmentDecision.kt`, `EnrollmentAcceptance.kt`, all four text codecs, `DeviceKeyFingerprint.kt`, and `CanonicalBase64Url.kt` on PR #2.
+- Revalidated that FMER1 signs request/family/applicant-key/role/created/expiry/nonce fields; the proof transfer envelope additionally carries the applicant SPKI public key and identity-created timestamp, but that identity-created timestamp is not part of the proof signing payload.
+- Revalidated that FMOT1 signs family/owner-member/owner-key/establishment-time/public-key fields; self-signature still proves possession only and requires independent fingerprint confirmation.
+- Revalidated that FMOD1 signs family/request/applicant-key/owner-key/outcome/decision-time fields; FMJA1 signs the exact encoded FMOD1 text plus applicant key ID, applicant SPKI bytes, and acceptance time.
+- All v1 artifacts remain custom fixed-order length-prefixed binary payloads with versioned text prefixes and canonical unpadded Base64URL. JCA `SHA256withECDSA` signatures are provider DER; v1 has no COSE R||S conversion or low-S policy. Current key IDs are domain-separated SHA-256 fingerprints over X.509 SPKI, not draft v2 COSE_Key identifiers.
+- Confirmed current time semantics: epoch milliseconds, no selected max TTL/skew; proof uses `createdAt <= now < expiresAt`; owner decision time is within the request interval and not in the future; acceptance event time is not before the decision, not in the future, and before request expiry. No separate authenticated owner receipt time is encoded.
+- Added the source revalidation addendum to ADR 0004. No runtime, cryptography, wire format, database, authorization, or transport change was made.
+- PR #2 current documentation head `117a690d30f5888fcd78c005e1b9c230a1be50e9` is under CI run #45943577511; validation is pending. The preceding source head `09eaa3832ac50e13b27506953d310adfae4b2f46` passed run #45885409892, including 41/41 instrumentation cases.

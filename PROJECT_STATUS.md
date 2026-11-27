@@ -1,14 +1,13 @@
 # FamilyMesh Project Status
 
-Last audited: 2026-11-25
+Last audited: 2026-11-27
 Repository: https://github.com/Mzarmehi1390/FamilyMesh
 Default branch: `main` at `968b580283b2ce17d0deda83beab4675ec55b845` (unchanged; no candidate changes merged)
-Current integration candidate: [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2), branch `build/gradle-wrapper-8.13-20261109`, head `754e7065eaa414c9689db6f299ba3a9dc30729db` (open, Draft, unmerged).
-Latest completed full CI: [run #45556670546](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45556670546) passed all three jobs on the immediately preceding head `997421221cf2ba4e9bcbae4db403620276a79ddf`. Verify passed COSE KAT, 15 backup-policy unit tests, direct backup-policy verification, JVM tests, aggregate Lint, Debug APK assembly, Room schema export, and artifact uploads. API 31 identity passed 11/11; API 34 storage 9/9; API 34 identity 11/11; all had zero failures/errors/skips.
-Current-head validation: [run #45626115545](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45626115545) is in progress for `754e7065eaa414c9689db6f299ba3a9dc30729db`; results are pending.
-The current head adds the adaptive-icon qualifier correction, Room 2.8.5 patch update, and JVM/Android-provider P-256 point-at-infinity rejection tests. These additions are not validated until run #45626115545 completes.
-Lint evidence from run #45556670546: 18 warnings in `:app`, zero in each core module; 16 version/toolchain suggestions, one `OldTargetApi`, and one `ObsoleteSdkInt`. The current head addresses the obsolete icon qualifier and updates Room; the next Lint artifact must confirm the remaining count.
-Protocol review drafts: ADR 0003 and ADR 0006 (proposals only; not production-approved)
+Current integration candidate: [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2), branch `build/gradle-wrapper-8.13-20261109`, head `117a690d30f5888fcd78c005e1b9c230a1be50e9` (open, Draft, unmerged).
+Latest completed full CI: [run #45885409892](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45885409892) passed all three jobs on exact source head `09eaa3832ac50e13b27506953d310adfae4b2f46`. The verify, API 31 identity/Keystore, and API 34 storage/identity jobs all passed. JUnit XML artifacts were downloaded and inspected: API 31 identity 16/16; API 34 identity 16/16; API 34 storage 9/9 (41 instrumentation cases total, zero failures/errors/skips).
+The current head contains documentation-only follow-ups after that green source head. Android CI [run #45943577511](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45943577511) is pending on head `117a690d30f5888fcd78c005e1b9c230a1be50e9`; do not claim this documentation head has completed CI until that run finishes.
+Lint evidence from the exact green source head: 13 warnings in `:app`, zero in each of the four core modules. Categories: 5 `NewerVersionAvailable`, 4 `GradleDependency`, 3 `AndroidGradlePluginVersion`, and 1 `OldTargetApi`. The downloaded XML reports were parsed; no `ObsoleteSdkInt` warning remains.
+Protocol review drafts: ADR 0003 and ADR 0006 (proposals only; not production-approved).
 
 ## Overall state
 
@@ -44,11 +43,12 @@ production authorization are not implemented.
 
 ## Latest verification
 
-- Android CI [run #45885409892](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45885409892) passed all three jobs on exact PR #2 head `09eaa3832ac50e13b27506953d310adfae4b2f46`.
-- `verify`: COSE primitive KAT, 15 backup-policy regression tests, direct manifest/data-extraction policy verification, JVM unit tests, aggregate `lintDebug`, Debug APK assembly, Room schema export, and all configured artifact uploads passed.
-- API 31 identity/Keystore instrumentation and API 34 storage/identity instrumentation jobs both passed. The uploaded JUnit reports are available in the run artifacts; this record does not infer hardware-backed Keystore assurance or physical-device compatibility.
-- The Lint XML artifact was downloaded and inspected: 13 app warnings, zero in `:core:common`, `:core:designsystem`, `:core:identity`, and `:core:storage`. Remaining app findings: five `NewerVersionAvailable`, four `GradleDependency`, three `AndroidGradlePluginVersion`, and one `OldTargetApi`.
-- The run validates this exact candidate head and its configured emulator images only. It does not prove hardware-backed Keystore assurance, remote attestation, physical-device compatibility, or security against a compromised operating system.
+- Android CI [run #45885409892](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45885409892) passed all three jobs on exact source head `09eaa3832ac50e13b27506953d310adfae4b2f46`.
+- `verify`: COSE primitive KAT, 15 backup-policy regression tests, direct manifest/data-extraction policy verification, JVM unit tests, aggregate `lintDebug`, Debug APK assembly, Room schema export, and configured artifact uploads passed.
+- JUnit XML artifacts were downloaded and parsed: API 31 identity/Keystore 16/16; API 34 identity/Keystore 16/16; API 34 storage 9/9. Total 41 instrumentation cases, with zero failures, errors, or skips.
+- The Lint XML artifact contains 13 app warnings and zero in `:core:common`, `:core:designsystem`, `:core:identity`, and `:core:storage`: five `NewerVersionAvailable`, four `GradleDependency`, three `AndroidGradlePluginVersion`, and one `OldTargetApi`.
+- Documentation-only commits have advanced PR #2 beyond the green source head. Current head `117a690d30f5888fcd78c005e1b9c230a1be50e9` is under CI run [#45943577511](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45943577511), which is pending. Do not transfer the previous green result to this new head until the run completes.
+- The successful emulator run does not prove hardware-backed Keystore assurance, remote attestation, physical-device compatibility, or security against a compromised operating system.
 - No local Android build, physical-device profile, hardware-backed attestation, or battery/performance benchmark was run. No numeric performance gain is claimed.
 - No candidate changes have been merged to `main`.
 
