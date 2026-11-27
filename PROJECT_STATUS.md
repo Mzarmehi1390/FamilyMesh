@@ -1,7 +1,8 @@
-## 2026-11-27 — Latest green CI confirmed on develop/agent-ready (run #268)
+## 2026-11-27 — Protocol-review support: added COSE v2 primitive KAT 0002
 
-- Android CI run [#46000688306](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/46000688306) completed successfully: both `verify` and `storage-instrumentation` passed on head `4603456a6a215835b188093d231c1aacad81ad1e`.
-- Historical v1–v7 schema fixtures and the foreign-key PRAGMA fix in migration tests remain validated.
+- Added a second reproducible primitive known-answer vector for the owner-decision artifact context. Negative-test outline and ADR 0003 now reference both KAT 0001 and KAT 0002.
+- Documentation-only; does not implement a COSE parser, approve the draft profile, or change runtime/schema.
+- Historical v1–v7 schema fixtures and foreign-key PRAGMA fix remain validated by prior green CI on this branch.
 - Integration candidate [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2) remains Draft with green CI on its head.
 - Room remains v7. Do not implement the proposed v8 owner-decision ledger/FMJA1 digest or alter expiry semantics until the ADR 0006/0008/0012 gates are explicitly approved. Keep membership authorization fail-closed and never replace a lost device key.
 
@@ -38,7 +39,7 @@ production authorization are not implemented.
 | Signed owner decision | IMPLEMENTED_AND_TESTED | Service resolves the pin itself; tests reject missing, mismatched, and ambiguous pins |
 | Applicant acceptance + owner finalization | IMPLEMENTED_AND_TESTED | Both signatures verified; local Room v7 record |
 | Production membership authorization | BLOCKED | No trusted resolver; default denies all |
-| Canonical COSE protocol | IN_PROGRESS | Draft v2 profile + primitive KAT + negative-test outline; not production |
+| Canonical COSE protocol | IN_PROGRESS | Draft v2 profile + two primitive KATs (enrollment-proof and owner-decision contexts) + negative-test outline; not production |
 | Invitations / revocation / recovery | NOT_STARTED | Requires reviewed lifecycle and authority model |
 | E2EE messaging | NOT_STARTED | No message crypto implementation |
 | BLE / Wi-Fi Direct / internet P2P / relay | NOT_STARTED | No transport implementation |
