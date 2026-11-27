@@ -55,6 +55,8 @@ jobs:
     # Use API 31 (project minSdk) and default target for faster, more reliable boots.
     # Snapshots are disabled because TCG Quick Boot has been unreliable on hosted runners.
     # Memory and core limits plus GPU mode chosen to reduce flaky system crashes during instrumentation.
+    # Retry wrapper is a single shell command because reactivecircus/android-emulator-runner@v2
+    # splits multi-line scripts and executes each line independently with sh -c.
     env:
       ANDROID_I_WANT_MY_TCG: "yes"
     runs-on: ubuntu-22.04
@@ -93,18 +95,7 @@ jobs:
           emulator-boot-timeout: 1200
           pre-emulator-launch-script: adb start-server
           script: |
-            set +e
-            for attempt in 1 2; do
-              echo "=== Instrumentation attempt $attempt ==="
-              gradle :core:storage:connectedDebugAndroidTest
-              exit_code=$?
-              if [ $exit_code -eq 0 ]; then
-                exit 0
-              fi
-              echo "Attempt $attempt failed with exit $exit_code; retrying once if possible..."
-              sleep 10
-            done
-            exit $exit_code
+            set +e; for attempt in 1 2; do echo "=== Instrumentation attempt $attempt ==="; gradle :core:storage:connectedDebugAndroidTest; exit_code=$?; if [ $exit_code -eq 0 ]; then exit 0; fi; echo "Attempt $attempt failed with exit $exit_code; retrying once if possible..."; sleep 10; done; exit $exit_code
       - name: Save API 31 AVD and system-image cache
         if: steps.avd-cache.outputs.cache-hit != 'true' && steps.run-api31-tests.outcome == 'success'
         uses: actions/cache/save@v4
