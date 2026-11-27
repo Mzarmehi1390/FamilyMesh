@@ -1,10 +1,8 @@
-## 2026-11-27 — Migration instrumentation CASCADE fixed; foreign keys enabled in tests; CI green
+## 2026-11-27 — Latest green CI confirmed on develop/agent-ready (run #268)
 
-- Storage-instrumentation on develop/agent-ready failed because MigrationTestHelper connections leave SQLite foreign_keys OFF by default, so DELETE FROM family_spaces did not cascade (expected 0, got 1).
-- Fixed by enabling `PRAGMA foreign_keys = ON` before assertions in FamilyMeshMigrationInstrumentedTest (commit 5bab532b).
-- Historical schema fixtures v1–v7 remain checked in. Identity fail-closed unit tests remain expanded.
-- Android CI run [#45992543396](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45992543396) (run 262) completed successfully on head `3f7acd73719f601a41d559bf8ef947b85fa0918e`: both `verify` and `storage-instrumentation` passed.
-- Integration candidate [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2) remains Draft.
+- Android CI run [#46000688306](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/46000688306) (run 268) completed successfully on head `4603456a6a215835b188093d231c1aacad81ad1e`.
+- Both `verify` and `storage-instrumentation` passed. This validates the prior CASCADE/PRAGMA foreign-key fix and historical schema fixtures.
+- Integration candidate [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2) (Gradle Wrapper + broader instrumentation) remains Draft with its own green CI on head `f47634412bf0f2c9b967a1f55fe6cdf567b79244`.
 - Room remains v7. Do not implement proposed v8 owner-ledger/FMJA1 digest or change expiry until ADR 0006/0008/0012 are explicitly approved. Authorization remains fail-closed; do not replace lost device keys.
 
 # FamilyMesh Handover
