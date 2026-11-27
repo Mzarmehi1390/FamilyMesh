@@ -47,7 +47,7 @@ Private, decentralized, **end-to-end encrypted by design** family messaging on *
 
 ## Build / CI notes
 
-- `main` / this branch still lack the Gradle Wrapper; PR #2 carries a pinned Gradle 8.13 wrapper candidate and has passed its current CI, but remains Draft/unmerged.
+- `main` / this branch still lack the Gradle Wrapper. PR #2 carries the pinned Gradle 8.13 wrapper candidate and remains Draft/unmerged; its latest head `f47634412bf0f2c9b967a1f55fe6cdf567b79244` is under Android CI run [#45943777424](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45943777424), which was still in progress at the 2026-11-27 synchronization. The earlier green run was on an older head.
 - `android-ci.yml`: unit tests, assembleDebug, APK artifact; storage instrumentation on emulator
 - Do not treat a green `verify` job alone as full security or migration proof
 
