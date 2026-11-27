@@ -50,9 +50,9 @@ From HANDOVER (verify against latest `main` each run):
 4. Commit via GitHub tools; refresh HANDOVER/PROJECT_STATUS/WORK_LOG when status changes
 5. Reply to the owner in **Persian** with commits, CI links, and remaining blockers
 
-## 2026-11-27 — CI stabilization ported to docs branch
+## 2026-11-27 — API 31 CI stabilization applied to docs branch
 
-- Applied AVD cache + longer boot timeout to `.github/workflows/android-ci.yml` on `develop/agent-ready` (commit `3b4bcf0f`). Next CI run should be monitored for green instrumentation.
-- Dedicated CI stabilization branch and identity negative-test branch remain available; Draft PR forms were presented for owner confirmation.
-- PR #2 remains the integration candidate with full green CI on its head.
+- Switched storage instrumentation in `.github/workflows/android-ci.yml` on `develop/agent-ready` to API 31 + AVD cache (commit `dec517de`) to address flaky API 34 boot timeouts.
+- Dedicated feature branch `ci/stabilize-emulator-and-expand-negative-tests-20261127` remains available with the same CI change plus expanded identity negative tests; Draft PR form was presented for owner confirmation.
+- PR #2 remains the integration candidate with full green CI on its head (run #45943777424).
 - Room remains v7. Keep ADR 0006/0008/0012 implementation gates closed. Authorization remains fail-closed; do not replace lost device keys.

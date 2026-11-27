@@ -1,8 +1,8 @@
-## 2026-11-27 — CI stabilization and negative-test expansion
+## 2026-11-27 — CI stabilization (API 31) applied to docs branch
 
-- Feature branch `ci/stabilize-emulator-and-expand-negative-tests-20261127` (commit `8a2956a2`) combines emulator reliability improvements (AVD cache, API 31 target, longer timeout) with expanded fail-closed unit tests for CanonicalBase64Url and P256PublicKeyParser.
-- Draft PR pending owner confirmation. Previous CI and test branches remain available.
-- Integration candidate [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2) remains Draft with full green CI.
+- `develop/agent-ready` CI workflow updated (commit `dec517de`) to use API 31 + AVD cache for storage instrumentation, addressing flaky API 34 boot timeouts.
+- Feature branch `ci/stabilize-emulator-and-expand-negative-tests-20261127` (commit `8a2956a2`) has the same CI change plus expanded fail-closed unit tests for CanonicalBase64Url and P256PublicKeyParser.
+- Integration candidate [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2) remains Draft with full green CI (run #45943777424).
 - Room remains v7. Do not implement the proposed v8 owner-decision ledger/FMJA1 digest or alter expiry semantics until the ADR 0006/0008/0012 gates are explicitly approved. Keep membership authorization fail-closed and never replace a lost device key.
 - No numerical performance gain is claimed; no device profiling was performed.
 
@@ -45,7 +45,7 @@ production authorization are not implemented.
 | BLE / Wi-Fi Direct / internet P2P / relay | NOT_STARTED | No transport implementation |
 | Cross-device synchronization | NOT_STARTED | Manual text transfer only |
 | Gradle Wrapper | IN_PROGRESS | Pinned 8.13 wrapper on PR #2 (green CI); not yet on main |
-| Android instrumentation / device validation | PARTIALLY_VERIFIED | Full suite green on PR #2 candidate; historical migrations covered there; new CI branch improves emulator reliability (pending confirmation) |
+| Android instrumentation / device validation | PARTIALLY_VERIFIED | Full suite green on PR #2 candidate; historical migrations covered there; API 31 CI stabilization applied to docs branch (pending confirmation) |
 
 ## Immediate priority
 
