@@ -21,6 +21,16 @@ class CanonicalBase64UrlTest {
     }
 
     @Test
+    fun rejectsWhitespace() {
+        assertThrows(IllegalArgumentException::class.java) {
+            CanonicalBase64Url.decode(" ")
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            CanonicalBase64Url.decode("\n")
+        }
+    }
+
+    @Test
     fun rejectsPaddedAliasOfCanonicalValue() {
         val bytes = byteArrayOf(1, 2, 3, 4, 5)
         val canonical = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)
@@ -39,6 +49,13 @@ class CanonicalBase64UrlTest {
     }
 
     @Test
+    fun rejectsPlusSignInAlphabet() {
+        assertThrows(IllegalArgumentException::class.java) {
+            CanonicalBase64Url.decode("abc+")
+        }
+    }
+
+    @Test
     fun rejectsInvalidCharacters() {
         assertThrows(IllegalArgumentException::class.java) {
             CanonicalBase64Url.decode("abc!")
@@ -47,23 +64,18 @@ class CanonicalBase64UrlTest {
 
     @Test
     fun rejectsNonCanonicalEncoding() {
-        // A value that decodes but is not the canonical unpadded form (e.g. with different padding or length issues)
         val bytes = byteArrayOf(1, 2, 3)
         val canonical = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)
-        // Force a non-canonical by adding extra valid chars that don't match round-trip
-        val nonCanonical = canonical + "A" // may or may not be valid; expect rejection on canonical check or alphabet
+        val nonCanonical = canonical + "A"
         assertThrows(IllegalArgumentException::class.java) {
             CanonicalBase64Url.decode(nonCanonical)
         }
     }
 
     @Test
-    fun acceptsEmptyDecodedBytesEdge() {
-        // Zero-length is empty string which is rejected; test a minimal valid
-        val bytes = byteArrayOf()
-        // Empty encoded is rejected by require(isNotEmpty)
+    fun rejectsEmptyDecodedBytes() {
         assertThrows(IllegalArgumentException::class.java) {
-            CanonicalBase64Url.decode(Base64.getUrlEncoder().withoutPadding().encodeToString(bytes))
+            CanonicalBase64Url.decode(Base64.getUrlEncoder().withoutPadding().encodeToString(byteArrayOf()))
         }
     }
 }

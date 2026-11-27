@@ -36,8 +36,23 @@ class P256PublicKeyParserTest {
     }
 
     @Test
+    fun rejectsTruncatedP256Spki() {
+        val pair = keyPair("secp256r1")
+        val encoded = pair.public.encoded
+        if (encoded.size > 10) {
+            assertNull(P256PublicKeyParser.decode(encoded.copyOf(encoded.size / 2)))
+        }
+    }
+
+    @Test
     fun rejectsNullLikeOrRandomBytes() {
         assertNull(P256PublicKeyParser.decode(ByteArray(64) { it.toByte() }))
+    }
+
+    @Test
+    fun rejectsNonEcAlgorithmIdentifier() {
+        // Minimal invalid DER that is not an EC key
+        assertNull(P256PublicKeyParser.decode(byteArrayOf(0x30, 0x0d, 0x06, 0x09, 0x2a, 0x86.toByte(), 0x48, 0x86.toByte(), 0xf7.toByte(), 0x0d, 0x01, 0x01, 0x01, 0x05, 0x00)))
     }
 
     private fun keyPair(curve: String) = KeyPairGenerator.getInstance("EC").run {
