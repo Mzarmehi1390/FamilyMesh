@@ -1,23 +1,23 @@
-# COSE v2 negative-test outline (derived from primitive KAT 0001)
+# COSE v2 negative-test outline (derived from primitive KATs 0001 and 0002)
 
 - Status: **Documentation support for protocol review; not a production approval or complete corpus**
 - Profile: draft ADR 0003
-- Base fixture: [COSE v2 primitive KAT 0001](cose-v2-primitive-kat-0001.md)
+- Base fixtures: [COSE v2 primitive KAT 0001](cose-v2-primitive-kat-0001.md), [COSE v2 primitive KAT 0002](cose-v2-primitive-kat-0002.md)
 - Purpose: record concrete malformed and cross-binding cases that any future parser must reject before implementation approval.
 
 This outline does not implement a parser, does not add executable tests, and does not satisfy the independent cross-implementation or full-schema gates in ADR 0003. It is a checklist of expected fail-closed behavior.
 
 ## Security warning
 
-The private scalar in the base KAT is the public constant 1. Never use it outside test-vector verification.
+The private scalar in the base KATs is the public constant 1. Never use it outside test-vector verification.
 
 ## Required rejection cases
 
-All cases start from the exact bytes of KAT 0001 and apply one change. Verification or parsing must fail closed (reject, do not fall back).
+All cases start from the exact bytes of KAT 0001 (enrollment-proof context) or KAT 0002 (owner-decision context) and apply one change. Verification or parsing must fail closed (reject, do not fall back). KAT 0002 already demonstrates a different external AAD and content type; using one vector's AAD with the other must fail.
 
 1. **Payload bit flip**: Invert one bit in the payload CBOR (`a30102020103436b6174`). Signature verification must fail.
 2. **Protected header bit flip**: Invert one bit in the protected header bstr. Signature verification must fail.
-3. **External AAD change**: Replace the AAD with `FamilyMesh-OwnerDecision-v2\0`. Signature verification must fail (cross-artifact binding).
+3. **External AAD change**: Replace the AAD with the other artifact's AAD (e.g., KAT 0001 AAD with KAT 0002 bytes, or vice versa). Signature verification must fail (cross-artifact binding).
 4. **Algorithm substitution**: Change alg from -9 (ESP256) to -7 (ES256) in the protected header. Reject before cryptographic verification.
 5. **Missing tag**: Present the COSE array without CBOR tag 18. Reject under this profile (tagged-only).
 6. **Signature length**: Change the signature bstr length from 64 to 63 or 65. Reject before JCA verification.
