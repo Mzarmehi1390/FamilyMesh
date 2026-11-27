@@ -1120,3 +1120,12 @@ Android CI [run #45406912355](https://github.com/Mzarmehi1390/FamilyMesh/actions
 
 - Inspect all jobs and JUnit/Lint artifacts from run #45626115545 before marking the current head validated.
 - Keep PR #2 Draft and unmerged. Room remains v7; the production COSE profile, four-artifact parity, signature canonicality, distributed replay policy, owner authority, revocation/recovery, production authorization, E2EE, and all network transports remain separate review gates.
+
+
+## 2026-11-27 — Validate current PR #2 head and inspect Lint artifact
+
+- PR #2 head `09eaa3832ac50e13b27506953d310adfae4b2f46` completed Android CI [run #45885409892](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45885409892) successfully. All three jobs passed: `verify`, API 31 identity/Keystore instrumentation, and API 34 storage/identity instrumentation.
+- The verify job completed the COSE primitive KAT, 15 backup-policy regression tests, direct backup-policy verification, JVM unit tests, aggregate Android Lint, Debug APK assembly, Room schema export, and configured artifact uploads.
+- Downloaded the `android-lint-reports` artifact and parsed all five module XML reports. `:app` has 13 warnings: five `NewerVersionAvailable`, four `GradleDependency`, three `AndroidGradlePluginVersion`, and one `OldTargetApi`. Each of `:core:common`, `:core:designsystem`, `:core:identity`, and `:core:storage` has zero warnings. No `ObsoleteSdkInt` warning remains.
+- No source/runtime, database schema, protocol, cryptography, authorization, or transport change was made in this validation step. The run is emulator/CI evidence only; no hardware-backed Keystore, attestation, physical-device, or performance claim is made.
+- PR #2 remains Draft and unmerged; `main` is unchanged. Continue with the source-backed four-artifact protocol parity audit and ADR decisions before implementation.
