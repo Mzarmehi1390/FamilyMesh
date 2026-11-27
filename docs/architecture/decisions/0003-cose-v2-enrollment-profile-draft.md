@@ -167,15 +167,16 @@ for the v1-to-v2 semantic parity gap and the schema-freeze checklist.
 
 ## 8. Required test and review gates
 
-Primitive known-answer fixtures are now recorded at
-[COSE v2 primitive KAT 0001](vectors/cose-v2-primitive-kat-0001.md) (enrollment-proof context),
-[COSE v2 primitive KAT 0002](vectors/cose-v2-primitive-kat-0002.md) (owner-decision context), and
-[COSE v2 primitive KAT 0003](vectors/cose-v2-primitive-kat-0003.md) (applicant-acceptance context).
+Primitive known-answer fixtures are now recorded for all four artifact contexts:
+[COSE v2 primitive KAT 0001](vectors/cose-v2-primitive-kat-0001.md) (enrollment-proof),
+[KAT 0002](vectors/cose-v2-primitive-kat-0002.md) (owner-decision),
+[KAT 0003](vectors/cose-v2-primitive-kat-0003.md) (applicant-acceptance), and
+[KAT 0004](vectors/cose-v2-primitive-kat-0004.md) (initial-owner-trust).
 They cover key ID derivation, protected header, external AAD, Sig_structure,
-low-S normalization, and final tagged COSE_Sign1 bytes for three artifact contexts.
+low-S normalization, and final tagged COSE_Sign1 bytes.
 Their public test key is deliberately insecure and must never be used outside
 test-vector verification. These fixtures are not complete artifact schemas or
-independent interoperability sign-off. One remaining primitive context is initial-owner trust.
+independent interoperability sign-off.
 
 Before implementation is approved:
 
