@@ -1,5 +1,27 @@
 # FamilyMesh Work Log
 
+## 2026-11-27 — Fixed emulator instrumentation retry script for android-emulator-runner
+
+### Observation / Action
+
+- Android CI run #46035651581 on develop/agent-ready failed in the `storage-instrumentation` job with a shell syntax error: `end of file unexpected (expecting "done")`.
+- Cause: `reactivecircus/android-emulator-runner@v2` splits multi-line `script:` input and executes each line independently with `sh -c`. The previous multi-line `for` loop was therefore invalid.
+- Collapsed the single-retry wrapper into one shell command while preserving the resource limits, `-gpu off`, and extended boot timeout.
+- All changes are CI-only. No runtime, schema, cryptographic implementation, or authorization changes.
+
+### Impact
+
+- Storage instrumentation on API 31 should now execute the retry logic correctly and remain resilient to intermittent system crashes.
+- Room remains v7; ADR 0006/0008/0012 implementation gates unchanged. Authorization remains fail-closed.
+
+### Next
+
+- Confirm the triggered CI run succeeds.
+- Continue protocol-review support without claiming production COSE.
+- Keep v8 implementation blocked pending ADR gates.
+
+---
+
 ## 2026-11-27 — Hardened emulator instrumentation against flaky system crashes
 
 ### Observation / Action
@@ -17,26 +39,6 @@
 
 - Confirm the triggered CI run succeeds.
 - Continue protocol-review support without claiming production COSE.
-- Keep v8 implementation blocked pending ADR gates.
-
----
-
-## 2026-11-27 — Added COSE v2 primitive KATs 0003 and 0004 (complete primitive set)
-
-### Observation / Action
-
-- Generated and checked in primitive known-answer vectors for the remaining two artifact contexts: applicant-acceptance (KAT 0003) and initial-owner-trust (KAT 0004).
-- Updated the negative-test outline and ADR 0003 to reference the complete set of four primitive fixtures covering all artifact contexts.
-- All changes are documentation-only. No runtime, schema, cryptographic implementation, or authorization changes.
-
-### Impact
-
-- Protocol-review support now has primitive vectors for every artifact context defined in the draft ADR 0003. Full payload schemas and independent cross-implementation verification remain open.
-- Room remains v7; ADR 0006/0008/0012 implementation gates unchanged. Authorization remains fail-closed.
-
-### Next
-
-- Continue protocol-review support (full payload schemas, malformed corpus details, ADR clarity) without claiming production COSE.
 - Keep v8 implementation blocked pending ADR gates.
 
 ---
