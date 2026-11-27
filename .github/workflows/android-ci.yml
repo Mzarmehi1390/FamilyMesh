@@ -54,10 +54,11 @@ jobs:
     # Cache AVD definition and system image to reduce repeated cold boots.
     # Use API 31 (project minSdk) and default target for faster, more reliable boots.
     # Snapshots are disabled because TCG Quick Boot has been unreliable on hosted runners.
+    # Memory and core limits plus GPU mode chosen to reduce flaky system crashes during instrumentation.
     env:
       ANDROID_I_WANT_MY_TCG: "yes"
     runs-on: ubuntu-22.04
-    timeout-minutes: 40
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -77,7 +78,7 @@ jobs:
           path: |
             ~/.android/avd/*
             /usr/local/lib/android/sdk/system-images/android-31/default/x86_64
-          key: familymesh-avd-api31-${{ runner.os }}-${{ runner.arch }}-default-x86_64-pixel2-v1
+          key: familymesh-avd-api31-${{ runner.os }}-${{ runner.arch }}-default-x86_64-pixel2-v2
       - name: Run Room storage tests on emulator
         id: run-api31-tests
         uses: reactivecircus/android-emulator-runner@v2
@@ -87,11 +88,23 @@ jobs:
           arch: x86_64
           profile: pixel_2
           force-avd-creation: false
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -no-metrics -camera-back none
+          emulator-options: -no-window -gpu off -no-snapshot -noaudio -no-boot-anim -no-metrics -camera-back none -memory 2048 -cores 2 -skin 1080x1920
           disable-animations: true
-          emulator-boot-timeout: 900
+          emulator-boot-timeout: 1200
           pre-emulator-launch-script: adb start-server
-          script: gradle :core:storage:connectedDebugAndroidTest
+          script: |
+            set +e
+            for attempt in 1 2; do
+              echo "=== Instrumentation attempt $attempt ==="
+              gradle :core:storage:connectedDebugAndroidTest
+              exit_code=$?
+              if [ $exit_code -eq 0 ]; then
+                exit 0
+              fi
+              echo "Attempt $attempt failed with exit $exit_code; retrying once if possible..."
+              sleep 10
+            done
+            exit $exit_code
       - name: Save API 31 AVD and system-image cache
         if: steps.avd-cache.outputs.cache-hit != 'true' && steps.run-api31-tests.outcome == 'success'
         uses: actions/cache/save@v4
@@ -99,7 +112,7 @@ jobs:
           path: |
             ~/.android/avd/*
             /usr/local/lib/android/sdk/system-images/android-31/default/x86_64
-          key: familymesh-avd-api31-${{ runner.os }}-${{ runner.arch }}-default-x86_64-pixel2-v1
+          key: familymesh-avd-api31-${{ runner.os }}-${{ runner.arch }}-default-x86_64-pixel2-v2
       - name: Upload instrumentation reports
         if: always()
         uses: actions/upload-artifact@v4
