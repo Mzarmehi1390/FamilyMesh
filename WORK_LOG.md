@@ -1,5 +1,24 @@
 # FamilyMesh Work Log
 
+## 2026-11-27 — Expanded identity fail-closed unit tests on develop/agent-ready
+
+### Observation / Action
+
+- Expanded CanonicalBase64UrlTest and P256PublicKeyParserTest with additional rejection cases (empty/whitespace, plus-sign alphabet, truncated SPKI, non-EC algorithm identifiers, malformed bytes) — commit 3d70f74f.
+- These strengthen the fail-closed boundaries of the existing enrollment codecs/verifiers without changing runtime behavior.
+
+### Impact
+
+- Broader unit-test surface for security-sensitive parsers.
+- No schema, protocol, authorization, or production-claim changes. Room remains v7.
+
+### Next
+
+- Confirm the next Android CI run on develop/agent-ready is green for both verify and storage-instrumentation (fixtures already present).
+- Continue protocol-review support within existing gates.
+
+---
+
 ## 2026-11-27 — Historical Room schema fixtures checked in on develop/agent-ready
 
 ### Observation / Action
@@ -17,28 +36,6 @@
 
 - Confirm the next Android CI run on develop/agent-ready is green for both verify and storage-instrumentation.
 - Continue protocol-review support work within existing gates.
-
----
-
-## 2026-11-27 — API 31 emulator stabilization applied to develop/agent-ready
-
-### Observation / Action
-
-- Observed repeated `Timeout waiting for emulator to boot` on API 34 storage-instrumentation jobs (e.g. Android CI run #45967740726 on develop/agent-ready).
-- Updated `.github/workflows/android-ci.yml` on `develop/agent-ready` (commit `dec517de`) to use API 31 (minSdk), default target, AVD/system-image caching, longer timeout, and snapshot-disable.
-- Feature branch `ci/stabilize-emulator-and-expand-negative-tests-20261127` already contains the same CI change plus expanded CanonicalBase64Url / P256PublicKeyParser unit tests (commit `8a2956a2`).
-- PR #2 integration candidate confirmed full green CI on head `f47634412` (run #45943777424).
-
-### Impact
-
-- Infrastructure reliability improvement for documentation-branch CI (next run should be monitored).
-- Broader fail-closed test surface available on the dedicated feature branch.
-- No schema, protocol, authorization, or production-claim changes.
-
-### Next
-
-- Confirm the next Android CI run on develop/agent-ready is green for both jobs.
-- Open PR for the CI + negative-test branch once interactive confirmation is available, and continue KAT / ADR clarity work within existing gates.
 
 ---
 
