@@ -1,7 +1,8 @@
-## 2026-11-27 — CI stabilization and identity test hardening
+## 2026-11-27 — CI stabilization applied to docs branch
 
-- Feature branch `ci/stabilize-emulator-avd-cache-20261127` (commit `4e2353fc`) adds AVD caching and longer boot timeout to the main Android CI workflow to reduce emulator flakiness.
-- Feature branch `test/p256-parser-negative-hardening-20261127` (commits `dcb8e705`, `720243d4`) expands pure unit-test negative coverage for P-256 parser and CanonicalBase64Url. No runtime change.
+- Applied AVD caching and longer boot timeout to the Android CI workflow on `develop/agent-ready` (commit `3b4bcf0f`) to reduce emulator flakiness on the documentation PR.
+- Dedicated feature branch `ci/stabilize-emulator-avd-cache-20261127` (commit `4e2353fc`) carries the same change for main.
+- Feature branch `test/p256-parser-negative-hardening-20261127` expands pure unit-test negative coverage for P-256 parser and CanonicalBase64Url. No runtime change.
 - Integration candidate [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2) remains Draft with full green CI on head `f47634412bf0f2c9b967a1f55fe6cdf567b79244` (run #45943777424).
 - Room remains v7. Do not implement the proposed v8 owner-decision ledger/FMJA1 digest or alter expiry semantics until the ADR 0006/0008/0012 gates are explicitly approved. Keep membership authorization fail-closed and never replace a lost device key.
 - No numerical CPU, memory, battery, network, or latency improvement is claimed; no device profiling was performed.
@@ -45,7 +46,7 @@ production authorization are not implemented.
 | BLE / Wi-Fi Direct / internet P2P / relay | NOT_STARTED | No transport implementation |
 | Cross-device synchronization | NOT_STARTED | Manual text transfer only |
 | Gradle Wrapper | IN_PROGRESS | Pinned 8.13 wrapper on PR #2 (green CI); not yet on main |
-| Android instrumentation / device validation | PARTIALLY_VERIFIED | Full suite green on PR #2 candidate; historical migrations covered there; main still uses older workflow (stabilization branch opened) |
+| Android instrumentation / device validation | PARTIALLY_VERIFIED | Full suite green on PR #2 candidate; historical migrations covered there; docs branch workflow now includes AVD cache (pending next CI confirmation) |
 
 ## Immediate priority
 
