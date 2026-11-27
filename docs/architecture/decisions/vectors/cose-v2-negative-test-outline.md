@@ -1,8 +1,8 @@
-# COSE v2 negative-test outline (derived from primitive KATs 0001, 0002, and 0003)
+# COSE v2 negative-test outline (derived from primitive KATs 0001–0004)
 
 - Status: **Documentation support for protocol review; not a production approval or complete corpus**
 - Profile: draft ADR 0003
-- Base fixtures: [COSE v2 primitive KAT 0001](cose-v2-primitive-kat-0001.md), [COSE v2 primitive KAT 0002](cose-v2-primitive-kat-0002.md), [COSE v2 primitive KAT 0003](cose-v2-primitive-kat-0003.md)
+- Base fixtures: [KAT 0001](cose-v2-primitive-kat-0001.md), [KAT 0002](cose-v2-primitive-kat-0002.md), [KAT 0003](cose-v2-primitive-kat-0003.md), [KAT 0004](cose-v2-primitive-kat-0004.md)
 - Purpose: record concrete malformed and cross-binding cases that any future parser must reject before implementation approval.
 
 This outline does not implement a parser, does not add executable tests, and does not satisfy the independent cross-implementation or full-schema gates in ADR 0003. It is a checklist of expected fail-closed behavior.
@@ -13,7 +13,7 @@ The private scalar in the base KATs is the public constant 1. Never use it outsi
 
 ## Required rejection cases
 
-All cases start from the exact bytes of KAT 0001 (enrollment-proof context), KAT 0002 (owner-decision context), or KAT 0003 (applicant-acceptance context) and apply one change. Verification or parsing must fail closed (reject, do not fall back). Using one vector's AAD or content type with another's bytes must fail (cross-artifact binding).
+All cases start from the exact bytes of any of the four primitive KATs (enrollment-proof, owner-decision, applicant-acceptance, or initial-owner-trust contexts) and apply one change. Verification or parsing must fail closed (reject, do not fall back). Using one vector's AAD or content type with another's bytes must fail (cross-artifact binding).
 
 1. **Payload bit flip**: Invert one bit in the payload CBOR (`a30102020103436b6174`). Signature verification must fail.
 2. **Protected header bit flip**: Invert one bit in the protected header bstr. Signature verification must fail.
@@ -45,7 +45,7 @@ These mappings support the review checklist only. They do not constitute additio
 ## Remaining gates
 
 These cases support review only. Still required before any implementation approval:
-- Complete payload schemas and positive vectors for all four artifacts (one remaining: initial-owner trust).
+- Complete payload schemas and positive vectors for all four artifacts (primitive KATs now cover all four contexts).
 - Independent second CBOR/COSE implementation reproducing the vectors.
 - Android Keystore instrumentation.
 - Explicit approval of time, replay, owner-authority, revocation, and recovery policies (ADR 0006 and related).
