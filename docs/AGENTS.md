@@ -55,9 +55,10 @@ Private, decentralized, **end-to-end encrypted by design** family messaging on *
 
 Maximize useful work per run: fix CI, close test gaps, advance the **current** work package from HANDOVER, update status docs. Stop only when blocked on product/security decisions listed in ADRs (e.g. expiry policy ADR 0006) or on human review gates.
 
-## 2026-11-27 — Live repository and CI synchronization
+## 2026-11-27 — Protocol-review support expanded with KAT 0002
 
-- `develop/agent-ready` (PR #5) head is now `4603456a6a215835b188093d231c1aacad81ad1e` with green Android CI run [#46000688306](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/46000688306) (both jobs passed).
+- `develop/agent-ready` (PR #5) now includes COSE v2 primitive KAT 0002 (OwnerDecision context) plus updated negative-test outline and ADR 0003 references.
+- Prior green Android CI runs on this branch remain valid for the storage/fixture work. New documentation commits have triggered fresh CI (in progress at time of writing).
 - Integration candidate PR #2 remains Draft at head `f47634412bf0f2c9b967a1f55fe6cdf567b79244` with its own green CI.
 - Historical Room fixtures and migration CASCADE coverage are validated on this branch.
 - Keep PR #2 Draft pending protocol/security/owner reviews. Do not implement Room v8, owner-ledger/FMJA1 digest, or expiry-policy changes before ADR 0006/0008/0012 approval. Membership authorization remains fail-closed; lost device keys must not be replaced.
