@@ -31,6 +31,17 @@ All cases start from the exact bytes of KAT 0001 and apply one change. Verificat
 14. **Indefinite length**: Replace a definite-length bstr or array with indefinite encoding. Reject.
 15. **Duplicate keys**: Encode a map with the same key twice. Reject.
 
+## Lessons from current v1 fail-closed boundaries
+
+The existing v1 enrollment codecs and parsers already enforce several fail-closed rules that the v2 profile must preserve or strengthen. These are documented here so reviewers can map them to the cases above without claiming that v1 is the production wire format.
+
+- **Canonical unpadded Base64URL only**: `CanonicalBase64Url` rejects padding, non-alphabet characters, empty/whitespace input, and non-canonical re-encodings. v2 deterministic CBOR must similarly reject non-preferred encodings and trailing data.
+- **P-256-only public keys**: `P256PublicKeyParser` rejects non-P-256 curves (P-384/P-521), truncated/malformed SPKI, empty bytes, and non-EC algorithm identifiers. v2 must reject wrong `crv`, invalid points, and non-32-byte coordinates on import.
+- **Bounded transfer envelopes**: Existing text codecs reject malformed prefixes, oversized inputs, and trailing bytes after the decoded payload. v2 tagged COSE_Sign1 must reject untagged arrays, wrong tags, and any trailing bytes.
+- **Exact signature binding**: Verifiers reject tampered signatures and require both owner and applicant signatures on finalization. v2 must reject signature length mismatches, high-S values, and any alteration of the protected header or external AAD.
+
+These mappings support the review checklist only. They do not constitute additional executable tests or approval of the draft profile.
+
 ## Remaining gates
 
 These cases support review only. Still required before any implementation approval:
