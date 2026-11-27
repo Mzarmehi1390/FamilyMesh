@@ -57,19 +57,11 @@ Default branch: `main`
 
 ## Latest code changes and verification
 
-The main-branch implementation baseline is unchanged. The PR #2 integration candidate includes:
+The main-branch implementation baseline is unchanged. The PR #2 integration candidate includes the Gradle 8.13 wrapper with pinned checksums, authentic Room schema fixtures v1–v7 and migration instrumentation, Android Keystore instrumentation on API 31/API 34, COSE primitive KAT validation, Compose Flow lifecycle fixes, P-256 SPKI hardening, backup exclusions, adaptive launcher icon, and aggregate Android Lint.
 
-- Official Gradle 8.13 POSIX/Windows Wrapper with pinned distribution and JAR checksums.
-- Authentic Room schema fixtures for versions 1–7 and `MigrationTestHelper` coverage of every supported start version.
-- Android Keystore instrumentation on API 31 and API 34, including stable identity, non-exportability, signing/verification, and fail-closed missing/corrupt key metadata cases.
-- DAO concurrency characterization for same-artifact/different-receipt-time imports and opposite decision artifacts.
-- Stable Room-backed Compose observation Flows and cancellation-safe Home screen suspend operations.
-- Common v1 P-256 SPKI import validation for field bounds and curve membership.
-- Aggregate Android Lint `lintDebug` in CI.
+Android CI [run #45885409892](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45885409892) passed all three jobs on current candidate head `09eaa3832ac50e13b27506953d310adfae4b2f46`. The verify job passed the COSE primitive KAT, 15 backup-policy tests, direct policy check, JVM tests, aggregate Lint, Debug APK assembly, Room schema export, and artifact uploads. API 31 identity/Keystore and API 34 storage/identity instrumentation jobs also passed. The downloaded Lint XML contains 13 app warnings and zero core-module warnings (5 version-availability, 4 dependency, 3 Android Gradle Plugin version, 1 target API advisory).
 
-Android CI [run #45552834794](https://github.com/Mzarmehi1390/FamilyMesh/actions/runs/45552834794) passed all three jobs on candidate head `a5a86de07ded532685249bf734111915cde20646`. The verify job passed the COSE primitive KAT, JVM unit tests, Android Lint, Debug APK assembly, Room schema export, and artifact uploads. API 31 identity passed 8/8; API 34 storage passed 9/9 and identity passed 8/8, all with zero failures, errors, or skipped tests.
-
-The staged follow-up branch adds direct Android-provider tests for the shared P-256 parser and uploads the HTML/XML Lint reports. Those staged changes are not part of run #45552834794 and require a fresh PR CI run. Emulator results do not prove hardware-backed Keystore assurance or physical-device compatibility.
+Emulator results establish behavior on those CI emulator images only. They do not prove hardware-backed Keystore assurance, remote attestation, physical-device compatibility, or security against a compromised operating system. Room remains v7; no v7→v8 migration is implemented or validated. PR #2 remains Draft and unmerged.
 
 ## Current work package
 
@@ -103,7 +95,8 @@ should be implemented until independent vectors and platform tests validate it.
 
 ## Next exact engineering action
 
-Integrate the staged Android-provider P-256 parser tests and lint-report upload into PR #2, then run the complete API 31/API 34 CI matrix. After that, continue ADR 0003's COSE v2 review with cross-language known-answer vectors for key representation, protected headers, external AAD, Sig_structure, and ECDSA DER/R||S conversion. Keep networking and authorization integration blocked until replay scope, trust lifecycle, revocation, recovery, and independent interoperability review are resolved.
+Continue the source-backed four-artifact protocol audit. Produce a field/validation parity matrix for the existing request, owner decision, applicant acceptance, and owner finalization envelopes against the draft COSE v2 profile. Explicitly record encoding, key identifiers, signature representation/canonicality, signed timestamps versus local receipt times, expiry, and replay identity. Resolve each unresolved item through the relevant ADR before changing runtime or Room schema. Keep network transport and production authorization blocked until independent interoperability and security review.
+
 
 
 ## Latest lifecycle audit (documentation proposal)
