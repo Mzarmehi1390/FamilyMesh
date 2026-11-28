@@ -55,9 +55,9 @@ Private, decentralized, **end-to-end encrypted by design** family messaging on *
 
 Maximize useful work per run: fix CI, close test gaps, advance the **current** work package from HANDOVER, update status docs. Stop only when blocked on product/security decisions listed in ADRs (e.g. expiry policy ADR 0006) or on human review gates.
 
-## 2026-11-28 — Concrete high-S and payload size analysis
+## 2026-11-28 — Full high-S complements and Base64URL test hardening
 
-- `develop/agent-ready` (PR #5) now includes concrete high-S complements for KAT 0001/0002 and an expanded payload schema proposal with size estimates plus a deterministic encoding sketch.
+- `develop/agent-ready` (PR #5) now includes concrete high-S complements for all four primitive KATs and expanded CanonicalBase64Url negative unit tests.
 - Latest Android CI on this branch remains green.
 - Complete primitive KAT set (0001–0004) remains checked in.
 - Integration candidate PR #2 remains Draft at head `f47634412bf0f2c9b967a1f55fe6cdf567b79244` with its own green CI.

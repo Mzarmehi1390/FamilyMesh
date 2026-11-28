@@ -1,8 +1,9 @@
-## 2026-11-28 — Concrete high-S values and payload size analysis for COSE v2 review
+## 2026-11-28 — Full high-S complements and CanonicalBase64Url test hardening
 
-- Recorded explicit `n - s` high-S complements for KAT 0001 and KAT 0002 in the low-S conversion notes, and added a matching concrete high-S mutation example to the negative-test outline.
-- Expanded the payload schema proposal with approximate maximum encoded sizes under deterministic CBOR and a concrete encoding sketch for a toy enrollment-proof payload.
-- Documentation-only protocol-review support. No parser, executable tests, or profile approval added.
+- Recorded explicit `n - s` high-S complements for all four primitive KATs (0001–0004) in the low-S conversion review notes.
+- Updated the negative-test outline to note full high-S coverage.
+- Added unit tests rejecting internal whitespace and standard Base64 alphabet characters in CanonicalBase64Url.
+- Documentation and test-only changes. No runtime codec change, no parser, no profile approval.
 - Latest Android CI on this branch remains green.
 - Integration candidate [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2) remains Draft with green CI on its head.
 - Do not implement proposed v8 owner-ledger/FMJA1 digest or change expiry until ADR 0006/0008/0012 are explicitly approved. Authorization remains fail-closed; do not replace lost device keys.

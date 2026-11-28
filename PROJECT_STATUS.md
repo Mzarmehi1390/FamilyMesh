@@ -1,8 +1,9 @@
-## 2026-11-28 — Concrete high-S values and payload size analysis for COSE v2 review
+## 2026-11-28 — Full high-S complements and CanonicalBase64Url test hardening
 
-- Low-S conversion notes now include concrete `n - s` high-S complements for KAT 0001 and KAT 0002; negative-test outline has a matching concrete high-S example.
-- Payload schema proposal expanded with approximate max encoded sizes and a deterministic encoding sketch for the enrollment-proof payload.
-- Documentation-only; does not implement conversion or approve the draft profile.
+- Low-S conversion notes now include concrete `n - s` high-S complements for all four primitive KATs (0001–0004).
+- Negative-test outline notes full high-S coverage.
+- CanonicalBase64Url unit tests expanded with internal-whitespace and standard-Base64 alphabet rejection cases.
+- Documentation and test-only; does not implement conversion or approve the draft profile.
 - Latest Android CI on develop/agent-ready remains green.
 - Integration candidate [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2) remains Draft with green CI on head `f47634412bf0f2c9b967a1f55fe6cdf567b79244`.
 - Room remains v7. Do not implement the proposed v8 owner-decision ledger/FMJA1 digest or alter expiry semantics until the ADR 0006/0008/0012 gates are explicitly approved. Keep membership authorization fail-closed and never replace a lost device key.
@@ -40,7 +41,7 @@ production authorization are not implemented.
 | Signed owner decision | IMPLEMENTED_AND_TESTED | Service resolves the pin itself; tests reject missing, mismatched, and ambiguous pins |
 | Applicant acceptance + owner finalization | IMPLEMENTED_AND_TESTED | Both signatures verified; local Room v7 record |
 | Production membership authorization | BLOCKED | No trusted resolver; default denies all |
-| Canonical COSE protocol | IN_PROGRESS | Draft v2 profile + four primitive KATs (all artifact contexts) + negative-test outline with concrete mutation examples for all fifteen checklist items (including concrete high-S) + review-only payload schema proposal (with size analysis and encoding sketch) + low-S conversion notes with concrete complements; not production |
+| Canonical COSE protocol | IN_PROGRESS | Draft v2 profile + four primitive KATs (all artifact contexts) + negative-test outline with concrete mutation examples for all fifteen checklist items (including concrete high-S for all KATs) + review-only payload schema proposal (with size analysis and encoding sketch) + low-S conversion notes with full concrete complements; not production |
 | Invitations / revocation / recovery | NOT_STARTED | Requires reviewed lifecycle and authority model |
 | E2EE messaging | NOT_STARTED | No message crypto implementation |
 | BLE / Wi-Fi Direct / internet P2P / relay | NOT_STARTED | No transport implementation |
