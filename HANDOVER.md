@@ -1,7 +1,7 @@
-## 2026-11-28 — Protocol review: payload-schema proposal and expanded negative mutations
+## 2026-11-28 — Protocol review: low-S conversion notes and kid-mismatch example
 
-- Added a documentation-only COSE v2 payload schema proposal that maps the ADR 0005 source inventory to candidate CBOR labels, types, and byte limits for the four artifacts. Explicitly not approved for implementation.
-- Expanded the negative-test outline with concrete protected-header bit-flip and signature-length mutation examples derived from KAT 0001, and linked the schema proposal.
+- Added a documentation-only review note covering strict DER-to-fixed-width R||S conversion steps, rejection criteria, high-S construction from existing KATs, and a concrete kid-mismatch example.
+- Linked the notes from ADR 0003 and expanded the negative-test outline with the kid-mismatch mutation.
 - Documentation-only support for protocol review. No parser, executable tests, or profile approval added.
 - Latest Android CI on this branch remains green.
 - Integration candidate [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2) remains Draft with green CI on its head.
