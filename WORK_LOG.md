@@ -1,5 +1,26 @@
 # FamilyMesh Work Log
 
+## 2026-11-28 — Low-S signature-conversion review notes and kid-mismatch example
+
+### Observation / Action
+
+- Protocol review still needed concrete guidance on DER-to-fixed-width R||S conversion and the proposed low-S policy.
+- Added a documentation-only review note covering conversion steps, rejection criteria, high-S construction from existing KATs, and a concrete kid-mismatch mutation.
+- Linked the notes from ADR 0003 and the negative-test outline.
+- Documentation-only. No runtime, schema, cryptographic implementation, or authorization changes.
+
+### Impact
+
+- Reviewers now have explicit conversion and high-S construction guidance without any claim of parser implementation or profile approval.
+- Room remains v7; ADR 0006/0008/0012 implementation gates unchanged. Authorization remains fail-closed.
+
+### Next
+
+- Continue protocol-review support (refine schema with feedback, complete positive vectors once labels discussed, additional corpus details).
+- Keep v8 implementation blocked pending ADR gates.
+
+---
+
 ## 2026-11-28 — COSE v2 payload-schema proposal and expanded negative-test mutations
 
 ### Observation / Action
