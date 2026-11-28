@@ -1,8 +1,8 @@
-## 2026-11-28 — COSE v2 negative-test outline expanded with concrete mutation examples
+## 2026-11-28 — Candidate COSE v2 payload schema proposal + expanded negative-test mutations
 
-- The negative-test outline now includes concrete byte-level examples (payload bit-flip, AAD cross-binding from KAT 0002, trailing bytes, alg substitution notes) derived from KAT 0001.
+- Added `docs/architecture/decisions/vectors/cose-v2-candidate-payload-schema-proposal.md` with candidate integer labels, CBOR types, and length bounds for all four artifact payloads (derived from ADR 0005). Explicitly draft only; no labels frozen.
+- Expanded the negative-test outline with concrete signature-length, kid-mismatch, and high-S examples.
 - Documentation-only; does not implement a parser or approve the draft profile.
-- Latest Android CI on develop/agent-ready (run #46051367326) is green after the emulator retry-script fix.
 - Integration candidate [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2) remains Draft with green CI on head `f47634412bf0f2c9b967a1f55fe6cdf567b79244`.
 - Room remains v7. Do not implement the proposed v8 owner-decision ledger/FMJA1 digest or alter expiry semantics until the ADR 0006/0008/0012 gates are explicitly approved. Keep membership authorization fail-closed and never replace a lost device key.
 
@@ -39,7 +39,7 @@ production authorization are not implemented.
 | Signed owner decision | IMPLEMENTED_AND_TESTED | Service resolves the pin itself; tests reject missing, mismatched, and ambiguous pins |
 | Applicant acceptance + owner finalization | IMPLEMENTED_AND_TESTED | Both signatures verified; local Room v7 record |
 | Production membership authorization | BLOCKED | No trusted resolver; default denies all |
-| Canonical COSE protocol | IN_PROGRESS | Draft v2 profile + four primitive KATs (all artifact contexts) + negative-test outline with concrete mutation examples; not production |
+| Canonical COSE protocol | IN_PROGRESS | Draft v2 profile + four primitive KATs (all artifact contexts) + negative-test outline with concrete mutation examples + candidate payload schema proposal; not production |
 | Invitations / revocation / recovery | NOT_STARTED | Requires reviewed lifecycle and authority model |
 | E2EE messaging | NOT_STARTED | No message crypto implementation |
 | BLE / Wi-Fi Direct / internet P2P / relay | NOT_STARTED | No transport implementation |
