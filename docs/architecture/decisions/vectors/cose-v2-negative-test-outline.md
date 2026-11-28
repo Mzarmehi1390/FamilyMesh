@@ -79,9 +79,23 @@ Substitute AAD from owner-decision (KAT 0002):
 
 Signature verification on the original KAT 0001 object with the substituted AAD must fail. The same rule applies in the opposite direction and across all four contexts.
 
-### 4. Algorithm substitution note
+### 4. Algorithm substitution
 
-The protected header of KAT 0001 begins with the deterministic map encoding that includes `1: -9`. Replacing the CBOR integer encoding of `-9` with the encoding of `-7` produces a different protected-header bstr. The profile requires rejection of alg ≠ -9 before any cryptographic check.
+Original protected-header map encoding starts with the deterministic bytes for label 1 = -9 (ESP256):
+```
+a30128
+```
+
+Mutated (replace the CBOR integer encoding of -9 with the encoding of -7, producing a different protected-header bstr that a future parser must reject before any cryptographic verification):
+```
+a30126
+```
+
+(The full protected-header bstr and resulting COSE object change accordingly. The profile requires rejection of alg ≠ -9.)
+
+### 5. Missing tag
+
+Original complete object begins with CBOR tag 18 (`d284...`). Presenting the same array without the tag (i.e. an untagged COSE_Sign1 array) must be rejected under this profile. The profile is tagged-only; untagged alternatives are not accepted.
 
 ### 6. Signature length
 
@@ -110,6 +124,14 @@ aa3ea3d23cf530a1f41c88d53c066ea6b2f183932e852ffe74da31c6a8554c6f
 ```
 
 A future parser that accepts the mutated protected header together with the original COSE_Key must reject on key-ID binding. Construction details are also recorded in the [low-S conversion review notes](cose-v2-low-s-signature-conversion-review.md).
+
+### 9. Non-deterministic map
+
+Original protected-header map uses bytewise lexicographic key ordering (labels 1, 3, 4). Reordering the map keys (for example encoding label 4 before label 1) produces a non-deterministic CBOR encoding that must be rejected under the draft deterministic-CBOR rules, even if the semantic content is identical.
+
+### 10. Unknown label
+
+Adding an unrecognized label (for example label 99 with a zero-length bstr) to the protected-header map or to the COSE_Key map produces a closed-profile violation. A future parser must reject the object. The same rule applies to unknown payload labels once schemas are frozen.
 
 ### 13. Trailing bytes
 
