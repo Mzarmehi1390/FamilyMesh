@@ -18,6 +18,18 @@ All proposals preserve the fail-closed semantics of the current v1 codecs. Unkno
 4. Signature material is never part of the payload map; it is the COSE signature field (exactly 64-byte R||S after low-S normalization).
 5. Protocol version and artifact type are required inside every payload for dual binding with external AAD and content type.
 
+## Approximate maximum encoded sizes (review aid)
+
+These estimates assume preferred deterministic CBOR (shortest integer/length encodings, definite lengths, lexicographic map-key order). They are upper bounds for discussion only and do not freeze limits.
+
+- Small integers (protocol-version, artifact-type, times as non-negative int): typically 1–5 bytes each.
+- 32-byte bstr (key-id, nonce): 34 bytes (2-byte length + 32 content).
+- tstr up to 256 bytes: up to 259 bytes (2-byte length + 256 content).
+- Nested COSE_Key map: ~77 bytes (fixed for P-256 coordinates).
+- Overall payload map: sum of field encodings plus map overhead (1–3 bytes).
+
+Proposed hard limits for the complete tagged COSE_Sign1 object (protected header + empty unprotected + payload + 64-byte signature + tag) should be discussed after schema freeze; a conservative starting bound of 4 KiB is suggested for review to keep manual-transfer envelopes practical.
+
 ## 1. Enrollment proof payload
 
 Candidate media type: `application/vnd.familymesh.enrollment-proof+cbor`
@@ -35,6 +47,25 @@ Candidate media type: `application/vnd.familymesh.enrollment-proof+cbor`
 | 9 | nonce | bstr | exactly 32 bytes | yes |
 
 No other labels permitted.
+
+### Concrete encoding sketch (minimal example)
+
+A deterministic CBOR map for a toy enrollment-proof payload under the candidate labels (not a complete signed object; times and identifiers are illustrative only):
+
+```
+a9          # map(9)
+   01 02    # 1: 2 (protocol-version)
+   02 01    # 2: 1 (artifact-type)
+   03 63 72 71 31  # 3: tstr "rq1" (3 bytes)
+   04 63 66 6d 31  # 4: tstr "fm1"
+   05 58 20 aa3ea3d23cf530a1f41c88d53c066ea6b2f183932e852ffe74da31c6a8554c6e  # 5: 32-byte key-id (from KAT 0001)
+   06 66 4d 45 4d 42 45 52  # 6: tstr "MEMBER"
+   07 1a 00000001  # 7: created-at-ms = 1 (example)
+   08 1a 00000002  # 8: expires-at-ms = 2
+   09 58 20 0000000000000000000000000000000000000000000000000000000000000001  # 9: 32-byte nonce
+```
+
+Reviewers can expand this sketch into a full positive vector once labels are accepted. The encoding must remain deterministic.
 
 ## 2. Initial-owner trust payload
 
@@ -86,7 +117,7 @@ The nested owner decision must itself verify under the owner-decision profile be
 - Whether identity-creation time should ever become signed.
 - Exact-decision vs digest binding (exact preferred here).
 - Time policy, maximum lifetime, and clock-skew (ADR 0006).
-- Maximum overall COSE object size after CBOR encoding analysis.
+- Maximum overall COSE object size after CBOR encoding analysis (4 KiB suggested above as a review starting point).
 - Independent second-implementation vectors for complete (non-primitive) payloads.
 
 This proposal exists solely to accelerate protocol review. Room schema remains v7. Authorization remains fail-closed. No production COSE, E2EE, or network transport is claimed or implemented.
