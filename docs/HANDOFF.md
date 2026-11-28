@@ -32,7 +32,7 @@ From HANDOVER (verify against latest `main` each run):
 
 1. Prefer **green CI** and expanding Room migration / instrumentation coverage (historical fixtures v1–v7 checked in; foreign-key PRAGMA now enabled in migration tests; emulator job hardened against flaky system crashes with a single-command retry).
 2. **Do not** implement Room v8 owner-ledger / FMJA1 digest until ADR gates (0006 expiry policy, 0008/0012 design approval) are satisfied — document and test toward those gates if blocked.
-3. Protocol review remains open (COSE v2 draft ADR 0003; custom v1 envelopes still ship). Four primitive KATs now cover all artifact contexts (0001–0004), negative-test outline includes concrete mutation examples, a review-only payload schema proposal is available, and low-S/signature-conversion review notes have been added. Full schemas remain open.
+3. Protocol review remains open (COSE v2 draft ADR 0003; custom v1 envelopes still ship). Four primitive KATs now cover all artifact contexts (0001–0004), negative-test outline includes concrete mutation examples (algorithm substitution, unknown label, non-deterministic map, missing tag, and prior cases), a review-only payload schema proposal is available, and low-S/signature-conversion review notes have been added. Full schemas remain open.
 4. PR #2 contains a pinned Gradle 8.13 Wrapper candidate and remains Draft/unmerged, so `main` still does not include it. Its current head has full green CI.
 
 ## What NOT to do
@@ -50,10 +50,9 @@ From HANDOVER (verify against latest `main` each run):
 4. Commit via GitHub tools; refresh HANDOVER/PROJECT_STATUS/WORK_LOG when status changes
 5. Reply to the owner in **Persian** with commits, CI links, and remaining blockers
 
-## 2026-11-28 — Low-S conversion notes and kid-mismatch example
+## 2026-11-28 — Expanded negative-test mutations
 
-- Review-only low-S/DER-to-R||S conversion guidance added (steps, rejections, high-S construction, kid-mismatch example).
-- Negative-test outline and ADR 0003 updated to reference the notes.
+- Negative-test outline expanded with concrete examples for algorithm substitution, unknown label, non-deterministic map, and missing-tag cases.
 - Latest Android CI on this branch remains green.
 - PR #2 remains the integration candidate.
 - Room remains v7. Keep ADR 0006/0008/0012 implementation gates closed. Authorization remains fail-closed; do not replace lost device keys.

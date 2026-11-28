@@ -1,7 +1,6 @@
-## 2026-11-28 — Low-S signature-conversion review notes and kid-mismatch example
+## 2026-11-28 — Expanded COSE v2 negative-test mutations
 
-- A review-only note now records DER-to-R||S conversion steps, rejection criteria, high-S construction guidance, and a concrete kid-mismatch example derived from KAT 0001.
-- Negative-test outline and ADR 0003 updated to reference the notes.
+- Negative-test outline now includes concrete mutation examples for algorithm substitution, unknown label, non-deterministic map, and missing-tag cases (from KAT 0001).
 - Documentation-only; does not implement conversion or approve the draft profile.
 - Latest Android CI on develop/agent-ready remains green.
 - Integration candidate [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2) remains Draft with green CI on head `f47634412bf0f2c9b967a1f55fe6cdf567b79244`.
@@ -40,7 +39,7 @@ production authorization are not implemented.
 | Signed owner decision | IMPLEMENTED_AND_TESTED | Service resolves the pin itself; tests reject missing, mismatched, and ambiguous pins |
 | Applicant acceptance + owner finalization | IMPLEMENTED_AND_TESTED | Both signatures verified; local Room v7 record |
 | Production membership authorization | BLOCKED | No trusted resolver; default denies all |
-| Canonical COSE protocol | IN_PROGRESS | Draft v2 profile + four primitive KATs (all artifact contexts) + negative-test outline with concrete mutation examples + review-only payload schema proposal + low-S conversion notes; not production |
+| Canonical COSE protocol | IN_PROGRESS | Draft v2 profile + four primitive KATs (all artifact contexts) + negative-test outline with concrete mutation examples (including algorithm, unknown label, non-deterministic, missing tag) + review-only payload schema proposal + low-S conversion notes; not production |
 | Invitations / revocation / recovery | NOT_STARTED | Requires reviewed lifecycle and authority model |
 | E2EE messaging | NOT_STARTED | No message crypto implementation |
 | BLE / Wi-Fi Direct / internet P2P / relay | NOT_STARTED | No transport implementation |

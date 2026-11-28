@@ -1,8 +1,7 @@
-## 2026-11-28 — Protocol review: low-S conversion notes and kid-mismatch example
+## 2026-11-28 — Expanded COSE v2 negative-test mutations
 
-- Added a documentation-only review note covering strict DER-to-fixed-width R||S conversion steps, rejection criteria, high-S construction from existing KATs, and a concrete kid-mismatch example.
-- Linked the notes from ADR 0003 and expanded the negative-test outline with the kid-mismatch mutation.
-- Documentation-only support for protocol review. No parser, executable tests, or profile approval added.
+- Added concrete examples for algorithm substitution, unknown label, non-deterministic map ordering, and missing-tag cases to the negative-test outline (derived from KAT 0001).
+- Documentation-only protocol-review support. No parser, executable tests, or profile approval added.
 - Latest Android CI on this branch remains green.
 - Integration candidate [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2) remains Draft with green CI on its head.
 - Do not implement proposed v8 owner-ledger/FMJA1 digest or change expiry until ADR 0006/0008/0012 are explicitly approved. Authorization remains fail-closed; do not replace lost device keys.
