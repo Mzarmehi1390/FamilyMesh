@@ -41,7 +41,17 @@ Concrete complements (reviewers can paste these directly):
 - Low-S: `33c400b679014b38b2082328561422a9cba4836487d030a16ad21826cd7aa719`
 - High-S (`n - s`): `cc3bff4886feb4c84df7dcd7a9ebdd55f14277491f476de388e7b29c2ee87e38`
 
-The same construction applies to the published low-S values in KATs 0003 and 0004. A future parser that accepts a 64-byte signature whose S component is the high-S value above must reject it under the proposed low-S policy.
+### KAT 0003 (applicant-acceptance)
+
+- Low-S: `6a6e78fc2bf11d648200615da01bb1c9e5c6ea3ef68912657cf1135e02e7dc20`
+- High-S (`n - s`): `95918702d40ee29c7dff9ea25fe44e35d720106eb08e8c1f76c8b764f97b4931`
+
+### KAT 0004 (initial-owner-trust)
+
+- Low-S: `03f80613b6b2c59272f495119245b29e29146d853d53603437855064e31a94b1`
+- High-S (`n - s`): `fc07f9eb494d3a6e8d0b6aee6dba4d6193d28d2869c43e50bc347a5e194890a0`
+
+A future parser that accepts a 64-byte signature whose S component is any of the high-S values above must reject it under the proposed low-S policy.
 
 ## Kid mismatch concrete example (from KAT 0001)
 
