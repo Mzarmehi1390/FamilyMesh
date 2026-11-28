@@ -55,11 +55,11 @@ Private, decentralized, **end-to-end encrypted by design** family messaging on *
 
 Maximize useful work per run: fix CI, close test gaps, advance the **current** work package from HANDOVER, update status docs. Stop only when blocked on product/security decisions listed in ADRs (e.g. expiry policy ADR 0006) or on human review gates.
 
-## 2026-11-28 — Negative-test outline expanded with concrete mutations
+## 2026-11-28 — Candidate payload schema proposal and expanded mutations
 
-- `develop/agent-ready` (PR #5) now includes concrete byte-level mutation examples in the COSE v2 negative-test outline.
-- Latest Android CI on this branch (run #46051367326) is green after the single-command retry fix.
+- A draft candidate payload schema proposal (integer labels, CBOR types, length bounds) is now available for review. Not frozen or approved.
+- Negative-test outline includes additional concrete mutations (signature length, kid mismatch, high-S note).
 - Complete primitive KAT set (0001–0004) remains checked in.
 - Integration candidate PR #2 remains Draft at head `f47634412bf0f2c9b967a1f55fe6cdf567b79244` with its own green CI.
-- Historical Room fixtures and migration CASCADE coverage are validated on this branch.
+- Historical Room fixtures and migration CASCADE coverage are validated on the parent branch.
 - Keep PR #2 Draft pending protocol/security/owner reviews. Do not implement Room v8, owner-ledger/FMJA1 digest, or expiry-policy changes before ADR 0006/0008/0012 approval. Membership authorization remains fail-closed; lost device keys must not be replaced.
