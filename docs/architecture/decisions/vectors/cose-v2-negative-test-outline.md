@@ -67,6 +67,38 @@ Signature verification on the original KAT 0001 object with the substituted AAD 
 
 The protected header of KAT 0001 begins with the deterministic map encoding that includes `1: -9`. Replacing the CBOR integer encoding of `-9` with the encoding of `-7` produces a different protected-header bstr. The profile requires rejection of alg ≠ -9 before any cryptographic check.
 
+### 6. Signature length truncation
+
+Original COSE signature (last 64 bytes of the tagged COSE_Sign1 in KAT 0001):
+```
+ce1b5c8f1d4df03943493d10dbfb7732bcd63557d9d8eca5f77e7b30cfd645f4193ed0dfc2fa72851f01b6ee6fecc32bc9cabde4537b13a721fd76caab338a4b
+```
+
+Truncated to 63 bytes (drop final byte `4b`):
+```
+ce1b5c8f1d4df03943493d10dbfb7732bcd63557d9d8eca5f77e7b30cfd645f4193ed0dfc2fa72851f01b6ee6fecc32bc9cabde4537b13a721fd76caab338a
+```
+
+A future parser must reject a signature bstr whose length is not exactly 64 before any cryptographic verification.
+
+### 8. Kid mismatch
+
+Original kid (32 bytes, from protected header of KAT 0001):
+```
+aa3ea3d23cf530a1f41c88d53c066ea6b2f183932e852ffe74da31c6a8554c6e
+```
+
+Mutated (last byte `6e` → `6f`):
+```
+aa3ea3d23cf530a1f41c88d53c066ea6b2f183932e852ffe74da31c6a8554c6f
+```
+
+Replacing the kid inside the protected-header map while retaining the original COSE_Key must cause rejection of the key-ID binding. The same rule applies if the COSE_Key is altered while the kid stays constant.
+
+### 7. High-S note
+
+The low-S value in KAT 0001 is `193ed0dfc2fa72851f01b6ee6fecc32bc9cabde4537b13a721fd76caab338a4b`. The P-256 order `n` is the well-known constant `ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551`. A high-S value is `n - s`. Under the proposed profile any signature whose S ≥ n/2 must be rejected. Reviewers can compute the exact high-S bytes and confirm rejection; the policy is not an IETF requirement and remains under review.
+
 ### 13. Trailing bytes
 
 Original complete tagged COSE_Sign1 (KAT 0001) ends with the 64-byte signature. Appending a single extra byte (for example `00`) after the complete object must cause the parser to reject the input. The same applies to any non-empty trailing data.
