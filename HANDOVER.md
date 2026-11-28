@@ -1,8 +1,9 @@
-## 2026-11-28 — Expanded COSE v2 negative-test mutations (invalid point, wrong curve, indefinite length, duplicate keys)
+## 2026-11-28 — COSE v2 payload schema size estimates and encoding sketch
 
-- Added concrete examples for invalid-point (mutated x-coordinate), wrong-curve (crv 1 → 2), indefinite-length, and duplicate-key cases to the negative-test outline (derived from KAT 0001).
+- Added approximate maximum encoded sizes for payload fields and a worked deterministic CBOR encoding sketch for a minimal enrollment-proof payload under the candidate labels.
+- Suggested a conservative 4 KiB starting bound for complete tagged COSE_Sign1 objects as a review discussion point.
 - Documentation-only protocol-review support. No parser, executable tests, or profile approval added.
-- Latest Android CI on this branch remains green.
+- Latest Android CI on develop/agent-ready remains green.
 - Integration candidate [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2) remains Draft with green CI on its head.
 - Do not implement proposed v8 owner-ledger/FMJA1 digest or change expiry until ADR 0006/0008/0012 are explicitly approved. Authorization remains fail-closed; do not replace lost device keys.
 

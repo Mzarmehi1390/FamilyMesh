@@ -55,10 +55,10 @@ Private, decentralized, **end-to-end encrypted by design** family messaging on *
 
 Maximize useful work per run: fix CI, close test gaps, advance the **current** work package from HANDOVER, update status docs. Stop only when blocked on product/security decisions listed in ADRs (e.g. expiry policy ADR 0006) or on human review gates.
 
-## 2026-11-28 — Expanded negative-test mutations
+## 2026-11-28 — Schema size estimates and encoding sketch
 
-- `develop/agent-ready` (PR #5) now includes additional concrete mutation examples in the COSE v2 negative-test outline for invalid point, wrong curve, indefinite length, and duplicate keys (completing concrete illustrations for all fifteen checklist items).
-- Latest Android CI on this branch remains green.
+- Payload schema proposal now includes approximate CBOR size estimates and a concrete enrollment-proof encoding sketch (plus a suggested 4 KiB review bound for complete COSE objects).
+- Latest Android CI on develop/agent-ready remains green.
 - Complete primitive KAT set (0001–0004) remains checked in.
 - Integration candidate PR #2 remains Draft at head `f47634412bf0f2c9b967a1f55fe6cdf567b79244` with its own green CI.
 - Historical Room fixtures and migration CASCADE coverage are validated on this branch.
