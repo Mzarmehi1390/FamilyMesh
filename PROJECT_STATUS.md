@@ -1,8 +1,8 @@
-## 2026-11-28 — COSE v2 payload-schema proposal and expanded negative-test mutations
+## 2026-11-28 — Low-S signature-conversion review notes and kid-mismatch example
 
-- A review-only payload schema proposal now maps ADR 0005 inventory to candidate labels/types/limits for the four artifacts.
-- Negative-test outline expanded with protected-header bit-flip and signature-length concrete examples; linked to the schema proposal.
-- Documentation-only; does not implement a parser or approve the draft profile.
+- A review-only note now records DER-to-R||S conversion steps, rejection criteria, high-S construction guidance, and a concrete kid-mismatch example derived from KAT 0001.
+- Negative-test outline and ADR 0003 updated to reference the notes.
+- Documentation-only; does not implement conversion or approve the draft profile.
 - Latest Android CI on develop/agent-ready remains green.
 - Integration candidate [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2) remains Draft with green CI on head `f47634412bf0f2c9b967a1f55fe6cdf567b79244`.
 - Room remains v7. Do not implement the proposed v8 owner-decision ledger/FMJA1 digest or alter expiry semantics until the ADR 0006/0008/0012 gates are explicitly approved. Keep membership authorization fail-closed and never replace a lost device key.
@@ -40,7 +40,7 @@ production authorization are not implemented.
 | Signed owner decision | IMPLEMENTED_AND_TESTED | Service resolves the pin itself; tests reject missing, mismatched, and ambiguous pins |
 | Applicant acceptance + owner finalization | IMPLEMENTED_AND_TESTED | Both signatures verified; local Room v7 record |
 | Production membership authorization | BLOCKED | No trusted resolver; default denies all |
-| Canonical COSE protocol | IN_PROGRESS | Draft v2 profile + four primitive KATs (all artifact contexts) + negative-test outline with concrete mutation examples + review-only payload schema proposal; not production |
+| Canonical COSE protocol | IN_PROGRESS | Draft v2 profile + four primitive KATs (all artifact contexts) + negative-test outline with concrete mutation examples + review-only payload schema proposal + low-S conversion notes; not production |
 | Invitations / revocation / recovery | NOT_STARTED | Requires reviewed lifecycle and authority model |
 | E2EE messaging | NOT_STARTED | No message crypto implementation |
 | BLE / Wi-Fi Direct / internet P2P / relay | NOT_STARTED | No transport implementation |
