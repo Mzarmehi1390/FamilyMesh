@@ -133,9 +133,42 @@ Original protected-header map uses bytewise lexicographic key ordering (labels 1
 
 Adding an unrecognized label (for example label 99 with a zero-length bstr) to the protected-header map or to the COSE_Key map produces a closed-profile violation. A future parser must reject the object. The same rule applies to unknown payload labels once schemas are frozen.
 
+### 11. Invalid point
+
+Original public COSE_Key (from KAT 0001):
+```
+a4010220012158206b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c2962258204fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5
+```
+
+Mutated (first byte of the x-coordinate `6b` → `6c`, producing a value that is not a valid P-256 point):
+```
+a4010220012158206c17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c2962258204fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5
+```
+
+A future parser must reject this key on public-key import (point validation fails). The same rejection applies to any coordinate that lies outside the field or does not satisfy the curve equation.
+
+### 12. Wrong curve
+
+Original COSE_Key encodes crv = 1 (P-256) as the byte sequence `2001` (label -1 followed by unsigned integer 1).
+
+Mutated (change the curve value to 2):
+```
+a4010220022158206b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c2962258204fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5
+```
+
+A future parser must reject the object because the profile admits only crv = 1. The same rule applies to any other curve identifier.
+
 ### 13. Trailing bytes
 
 Original complete tagged COSE_Sign1 (KAT 0001) ends with the 64-byte signature. Appending a single extra byte (for example `00`) after the complete object must cause the parser to reject the input. The same applies to any non-empty trailing data.
+
+### 14. Indefinite length
+
+Original protected-header bstr uses definite-length encoding (`58 59` followed by 89 content bytes). Replacing any definite-length bstr or array with the indefinite-length encoding (for example starting a bstr with `5f` and terminating with `ff`) must be rejected under the draft deterministic-CBOR rules. A future parser must fail closed on the first indefinite-length item.
+
+### 15. Duplicate keys
+
+Original protected-header map encodes each label exactly once. Encoding the same map with label 1 appearing twice (even with identical values) produces a duplicate-key violation. A future parser must reject the object under the closed deterministic-CBOR profile. The same rule applies to any map in the COSE_Key or payload.
 
 These examples make the checklist more actionable for reviewers without adding executable tests or approving the draft profile.
 
