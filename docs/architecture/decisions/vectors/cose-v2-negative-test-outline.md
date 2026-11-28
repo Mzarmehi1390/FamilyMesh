@@ -3,6 +3,7 @@
 - Status: **Documentation support for protocol review; not a production approval or complete corpus**
 - Profile: draft ADR 0003
 - Base fixtures: [KAT 0001](cose-v2-primitive-kat-0001.md), [KAT 0002](cose-v2-primitive-kat-0002.md), [KAT 0003](cose-v2-primitive-kat-0003.md), [KAT 0004](cose-v2-primitive-kat-0004.md)
+- Related proposal: [COSE v2 payload schema proposal](cose-v2-payload-schema-proposal.md) (not approved)
 - Purpose: record concrete malformed and cross-binding cases that any future parser must reject before implementation approval.
 
 This outline does not implement a parser, does not add executable tests, and does not satisfy the independent cross-implementation or full-schema gates in ADR 0003. It is a checklist of expected fail-closed behavior.
@@ -49,6 +50,20 @@ a30102020103436b6175
 
 Any future verifier must reject the resulting tagged COSE_Sign1 (same protected header, AAD, and signature) because the Sig_structure no longer matches.
 
+### 2. Protected header bit flip
+
+Original protected-header bstr begins:
+```
+a301280378306170706c69636174696f6e2f766e642e66616d696c796d6573682e656e726f6c6c6d656e742d70726f6f662b63626f72045820aa3ea3d23cf530a1f41c88d53c066ea6b2f183932e852ffe74da31c6a8554c6e
+```
+
+Mutated (invert one bit in the first content-type character byte, e.g. first `61` of "application" → `60`):
+```
+a301280378306160706c69636174696f6e2f766e642e66616d696c796d6573682e656e726f6c6c6d656e742d70726f6f662b63626f72045820aa3ea3d23cf530a1f41c88d53c066ea6b2f183932e852ffe74da31c6a8554c6e
+```
+
+Signature verification must fail because the protected-header bytes that enter the Sig_structure have changed.
+
 ### 3. External AAD cross-binding
 
 Original AAD for enrollment-proof (KAT 0001):
@@ -66,6 +81,20 @@ Signature verification on the original KAT 0001 object with the substituted AAD 
 ### 4. Algorithm substitution note
 
 The protected header of KAT 0001 begins with the deterministic map encoding that includes `1: -9`. Replacing the CBOR integer encoding of `-9` with the encoding of `-7` produces a different protected-header bstr. The profile requires rejection of alg ≠ -9 before any cryptographic check.
+
+### 6. Signature length
+
+Original COSE signature (exactly 64 bytes):
+```
+ce1b5c8f1d4df03943493d10dbfb7732bcd63557d9d8eca5f77e7b30cfd645f4193ed0dfc2fa72851f01b6ee6fecc32bc9cabde4537b13a721fd76caab338a4b
+```
+
+Mutated (truncate to 63 bytes by dropping the final byte):
+```
+ce1b5c8f1d4df03943493d10dbfb7732bcd63557d9d8eca5f77e7b30cfd645f4193ed0dfc2fa72851f01b6ee6fecc32bc9cabde4537b13a721fd76caab338a4
+```
+
+A future parser must reject the object before any JCA signature verification because the signature bstr is not exactly 64 bytes. The same rejection applies to a 65-byte extension.
 
 ### 13. Trailing bytes
 
@@ -87,7 +116,7 @@ These mappings support the review checklist only. They do not constitute additio
 ## Remaining gates
 
 These cases support review only. Still required before any implementation approval:
-- Complete payload schemas and positive vectors for all four artifacts (primitive KATs now cover all four contexts).
+- Complete payload schemas and positive vectors for all four artifacts (primitive KATs now cover all four contexts; a review proposal for labels/types is now available).
 - Independent second CBOR/COSE implementation reproducing the vectors.
 - Android Keystore instrumentation.
 - Explicit approval of time, replay, owner-authority, revocation, and recovery policies (ADR 0006 and related).
