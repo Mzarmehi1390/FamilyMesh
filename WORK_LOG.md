@@ -1,5 +1,26 @@
 # FamilyMesh Work Log
 
+## 2026-11-28 — COSE v2 payload-schema proposal and expanded negative-test mutations
+
+### Observation / Action
+
+- Protocol review still needed concrete schema candidates and additional mutation examples.
+- Added a review-only payload schema proposal mapping ADR 0005 inventory to candidate CBOR labels, types, and byte limits for the four artifacts (exact-decision binding preferred; identity-creation time remains transfer metadata).
+- Expanded the negative-test outline with concrete protected-header bit-flip and signature-length examples from KAT 0001 and linked the schema proposal.
+- Documentation-only. No runtime, schema, cryptographic implementation, or authorization changes.
+
+### Impact
+
+- Reviewers now have an explicit candidate schema and more actionable mutation illustrations without any claim of parser implementation or profile approval.
+- Room remains v7; ADR 0006/0008/0012 implementation gates unchanged. Authorization remains fail-closed.
+
+### Next
+
+- Continue protocol-review support (refine schema with feedback, complete positive vectors once labels discussed, additional corpus details).
+- Keep v8 implementation blocked pending ADR gates.
+
+---
+
 ## 2026-11-28 — Expanded COSE v2 negative-test outline with concrete mutation examples
 
 ### Observation / Action
