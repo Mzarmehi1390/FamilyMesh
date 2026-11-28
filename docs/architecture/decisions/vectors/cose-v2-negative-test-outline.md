@@ -23,7 +23,7 @@ All cases start from the exact bytes of any of the four primitive KATs (enrollme
 4. **Algorithm substitution**: Change alg from -9 (ESP256) to -7 (ES256) in the protected header. Reject before cryptographic verification.
 5. **Missing tag**: Present the COSE array without CBOR tag 18. Reject under this profile (tagged-only).
 6. **Signature length**: Change the signature bstr length from 64 to 63 or 65. Reject before JCA verification.
-7. **High-S**: Replace the low-S value with `n - s`. Reject under the proposed low-S policy. See the [low-S conversion review notes](cose-v2-low-s-signature-conversion-review.md) for construction guidance.
+7. **High-S**: Replace the low-S value with `n - s`. Reject under the proposed low-S policy. See the [low-S conversion review notes](cose-v2-low-s-signature-conversion-review.md) for construction guidance and concrete complements.
 8. **Kid mismatch**: Change one byte of the kid in the protected header while keeping the same COSE_Key. Reject key-ID binding.
 9. **Non-deterministic map**: Reorder map keys or use non-preferred integer encoding in any map. Reject under deterministic-CBOR rules.
 10. **Unknown label**: Add an unrecognized label to the protected header or COSE_Key map. Reject under the closed draft profile.
@@ -111,6 +111,20 @@ ce1b5c8f1d4df03943493d10dbfb7732bcd63557d9d8eca5f77e7b30cfd645f4193ed0dfc2fa7285
 
 A future parser must reject the object before any JCA signature verification because the signature bstr is not exactly 64 bytes. The same rejection applies to a 65-byte extension.
 
+### 7. High-S
+
+Original low-S from KAT 0001:
+```
+193ed0dfc2fa72851f01b6ee6fecc32bc9cabde4537b13a721fd76caab338a4b
+```
+
+High-S (`n - s`):
+```
+e6c12f1f3d058d7be0fe491190133cd3f31c3cc9539c8addd1bc53f8512f9b06
+```
+
+Replacing the low-S in the 64-byte signature while keeping R unchanged produces an object that a future parser must reject under the proposed low-S policy. Full complements for additional KATs are recorded in the [low-S conversion review notes](cose-v2-low-s-signature-conversion-review.md).
+
 ### 8. Kid mismatch
 
 Original kid (last 32 bytes of the protected-header bstr content):
@@ -186,7 +200,7 @@ These mappings support the review checklist only. They do not constitute additio
 ## Remaining gates
 
 These cases support review only. Still required before any implementation approval:
-- Complete payload schemas and positive vectors for all four artifacts (primitive KATs now cover all four contexts; a review proposal for labels/types is now available).
+- Complete payload schemas and positive vectors for all four artifacts (primitive KATs now cover all four contexts; a review proposal for labels/types is now available, including a size analysis and encoding sketch).
 - Independent second CBOR/COSE implementation reproducing the vectors.
 - Android Keystore instrumentation.
 - Explicit approval of time, replay, owner-authority, revocation, and recovery policies (ADR 0006 and related).
