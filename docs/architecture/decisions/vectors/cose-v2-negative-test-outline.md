@@ -4,6 +4,7 @@
 - Profile: draft ADR 0003
 - Base fixtures: [KAT 0001](cose-v2-primitive-kat-0001.md), [KAT 0002](cose-v2-primitive-kat-0002.md), [KAT 0003](cose-v2-primitive-kat-0003.md), [KAT 0004](cose-v2-primitive-kat-0004.md)
 - Related proposal: [COSE v2 payload schema proposal](cose-v2-payload-schema-proposal.md) (not approved)
+- Related notes: [low-S and signature conversion review](cose-v2-low-s-signature-conversion-review.md) (not approved)
 - Purpose: record concrete malformed and cross-binding cases that any future parser must reject before implementation approval.
 
 This outline does not implement a parser, does not add executable tests, and does not satisfy the independent cross-implementation or full-schema gates in ADR 0003. It is a checklist of expected fail-closed behavior.
@@ -22,7 +23,7 @@ All cases start from the exact bytes of any of the four primitive KATs (enrollme
 4. **Algorithm substitution**: Change alg from -9 (ESP256) to -7 (ES256) in the protected header. Reject before cryptographic verification.
 5. **Missing tag**: Present the COSE array without CBOR tag 18. Reject under this profile (tagged-only).
 6. **Signature length**: Change the signature bstr length from 64 to 63 or 65. Reject before JCA verification.
-7. **High-S**: Replace the low-S value with `n - s`. Reject under the proposed low-S policy.
+7. **High-S**: Replace the low-S value with `n - s`. Reject under the proposed low-S policy. See the [low-S conversion review notes](cose-v2-low-s-signature-conversion-review.md) for construction guidance.
 8. **Kid mismatch**: Change one byte of the kid in the protected header while keeping the same COSE_Key. Reject key-ID binding.
 9. **Non-deterministic map**: Reorder map keys or use non-preferred integer encoding in any map. Reject under deterministic-CBOR rules.
 10. **Unknown label**: Add an unrecognized label to the protected header or COSE_Key map. Reject under the closed draft profile.
@@ -95,6 +96,20 @@ ce1b5c8f1d4df03943493d10dbfb7732bcd63557d9d8eca5f77e7b30cfd645f4193ed0dfc2fa7285
 ```
 
 A future parser must reject the object before any JCA signature verification because the signature bstr is not exactly 64 bytes. The same rejection applies to a 65-byte extension.
+
+### 8. Kid mismatch
+
+Original kid (last 32 bytes of the protected-header bstr content):
+```
+aa3ea3d23cf530a1f41c88d53c066ea6b2f183932e852ffe74da31c6a8554c6e
+```
+
+Mutated (final byte `6e` → `6f`):
+```
+aa3ea3d23cf530a1f41c88d53c066ea6b2f183932e852ffe74da31c6a8554c6f
+```
+
+A future parser that accepts the mutated protected header together with the original COSE_Key must reject on key-ID binding. Construction details are also recorded in the [low-S conversion review notes](cose-v2-low-s-signature-conversion-review.md).
 
 ### 13. Trailing bytes
 
