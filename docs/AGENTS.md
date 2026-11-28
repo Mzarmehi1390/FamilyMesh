@@ -57,7 +57,7 @@ Maximize useful work per run: fix CI, close test gaps, advance the **current** w
 
 ## 2026-11-28 — Expanded negative-test mutations
 
-- `develop/agent-ready` (PR #5) now includes additional concrete mutation examples in the COSE v2 negative-test outline (algorithm substitution, unknown label, non-deterministic map, missing tag).
+- `develop/agent-ready` (PR #5) now includes additional concrete mutation examples in the COSE v2 negative-test outline for invalid point, wrong curve, indefinite length, and duplicate keys (completing concrete illustrations for all fifteen checklist items).
 - Latest Android CI on this branch remains green.
 - Complete primitive KAT set (0001–0004) remains checked in.
 - Integration candidate PR #2 remains Draft at head `f47634412bf0f2c9b967a1f55fe6cdf567b79244` with its own green CI.
