@@ -31,6 +31,16 @@ class CanonicalBase64UrlTest {
     }
 
     @Test
+    fun rejectsInternalWhitespace() {
+        assertThrows(IllegalArgumentException::class.java) {
+            CanonicalBase64Url.decode("ab cd")
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            CanonicalBase64Url.decode("ab\tcd")
+        }
+    }
+
+    @Test
     fun rejectsPaddedAliasOfCanonicalValue() {
         val bytes = byteArrayOf(1, 2, 3, 4, 5)
         val canonical = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)
@@ -45,6 +55,16 @@ class CanonicalBase64UrlTest {
     fun rejectsNonBase64UrlAlphabet() {
         assertThrows(IllegalArgumentException::class.java) {
             CanonicalBase64Url.decode("ab+c/")
+        }
+    }
+
+    @Test
+    fun rejectsStandardBase64AlphabetCharacters() {
+        assertThrows(IllegalArgumentException::class.java) {
+            CanonicalBase64Url.decode("abc+")
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            CanonicalBase64Url.decode("abc/")
         }
     }
 

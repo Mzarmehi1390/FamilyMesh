@@ -23,7 +23,7 @@ All cases start from the exact bytes of any of the four primitive KATs (enrollme
 4. **Algorithm substitution**: Change alg from -9 (ESP256) to -7 (ES256) in the protected header. Reject before cryptographic verification.
 5. **Missing tag**: Present the COSE array without CBOR tag 18. Reject under this profile (tagged-only).
 6. **Signature length**: Change the signature bstr length from 64 to 63 or 65. Reject before JCA verification.
-7. **High-S**: Replace the low-S value with `n - s`. Reject under the proposed low-S policy. See the [low-S conversion review notes](cose-v2-low-s-signature-conversion-review.md) for construction guidance and concrete complements.
+7. **High-S**: Replace the low-S value with `n - s`. Reject under the proposed low-S policy. See the [low-S conversion review notes](cose-v2-low-s-signature-conversion-review.md) for construction guidance and concrete complements for all four KATs.
 8. **Kid mismatch**: Change one byte of the kid in the protected header while keeping the same COSE_Key. Reject key-ID binding.
 9. **Non-deterministic map**: Reorder map keys or use non-preferred integer encoding in any map. Reject under deterministic-CBOR rules.
 10. **Unknown label**: Add an unrecognized label to the protected header or COSE_Key map. Reject under the closed draft profile.
@@ -123,7 +123,7 @@ High-S (`n - s`):
 e6c12f1f3d058d7be0fe491190133cd3f31c3cc9539c8addd1bc53f8512f9b06
 ```
 
-Replacing the low-S in the 64-byte signature while keeping R unchanged produces an object that a future parser must reject under the proposed low-S policy. Full complements for additional KATs are recorded in the [low-S conversion review notes](cose-v2-low-s-signature-conversion-review.md).
+Replacing the low-S in the 64-byte signature while keeping R unchanged produces an object that a future parser must reject under the proposed low-S policy. Full concrete complements for all four KATs (0001–0004) are recorded in the [low-S conversion review notes](cose-v2-low-s-signature-conversion-review.md).
 
 ### 8. Kid mismatch
 
