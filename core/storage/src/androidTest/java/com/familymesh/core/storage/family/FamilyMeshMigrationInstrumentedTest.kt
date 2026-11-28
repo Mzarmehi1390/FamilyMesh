@@ -40,6 +40,9 @@ class FamilyMeshMigrationInstrumentedTest {
                 *FamilyMeshDatabase.migrationsForTesting(),
             )
             try {
+                // SQLite disables foreign keys by default on raw connections.
+                // Enable them so CASCADE and constraint behavior match production Room.
+                migrated.execSQL("PRAGMA foreign_keys = ON")
                 assertEquals(1, count(migrated, "family_spaces"))
                 assertEquals(1, count(migrated, "family_members"))
                 assertEquals(1_000L, scalarLong(migrated, "SELECT createdAtEpochMillis FROM family_spaces WHERE id = 'family-$startVersion'"))

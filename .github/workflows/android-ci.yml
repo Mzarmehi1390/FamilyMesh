@@ -51,10 +51,16 @@ jobs:
           retention-days: 7
 
   storage-instrumentation:
-    # Keep emulator execution on the known Ubuntu 22.04 image while isolating
-    # the repeated Android Emulator/ADB startup failure seen on Ubuntu 24.04.
+    # Cache AVD definition and system image to reduce repeated cold boots.
+    # Use API 31 (project minSdk) and default target for faster, more reliable boots.
+    # Snapshots are disabled because TCG Quick Boot has been unreliable on hosted runners.
+    # Memory and core limits plus GPU mode chosen to reduce flaky system crashes during instrumentation.
+    # Retry wrapper is a single shell command because reactivecircus/android-emulator-runner@v2
+    # splits multi-line scripts and executes each line independently with sh -c.
+    env:
+      ANDROID_I_WANT_MY_TCG: "yes"
     runs-on: ubuntu-22.04
-    timeout-minutes: 35
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -67,17 +73,37 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.13"
+      - name: Restore API 31 AVD and system-image cache
+        uses: actions/cache/restore@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            /usr/local/lib/android/sdk/system-images/android-31/default/x86_64
+          key: familymesh-avd-api31-${{ runner.os }}-${{ runner.arch }}-default-x86_64-pixel2-v2
       - name: Run Room storage tests on emulator
+        id: run-api31-tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 34
-          target: google_apis
+          api-level: 31
+          target: default
           arch: x86_64
           profile: pixel_2
-          emulator-options: -no-window -gpu swiftshader -no-snapshot -noaudio -no-boot-anim -no-metrics
+          force-avd-creation: false
+          emulator-options: -no-window -gpu off -no-snapshot -noaudio -no-boot-anim -no-metrics -camera-back none -memory 2048 -cores 2 -skin 1080x1920
           disable-animations: true
-          emulator-boot-timeout: 600
-          script: gradle :core:storage:connectedDebugAndroidTest
+          emulator-boot-timeout: 1200
+          pre-emulator-launch-script: adb start-server
+          script: |
+            set +e; for attempt in 1 2; do echo "=== Instrumentation attempt $attempt ==="; gradle :core:storage:connectedDebugAndroidTest; exit_code=$?; if [ $exit_code -eq 0 ]; then exit 0; fi; echo "Attempt $attempt failed with exit $exit_code; retrying once if possible..."; sleep 10; done; exit $exit_code
+      - name: Save API 31 AVD and system-image cache
+        if: steps.avd-cache.outputs.cache-hit != 'true' && steps.run-api31-tests.outcome == 'success'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ~/.android/avd/*
+            /usr/local/lib/android/sdk/system-images/android-31/default/x86_64
+          key: familymesh-avd-api31-${{ runner.os }}-${{ runner.arch }}-default-x86_64-pixel2-v2
       - name: Upload instrumentation reports
         if: always()
         uses: actions/upload-artifact@v4

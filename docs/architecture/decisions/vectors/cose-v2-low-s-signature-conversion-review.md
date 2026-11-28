@@ -1,0 +1,80 @@
+# COSE v2 low-S policy and signature conversion review notes
+
+- Status: **Documentation support for protocol review — not approved for implementation or production use**
+- Profile: draft ADR 0003
+- Related: [negative-test outline](cose-v2-negative-test-outline.md), primitive KATs 0001–0004
+- Date: 2026-11-28
+
+This note records the exact conversion steps, rejection criteria, and high-S construction guidance that reviewers need before any parser or verifier is written. It does **not** implement conversion logic, does **not** add executable tests, and does **not** approve the draft profile or the low-S policy.
+
+## Conversion requirements (proposal)
+
+Android/JCA `SHA256withECDSA` produces ASN.1 DER signatures. The proposed COSE ESP256 profile requires a fixed-width 64-byte `R || S`.
+
+Strict conversion steps (must fail closed on any deviation):
+
+1. Parse the DER SEQUENCE of exactly two INTEGER values (r, s). Reject extra fields, indefinite lengths, or trailing data after the SEQUENCE.
+2. Reject negative integers, zero values, or values >= the P-256 order n.
+3. Reject overlong encodings (leading zero bytes that are not required for positive interpretation).
+4. Left-pad each accepted scalar to exactly 32 bytes (unsigned big-endian).
+5. Concatenate the two 32-byte values into a 64-byte signature.
+6. On output (signing), optionally normalize S to `min(s, n-s)` per the low-S proposal.
+7. On input (verification), reject any signature that is not exactly 64 bytes, or whose S >= n/2 under the low-S proposal, or whose R or S is outside `1 <= value < n`.
+
+The low-S policy is a FamilyMesh proposal for canonical representation. It is **not** required by RFC 9053 or RFC 9864 and must not be described as an IETF mandate. Android Keystore may not expose deterministic nonce control (RFC 6979); do not claim RFC 6979 compliance without device-level evidence.
+
+## High-S construction from existing KATs
+
+All primitive KATs already publish a low-S value. A high-S test vector is obtained by replacing that S with `n - s` (where n is the P-256 order) while keeping R unchanged, then reassembling the COSE object. Verification under the proposed policy must reject the resulting object before or during cryptographic check.
+
+P-256 order n = `FFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551`.
+
+Concrete complements (reviewers can paste these directly):
+
+### KAT 0001 (enrollment-proof)
+
+- Low-S: `193ed0dfc2fa72851f01b6ee6fecc32bc9cabde4537b13a721fd76caab338a4b`
+- High-S (`n - s`): `e6c12f1f3d058d7be0fe491190133cd3f31c3cc9539c8addd1bc53f8512f9b06`
+
+### KAT 0002 (owner-decision)
+
+- Low-S: `33c400b679014b38b2082328561422a9cba4836487d030a16ad21826cd7aa719`
+- High-S (`n - s`): `cc3bff4886feb4c84df7dcd7a9ebdd55f14277491f476de388e7b29c2ee87e38`
+
+### KAT 0003 (applicant-acceptance)
+
+- Low-S: `6a6e78fc2bf11d648200615da01bb1c9e5c6ea3ef68912657cf1135e02e7dc20`
+- High-S (`n - s`): `95918702d40ee29c7dff9ea25fe44e35d720106eb08e8c1f76c8b764f97b4931`
+
+### KAT 0004 (initial-owner-trust)
+
+- Low-S: `03f80613b6b2c59272f495119245b29e29146d853d53603437855064e31a94b1`
+- High-S (`n - s`): `fc07f9eb494d3a6e8d0b6aee6dba4d6193d28d2869c43e50bc347a5e194890a0`
+
+A future parser that accepts a 64-byte signature whose S component is any of the high-S values above must reject it under the proposed low-S policy.
+
+## Kid mismatch concrete example (from KAT 0001)
+
+Original kid (32 bytes) in the protected header:
+```
+aa3ea3d23cf530a1f41c88d53c066ea6b2f183932e852ffe74da31c6a8554c6e
+```
+
+Mutated (flip the last byte `6e` → `6f`):
+```
+aa3ea3d23cf530a1f41c88d53c066ea6b2f183932e852ffe74da31c6a8554c6f
+```
+
+A future parser that accepts the mutated protected header with the original COSE_Key must reject on key-ID binding. The same rule applies to every KAT.
+
+## Additional rejection cases for conversion
+
+- DER with an extra trailing byte after the SEQUENCE
+- INTEGER with a leading zero that makes the encoding non-minimal
+- r or s equal to zero or equal to n
+- Signature bstr of length other than 64 (already covered in the negative-test outline)
+- High-S as described above
+
+These notes accelerate review of the signature-representation gate in ADR 0003. They do not constitute vectors, a parser, or approval.
+
+Room schema remains v7. Authorization remains fail-closed. No production COSE, E2EE, or network transport is claimed or implemented.

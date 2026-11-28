@@ -131,6 +131,8 @@ signature, and complete COSE object from the stated inputs.
 
 ## Required negative tests derived from this vector
 
+See the expanded checklist in [cose-v2-negative-test-outline.md](cose-v2-negative-test-outline.md).
+
 1. Flip one bit in payload, protected header, AAD, or signature: verification
    must fail.
 2. Change external AAD to another artifact context: verification must fail.

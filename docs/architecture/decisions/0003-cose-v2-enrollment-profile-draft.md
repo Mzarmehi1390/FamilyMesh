@@ -50,6 +50,12 @@ nonce control. Do not claim RFC 6979 compliance unless verified on the actual
 supported providers/devices. The security and interoperability review must
 document this platform limitation.
 
+A review-only note recording the exact conversion steps, rejection criteria,
+high-S construction from existing KATs, and a concrete kid-mismatch example
+is available in
+[COSE v2 low-S and signature conversion review notes](vectors/cose-v2-low-s-signature-conversion-review.md).
+It is not an approved procedure.
+
 ## 3. Proposed public-key representation
 
 Use a public-only COSE EC2 key map with exactly these entries:
@@ -151,6 +157,12 @@ a later version explicitly defines extension behavior.
 See also [ADR 0004: COSE v2 schema parity review](0004-cose-v2-schema-parity-review.md)
 for the v1-to-v2 semantic parity gap and the schema-freeze checklist.
 
+A concrete review-only proposal assigning candidate labels, types, and byte
+limits (preferring exact encoded decision binding and omitting identity-creation
+time from the signed payload) is now available in
+[COSE v2 payload schema proposal](vectors/cose-v2-payload-schema-proposal.md).
+It is not an approved schema.
+
 ## 7. Migration and compatibility
 
 - Keep v1 and v2 parsers separate and selected by an unambiguous outer
@@ -167,13 +179,16 @@ for the v1-to-v2 semantic parity gap and the schema-freeze checklist.
 
 ## 8. Required test and review gates
 
-A first primitive known-answer fixture is now recorded at
-[COSE v2 primitive KAT 0001](vectors/cose-v2-primitive-kat-0001.md). It covers
-one enrollment-context key, key ID, protected header, external AAD,
-Sig_structure, deterministic test signature, low-S normalization, and final
-tagged COSE_Sign1 bytes. Its public test key is deliberately insecure and
-must never be used outside test-vector verification. This fixture is not a
-complete artifact schema or independent interoperability sign-off.
+Primitive known-answer fixtures are now recorded for all four artifact contexts:
+[COSE v2 primitive KAT 0001](vectors/cose-v2-primitive-kat-0001.md) (enrollment-proof),
+[KAT 0002](vectors/cose-v2-primitive-kat-0002.md) (owner-decision),
+[KAT 0003](vectors/cose-v2-primitive-kat-0003.md) (applicant-acceptance), and
+[KAT 0004](vectors/cose-v2-primitive-kat-0004.md) (initial-owner-trust).
+They cover key ID derivation, protected header, external AAD, Sig_structure,
+low-S normalization, and final tagged COSE_Sign1 bytes.
+Their public test key is deliberately insecure and must never be used outside
+test-vector verification. These fixtures are not complete artifact schemas or
+independent interoperability sign-off.
 
 Before implementation is approved:
 
