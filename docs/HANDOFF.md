@@ -32,7 +32,7 @@ From HANDOVER (verify against latest `main` each run):
 
 1. Prefer **green CI** and expanding Room migration / instrumentation coverage (historical fixtures v1–v7 checked in; foreign-key PRAGMA now enabled in migration tests; emulator job hardened against flaky system crashes with a single-command retry).
 2. **Do not** implement Room v8 owner-ledger / FMJA1 digest until ADR gates (0006 expiry policy, 0008/0012 design approval) are satisfied — document and test toward those gates if blocked.
-3. Protocol review remains open (COSE v2 draft ADR 0003; custom v1 envelopes still ship). Four primitive KATs now cover all artifact contexts (0001–0004) plus negative-test outline for review support. Full schemas remain open.
+3. Protocol review remains open (COSE v2 draft ADR 0003; custom v1 envelopes still ship). Four primitive KATs now cover all artifact contexts (0001–0004) plus negative-test outline with concrete mutation examples for review support. Full schemas remain open.
 4. PR #2 contains a pinned Gradle 8.13 Wrapper candidate and remains Draft/unmerged, so `main` still does not include it. Its current head has full green CI.
 
 ## What NOT to do
@@ -50,10 +50,9 @@ From HANDOVER (verify against latest `main` each run):
 4. Commit via GitHub tools; refresh HANDOVER/PROJECT_STATUS/WORK_LOG when status changes
 5. Reply to the owner in **Persian** with commits, CI links, and remaining blockers
 
-## 2026-11-27 — Emulator instrumentation retry script fixed
+## 2026-11-28 — Negative-test outline expanded with concrete mutations
 
-- Multi-line retry loop replaced by a single shell command compatible with `reactivecircus/android-emulator-runner@v2` script parsing (fixes syntax error on run #46035651581).
-- Resource limits, `-gpu off`, and extended boot timeout remain.
-- Prior green Android CI runs on this branch remain valid for the storage/fixture work.
+- Concrete byte-level examples (payload bit-flip, AAD cross-binding, trailing bytes) added to the COSE v2 negative-test outline.
+- Latest Android CI on this branch (run #46051367326) is green.
 - PR #2 remains the integration candidate.
 - Room remains v7. Keep ADR 0006/0008/0012 implementation gates closed. Authorization remains fail-closed; do not replace lost device keys.
