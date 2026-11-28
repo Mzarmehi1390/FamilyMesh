@@ -1,5 +1,26 @@
 # FamilyMesh Work Log
 
+## 2026-11-28 — Concrete high-S complements for protocol review
+
+### Observation / Action
+
+- Protocol review still needed ready-to-paste high-S values for the published KATs.
+- Computed and recorded the exact modular complements (`n - s`) for the low-S values of KATs 0001 and 0002.
+- Expanded the negative-test outline with the concrete high-S replacement example from KAT 0001.
+- Documentation-only. No runtime, schema, cryptographic implementation, or authorization changes.
+
+### Impact
+
+- Reviewers can now construct high-S rejection vectors directly from the published notes without recomputing the P-256 order.
+- Room remains v7; ADR 0006/0008/0012 implementation gates unchanged. Authorization remains fail-closed.
+
+### Next
+
+- Continue protocol-review support (refine schema with feedback, complete positive vectors once labels discussed, additional corpus details).
+- Keep v8 implementation blocked pending ADR gates.
+
+---
+
 ## 2026-11-28 — Low-S signature-conversion review notes and kid-mismatch example
 
 ### Observation / Action

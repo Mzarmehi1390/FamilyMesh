@@ -55,11 +55,11 @@ Private, decentralized, **end-to-end encrypted by design** family messaging on *
 
 Maximize useful work per run: fix CI, close test gaps, advance the **current** work package from HANDOVER, update status docs. Stop only when blocked on product/security decisions listed in ADRs (e.g. expiry policy ADR 0006) or on human review gates.
 
-## 2026-11-28 — Low-S conversion notes and kid-mismatch example
+## 2026-11-28 — Concrete high-S complements
 
-- `develop/agent-ready` (PR #5) now includes review-only low-S/DER-to-R||S conversion guidance and an additional concrete kid-mismatch mutation example in the negative-test outline.
-- Latest Android CI on this branch remains green.
+- Protocol-review notes now include exact high-S (`n - s`) values for KATs 0001 and 0002, plus a concrete mutation example in the negative-test outline.
+- Latest Android CI on the base branch remains green.
 - Complete primitive KAT set (0001–0004) remains checked in.
 - Integration candidate PR #2 remains Draft at head `f47634412bf0f2c9b967a1f55fe6cdf567b79244` with its own green CI.
-- Historical Room fixtures and migration CASCADE coverage are validated on this branch.
+- Historical Room fixtures and migration CASCADE coverage are validated on the base branch.
 - Keep PR #2 Draft pending protocol/security/owner reviews. Do not implement Room v8, owner-ledger/FMJA1 digest, or expiry-policy changes before ADR 0006/0008/0012 approval. Membership authorization remains fail-closed; lost device keys must not be replaced.
