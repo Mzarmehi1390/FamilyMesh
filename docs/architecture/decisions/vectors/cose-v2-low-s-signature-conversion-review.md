@@ -27,12 +27,21 @@ The low-S policy is a FamilyMesh proposal for canonical representation. It is **
 
 All primitive KATs already publish a low-S value. A high-S test vector is obtained by replacing that S with `n - s` (where n is the P-256 order) while keeping R unchanged, then reassembling the COSE object. Verification under the proposed policy must reject the resulting object before or during cryptographic check.
 
-Example (from KAT 0001 low-S):
+P-256 order n = `FFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551`.
+
+Concrete complements (reviewers can paste these directly):
+
+### KAT 0001 (enrollment-proof)
 
 - Low-S: `193ed0dfc2fa72851f01b6ee6fecc32bc9cabde4537b13a721fd76caab338a4b`
-- High-S is the modular complement (reviewers can compute `n - s` with any big-integer library). The resulting 64-byte signature must be rejected under the low-S rule.
+- High-S (`n - s`): `e6c12f1f3d058d7be0fe491190133cd3f31c3cc9539c8addd1bc53f8512f9b06`
 
-The same construction applies to the published low-S values in KATs 0002–0004.
+### KAT 0002 (owner-decision)
+
+- Low-S: `33c400b679014b38b2082328561422a9cba4836487d030a16ad21826cd7aa719`
+- High-S (`n - s`): `cc3bff4886feb4c84df7dcd7a9ebdd55f14277491f476de388e7b29c2ee87e38`
+
+The same construction applies to the published low-S values in KATs 0003 and 0004. A future parser that accepts a 64-byte signature whose S component is the high-S value above must reject it under the proposed low-S policy.
 
 ## Kid mismatch concrete example (from KAT 0001)
 
