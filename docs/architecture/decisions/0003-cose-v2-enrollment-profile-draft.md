@@ -151,6 +151,12 @@ a later version explicitly defines extension behavior.
 See also [ADR 0004: COSE v2 schema parity review](0004-cose-v2-schema-parity-review.md)
 for the v1-to-v2 semantic parity gap and the schema-freeze checklist.
 
+A concrete review-only proposal assigning candidate labels, types, and byte
+limits (preferring exact encoded decision binding and omitting identity-creation
+time from the signed payload) is now available in
+[COSE v2 payload schema proposal](vectors/cose-v2-payload-schema-proposal.md).
+It is not an approved schema.
+
 ## 7. Migration and compatibility
 
 - Keep v1 and v2 parsers separate and selected by an unambiguous outer
