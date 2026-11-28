@@ -31,6 +31,48 @@ All cases start from the exact bytes of any of the four primitive KATs (enrollme
 14. **Indefinite length**: Replace a definite-length bstr or array with indefinite encoding. Reject.
 15. **Duplicate keys**: Encode a map with the same key twice. Reject.
 
+## Concrete mutation examples (from KAT 0001)
+
+These examples illustrate specific cases from the checklist using the exact fixture bytes of [KAT 0001](cose-v2-primitive-kat-0001.md). They are documentation only; no parser is exercised here. Reviewers can regenerate the full mutated objects with a deterministic CBOR/COSE encoder and confirm rejection.
+
+### 1. Payload bit flip
+
+Original minimal payload CBOR:
+```
+a30102020103436b6174
+```
+
+Mutated (last byte `74` → `75`, one-bit change in the bstr content):
+```
+a30102020103436b6175
+```
+
+Any future verifier must reject the resulting tagged COSE_Sign1 (same protected header, AAD, and signature) because the Sig_structure no longer matches.
+
+### 3. External AAD cross-binding
+
+Original AAD for enrollment-proof (KAT 0001):
+```
+46616d696c794d6573682d456e726f6c6c6d656e7450726f6f662d763200
+```
+
+Substitute AAD from owner-decision (KAT 0002):
+```
+46616d696c794d6573682d4f776e65724465636973696f6e2d763200
+```
+
+Signature verification on the original KAT 0001 object with the substituted AAD must fail. The same rule applies in the opposite direction and across all four contexts.
+
+### 4. Algorithm substitution note
+
+The protected header of KAT 0001 begins with the deterministic map encoding that includes `1: -9`. Replacing the CBOR integer encoding of `-9` with the encoding of `-7` produces a different protected-header bstr. The profile requires rejection of alg ≠ -9 before any cryptographic check.
+
+### 13. Trailing bytes
+
+Original complete tagged COSE_Sign1 (KAT 0001) ends with the 64-byte signature. Appending a single extra byte (for example `00`) after the complete object must cause the parser to reject the input. The same applies to any non-empty trailing data.
+
+These examples make the checklist more actionable for reviewers without adding executable tests or approving the draft profile.
+
 ## Lessons from current v1 fail-closed boundaries
 
 The existing v1 enrollment codecs and parsers already enforce several fail-closed rules that the v2 profile must preserve or strengthen. These are documented here so reviewers can map them to the cases above without claiming that v1 is the production wire format.
