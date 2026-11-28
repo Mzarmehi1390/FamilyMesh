@@ -50,6 +50,12 @@ nonce control. Do not claim RFC 6979 compliance unless verified on the actual
 supported providers/devices. The security and interoperability review must
 document this platform limitation.
 
+A review-only note recording the exact conversion steps, rejection criteria,
+high-S construction from existing KATs, and a concrete kid-mismatch example
+is available in
+[COSE v2 low-S and signature conversion review notes](vectors/cose-v2-low-s-signature-conversion-review.md).
+It is not an approved procedure.
+
 ## 3. Proposed public-key representation
 
 Use a public-only COSE EC2 key map with exactly these entries:
