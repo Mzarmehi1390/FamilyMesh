@@ -1,6 +1,7 @@
-## 2026-11-28 — Expanded COSE v2 negative-test mutations (invalid point, wrong curve, indefinite length, duplicate keys)
+## 2026-11-28 — Concrete high-S values and payload size analysis for COSE v2 review
 
-- Added concrete examples for invalid-point (mutated x-coordinate), wrong-curve (crv 1 → 2), indefinite-length, and duplicate-key cases to the negative-test outline (derived from KAT 0001).
+- Recorded explicit `n - s` high-S complements for KAT 0001 and KAT 0002 in the low-S conversion notes, and added a matching concrete high-S mutation example to the negative-test outline.
+- Expanded the payload schema proposal with approximate maximum encoded sizes under deterministic CBOR and a concrete encoding sketch for a toy enrollment-proof payload.
 - Documentation-only protocol-review support. No parser, executable tests, or profile approval added.
 - Latest Android CI on this branch remains green.
 - Integration candidate [PR #2](https://github.com/Mzarmehi1390/FamilyMesh/pull/2) remains Draft with green CI on its head.
